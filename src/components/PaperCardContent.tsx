@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Clock, ExternalLink } from 'lucide-react';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import PaperCardTakeaways from './PaperCardTakeaways';
@@ -21,10 +21,41 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   takeaways
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // Handle scroll events to prevent card swipes during content scrolling
+  const handleContentScroll = (e: Event) => {
+    // Create and dispatch custom events for scroll state
+    const scrollEvent = new CustomEvent('scrollContent');
+    document.dispatchEvent(scrollEvent);
+  };
+  
+  const handleScrollEnd = () => {
+    // Wait a bit before enabling swiping again
+    setTimeout(() => {
+      const endEvent = new CustomEvent('scrollEnd');
+      document.dispatchEvent(endEvent);
+    }, 200);
+  };
 
-  // Prevent swipe events from bubbling up when scrolling content
+  useEffect(() => {
+    const scrollArea = scrollRef.current;
+    
+    if (scrollArea) {
+      scrollArea.addEventListener('scroll', handleContentScroll, { passive: true });
+      scrollArea.addEventListener('touchend', handleScrollEnd, { passive: true });
+      
+      return () => {
+        scrollArea.removeEventListener('scroll', handleContentScroll);
+        scrollArea.removeEventListener('touchend', handleScrollEnd);
+      };
+    }
+  }, []);
+
+  // Prevent swipe events from bubbling up when interacting with content
   const handleContentTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
+    const scrollEvent = new CustomEvent('scrollContent');
+    document.dispatchEvent(scrollEvent);
   };
 
   return (
@@ -34,7 +65,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
       </h2>
       
       <ScrollArea 
-        className="flex-1 max-h-[calc(100vh-15rem)]" 
+        className="flex-1 max-h-[calc(100vh-15rem)]"
         ref={scrollRef}
         onTouchStart={handleContentTouchStart}
       >

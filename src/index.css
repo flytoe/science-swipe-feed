@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,8 +18,13 @@
     @apply overflow-hidden bg-white rounded-xl shadow-xl flex flex-col h-full mx-auto max-w-md animate-fade-in;
   }
   
+  /* Overlapping design styling */
+  .paper-card.overlapping-design {
+    @apply relative;
+  }
+  
   .paper-card-image-container {
-    @apply w-full h-56 md:h-64 bg-gradient-to-b from-blue-100 to-blue-50;
+    @apply w-full h-40 md:h-48 bg-gradient-to-b from-blue-100 to-blue-50;
   }
   
   .paper-card-image {

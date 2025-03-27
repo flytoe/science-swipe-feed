@@ -53,7 +53,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
 
   return (
     <motion.div 
-      className="paper-card"
+      className="paper-card overlapping-design"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
