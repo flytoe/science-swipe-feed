@@ -93,16 +93,22 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           <span>{formattedDate}</span>
         </div>
         {doiUrl && (
-          <a 
-            href={doiUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+          <Button 
+            variant="outline"
+            size="sm"
+            className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100"
+            asChild
             onClick={(e) => e.stopPropagation()}
           >
-            <ExternalLink size={14} />
-            <span>View Paper</span>
-          </a>
+            <a 
+              href={doiUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink size={14} />
+              <span>View Paper</span>
+            </a>
+          </Button>
         )}
       </div>
     </div>
