@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import PaperCard from '../PaperCard';
@@ -27,7 +26,6 @@ const SwipeFeed: React.FC = () => {
       isScrolling
     });
   
-  // Function to check if we're scrolling content
   const setScrollingState = (scrolling: boolean) => {
     setIsScrolling(scrolling);
   };
@@ -44,7 +42,6 @@ const SwipeFeed: React.FC = () => {
         } else {
           setPapers(fetchedPapers);
           
-          // Check if using demo data (when we have exactly 3 demo papers)
           if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
             setIsUsingDemoData(true);
             toast.info('Using demo data. No papers found in your Supabase database.', {
@@ -69,25 +66,23 @@ const SwipeFeed: React.FC = () => {
     
     loadPapers();
     
-    // Hide instructions after 5 seconds
     const timeout = setTimeout(() => {
       setShowInstructions(false);
     }, 5000);
     
-    // Setup listeners for scroll events in paper content
-    // Fix: Use a callback function without arguments for addEventListener
-    document.addEventListener('scrollContent', () => setScrollingState(true));
-    document.addEventListener('scrollEnd', () => setScrollingState(false));
+    const handleScrollContent = () => setScrollingState(true);
+    const handleScrollEnd = () => setScrollingState(false);
+    
+    document.addEventListener('scrollContent', handleScrollContent);
+    document.addEventListener('scrollEnd', handleScrollEnd);
     
     return () => {
       clearTimeout(timeout);
-      // Fix: Use the same callback function signatures for removeEventListener
-      document.removeEventListener('scrollContent', () => setScrollingState(true));
-      document.removeEventListener('scrollEnd', () => setScrollingState(false));
+      document.removeEventListener('scrollContent', handleScrollContent);
+      document.removeEventListener('scrollEnd', handleScrollEnd);
     };
   }, []);
 
-  // Modified touch handlers that check if we're scrolling content
   const handleContainerTouchStart = (e: React.TouchEvent) => {
     if (!isScrolling) {
       handleTouchStart(e);
