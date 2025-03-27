@@ -1,14 +1,7 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase as supabaseClient } from '../integrations/supabase/client';
 
-// Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Check if we're in development mode (for demonstration purposes)
-const isDevelopment = import.meta.env.DEV;
-
-// Use demo data when environment variables are not set
+// Demo data for when connection fails or for development
 const demoData: Paper[] = [
   {
     id: '1',
@@ -57,28 +50,6 @@ const demoData: Paper[] = [
   }
 ];
 
-// Create Supabase client if environment variables are available
-let supabase: any;
-
-if (supabaseUrl && supabaseAnonKey) {
-  supabase = createClient(supabaseUrl, supabaseAnonKey);
-  console.log('Supabase client initialized with provided credentials');
-} else {
-  console.warn('Supabase environment variables are not set, using mock data for demonstration');
-  // Create a minimal mock client to avoid errors
-  supabase = {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          order: () => ({
-            then: (callback: any) => Promise.resolve(callback({ data: demoData, error: null }))
-          })
-        })
-      })
-    })
-  };
-}
-
 export type Paper = {
   id: string;
   doi: string;
@@ -97,26 +68,25 @@ export type Paper = {
 
 export const getPapers = async (): Promise<Paper[]> => {
   try {
-    // If we're using the mock client, it will return demo data
-    const { data, error } = await supabase
+    // Using the imported Supabase client from integrations
+    const { data, error } = await supabaseClient
       .from('n8n_table')
       .select('*')
       .eq('ai_summary_done', true)
       .order('created_at', { ascending: false });
     
     if (error) {
+      console.error('Error fetching papers:', error);
       throw error;
     }
     
     return data || [];
   } catch (error) {
     console.error('Error fetching papers:', error);
-    if (!supabaseUrl || !supabaseAnonKey) {
-      console.info('Using demo data since Supabase credentials are not configured');
-      return demoData;
-    }
-    return [];
+    console.info('Using demo data due to connection issue');
+    return demoData;
   }
 };
 
-export default supabase;
+// Export the client for potential use elsewhere
+export default supabaseClient;
