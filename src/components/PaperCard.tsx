@@ -14,7 +14,9 @@ interface PaperCardProps {
 
 interface FormattedTakeaway {
   text: string;
+  citation?: string;
   tag?: string;
+  type?: string;
 }
 
 const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
@@ -23,37 +25,44 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
   const categories = Array.isArray(paper.category) ? paper.category : 
     (typeof paper.category === 'string' ? [paper.category] : []);
   
-  // Parse the key takeaways from a string with /n/ separators 
-  // and extract Roman numerals or capital letters as tags
+  // Parse the key takeaways from the new JSON format
   const parseKeyTakeaways = (takeaways: string[] | string | null): FormattedTakeaway[] => {
     if (!takeaways) return [];
     
     // For debugging - log the raw value to understand its format
     console.log('Raw takeaways value:', takeaways);
     
-    // Handle if it's already an array of strings
-    if (Array.isArray(takeaways)) {
+    // If it's already an array of objects
+    if (Array.isArray(takeaways) && typeof takeaways[0] === 'object') {
+      return takeaways.map(item => ({
+        text: item.text || '',
+        citation: item.citation || undefined,
+        type: item.type || undefined
+      }));
+    }
+    
+    // Handle if it's an array of strings (legacy format)
+    if (Array.isArray(takeaways) && typeof takeaways[0] === 'string') {
       return takeaways.map(takeaway => {
-        // First check if this array item might itself be a JSON string
+        // Check if this array item might be a JSON string
         if (typeof takeaway === 'string') {
           try {
             const parsedItem = JSON.parse(takeaway);
-            if (Array.isArray(parsedItem)) {
-              // If it's a JSON array string, process its first item
-              const item = parsedItem[0] || '';
-              const match = item.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-              if (match) {
-                return { text: match[2], tag: match[1] };
-              }
-              return { text: item };
+            if (typeof parsedItem === 'object' && parsedItem !== null) {
+              return {
+                text: parsedItem.text || '',
+                citation: parsedItem.citation || undefined,
+                type: parsedItem.type || undefined
+              };
             }
-            // If it's another type of JSON, just stringify it as fallback
-            if (typeof parsedItem === 'object') {
-              return { text: JSON.stringify(parsedItem) };
+            // If it parsed but isn't the expected format, use old format
+            const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+            if (match) {
+              return { text: match[2], tag: match[1] };
             }
-            return { text: String(parsedItem) };
+            return { text: takeaway };
           } catch (e) {
-            // Not JSON, process as regular string
+            // Not JSON, process as regular string using old format
             const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
             if (match) {
               return { text: match[2], tag: match[1] };
@@ -61,24 +70,50 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
             return { text: takeaway };
           }
         }
-        // If not a string, stringify it
         return { text: String(takeaway) };
       });
     }
     
-    // Handle if it's a single string that needs to be split
+    // Handle if it's a string that needs to be parsed as JSON
     if (typeof takeaways === 'string') {
-      // Try to parse if it's a JSON string
       try {
         const parsed = JSON.parse(takeaways);
+        
+        // If it's an array, process it
         if (Array.isArray(parsed)) {
-          // If successfully parsed as array, recursively call with the array
-          return parseKeyTakeaways(parsed);
+          return parsed.map(item => {
+            if (typeof item === 'object' && item !== null) {
+              return {
+                text: item.text || '',
+                citation: item.citation || undefined,
+                type: item.type || undefined
+              };
+            }
+            // If array item is a string, use old format
+            if (typeof item === 'string') {
+              const match = item.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+              if (match) {
+                return { text: match[2], tag: match[1] };
+              }
+              return { text: item };
+            }
+            return { text: String(item) };
+          });
         }
-        // If it's an object or other JSON value, handle appropriately
+        
+        // If it parsed as an object but not an array
+        if (typeof parsed === 'object' && parsed !== null) {
+          return [{ 
+            text: parsed.text || '',
+            citation: parsed.citation || undefined,
+            type: parsed.type || undefined
+          }];
+        }
+        
+        // Fallback for other JSON types
         return [{ text: JSON.stringify(parsed) }];
       } catch (e) {
-        // Not valid JSON, treat as string with /n/ separators
+        // Not valid JSON, use the old format with /n/ separators
         console.log('Splitting by /n/ separator as it\'s not valid JSON');
         const parts = takeaways.split('/n/').filter(part => part.trim() !== '');
         
@@ -178,7 +213,11 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
                       {takeaway.tag}
                     </Badge>
                   )}
-                  <KeyTakeaway text={takeaway.text} />
+                  <KeyTakeaway 
+                    text={takeaway.text} 
+                    citation={takeaway.citation}
+                    type={takeaway.type}
+                  />
                 </div>
               ))}
             </div>
