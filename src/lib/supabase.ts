@@ -101,29 +101,66 @@ export const getPapers = async (): Promise<Paper[]> => {
     
     // Transform the data to match the Paper type
     // Note: using doi as id since the table doesn't have an id column
-    const papers: Paper[] = data?.map((item: any) => ({
-      id: item.doi, // Use doi as the id
-      doi: item.doi,
-      title_org: item.title_org,
-      abstract_org: item.abstract_org || '',
-      score: item.score,
-      html_available: !!item.html_available,
-      ai_summary_done: !!item.ai_summary_done,
-      ai_image_prompt: item.ai_image_prompt || '',
-      ai_headline: item.ai_headline || '',
-      ai_key_takeaways: Array.isArray(item.ai_key_takeaways) 
-        ? item.ai_key_takeaways 
-        : (typeof item.ai_key_takeaways === 'string' 
-            ? JSON.parse(item.ai_key_takeaways) 
-            : null),
-      created_at: item.created_at || new Date().toISOString(),
-      category: Array.isArray(item.category) 
-        ? item.category 
-        : (typeof item.category === 'string' 
-            ? [item.category] 
-            : null),
-      image_url: item.image_url || null,
-    })) || [];
+    const papers: Paper[] = data?.map((item: any) => {
+      // Handle ai_key_takeaways safely
+      let takeaways: string[] | null = null;
+      if (item.ai_key_takeaways) {
+        try {
+          if (Array.isArray(item.ai_key_takeaways)) {
+            takeaways = item.ai_key_takeaways;
+          } else if (typeof item.ai_key_takeaways === 'string') {
+            takeaways = JSON.parse(item.ai_key_takeaways);
+          } else {
+            takeaways = null;
+          }
+        } catch (e) {
+          console.warn(`Could not parse ai_key_takeaways for doi ${item.doi}:`, e);
+          // If the string can't be parsed as JSON, use it as a single item array if it's a string
+          takeaways = typeof item.ai_key_takeaways === 'string' 
+            ? [item.ai_key_takeaways] 
+            : null;
+        }
+      }
+
+      // Handle category safely
+      let categories: string[] | null = null;
+      if (item.category) {
+        try {
+          if (Array.isArray(item.category)) {
+            categories = item.category;
+          } else if (typeof item.category === 'string') {
+            categories = [item.category];
+          } else {
+            categories = null;
+          }
+        } catch (e) {
+          console.warn(`Could not parse category for doi ${item.doi}:`, e);
+          categories = typeof item.category === 'string' ? [item.category] : null;
+        }
+      }
+
+      // Ensure created_at is a valid date string
+      let createdAt = item.created_at || new Date().toISOString();
+      if (typeof createdAt !== 'string') {
+        createdAt = new Date().toISOString();
+      }
+
+      return {
+        id: item.doi, // Use doi as the id
+        doi: item.doi,
+        title_org: item.title_org || '',
+        abstract_org: item.abstract_org || '',
+        score: item.score,
+        html_available: !!item.html_available,
+        ai_summary_done: !!item.ai_summary_done,
+        ai_image_prompt: item.ai_image_prompt || '',
+        ai_headline: item.ai_headline || '',
+        ai_key_takeaways: takeaways,
+        created_at: createdAt,
+        category: categories,
+        image_url: item.image_url || null,
+      };
+    }) || [];
     
     console.log('Fetched papers:', papers.length);
     return papers;

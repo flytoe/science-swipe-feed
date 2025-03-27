@@ -3,15 +3,18 @@ import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
 import { Info } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
+import { toast } from 'sonner';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
   const [hasPapers, setHasPapers] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check if we have any papers in the database
   useEffect(() => {
     const checkDatabase = async () => {
       try {
+        setIsLoading(true);
         // Make a simple query to check if the table has any rows
         const { data, error, count } = await supabase
           .from('n8n_table')
@@ -20,14 +23,23 @@ const Index: React.FC = () => {
         
         if (error) {
           console.error('Error checking database:', error);
+          toast.error('Error connecting to Supabase: ' + error.message);
           setHasPapers(false);
           return;
         }
         
+        console.log('Database check result:', { data, count });
         setHasPapers(count !== null && count > 0);
+        
+        if (count !== null && count > 0) {
+          toast.success(`Found ${count} papers in the database`);
+        }
       } catch (error) {
         console.error('Error checking papers:', error);
+        toast.error('Error checking database');
         setHasPapers(false);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -57,15 +69,16 @@ const Index: React.FC = () => {
       
       if (error) {
         console.error('Error adding sample paper:', error);
-        alert('Failed to add sample paper: ' + error.message);
+        toast.error('Failed to add sample paper: ' + error.message);
         return;
       }
       
-      alert('Sample paper added successfully! Refresh the page to see it.');
+      toast.success('Sample paper added successfully! Refresh the page to see it.');
       setIsSample(true);
+      setHasPapers(true);
     } catch (error) {
       console.error('Error adding sample paper:', error);
-      alert('Failed to add sample paper');
+      toast.error('Failed to add sample paper');
     }
   };
 
@@ -80,7 +93,11 @@ const Index: React.FC = () => {
         </div>
       </header>
 
-      {hasPapers === false && !isSample && (
+      {isLoading ? (
+        <div className="max-w-md mx-auto mt-6 px-4 flex justify-center">
+          <div className="loading-spinner" />
+        </div>
+      ) : hasPapers === false && !isSample ? (
         <div className="max-w-md mx-auto mt-2 px-4">
           <div className="flex flex-col items-center gap-2 bg-amber-50 p-4 rounded-md border border-amber-100 text-sm text-amber-800">
             <Info size={16} />
@@ -95,7 +112,7 @@ const Index: React.FC = () => {
             </button>
           </div>
         </div>
-      )}
+      ) : null}
 
       <main className="container max-w-md mx-auto px-0 py-4">
         <SwipeFeed />

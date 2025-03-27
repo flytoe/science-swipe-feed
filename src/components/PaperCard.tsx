@@ -19,13 +19,21 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
     (typeof paper.category === 'string' ? [paper.category] : []);
   
   const keyTakeaways = Array.isArray(paper.ai_key_takeaways) ? paper.ai_key_takeaways : 
-    (typeof paper.ai_key_takeaways === 'string' ? JSON.parse(paper.ai_key_takeaways) : []);
+    (typeof paper.ai_key_takeaways === 'string' ? [paper.ai_key_takeaways] : []);
     
-  const formattedDate = new Date(paper.created_at).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
+  // Make sure date parsing is safe
+  const formattedDate = (() => {
+    try {
+      return new Date(paper.created_at).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch (e) {
+      console.warn(`Invalid date format for paper ${paper.id}:`, e);
+      return 'Unknown date';
+    }
+  })();
   
   // Default image if none is provided
   const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop';
