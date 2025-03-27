@@ -21,13 +21,13 @@ const SwipeFeed: React.FC = () => {
         const fetchedPapers = await getPapers();
         
         if (fetchedPapers.length === 0) {
-          setError('No papers found with completed AI summaries. This could be due to missing Supabase credentials or no papers with ai_summary_done=true.');
+          setError('No papers found with completed AI summaries.');
         } else {
           setPapers(fetchedPapers);
           
           // Check if using demo data (when we have exactly 3 demo papers)
           if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
-            toast.info('Using demo data. Configure Supabase for real data.', {
+            toast.info('Using demo data.', {
               duration: 5000,
             });
           }
@@ -36,8 +36,8 @@ const SwipeFeed: React.FC = () => {
         setLoading(false);
       } catch (error) {
         console.error('Error loading papers:', error);
-        setError('Failed to load papers. Please check your Supabase configuration.');
-        toast.error('Failed to load papers. Please check Supabase configuration.');
+        setError('Failed to load papers. Please check the console for more details.');
+        toast.error('Failed to load papers.');
         setLoading(false);
       }
     };
@@ -121,11 +121,8 @@ const SwipeFeed: React.FC = () => {
       ) : error ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4">
           <AlertTriangle className="text-amber-500" size={32} />
-          <div className="text-xl font-semibold mb-2">Configuration Issue</div>
+          <div className="text-xl font-semibold mb-2">Data Issue</div>
           <p className="text-gray-500">{error}</p>
-          <p className="text-sm bg-amber-50 p-4 rounded-md border border-amber-100">
-            To connect to Supabase, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.
-          </p>
         </div>
       ) : papers.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-6">
