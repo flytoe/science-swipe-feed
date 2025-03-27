@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaperCard from './PaperCard';
 import { getPapers, type Paper } from '../lib/supabase';
-import { ChevronUp, ChevronDown, ArrowUpDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ArrowUpDown, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 const SwipeFeed: React.FC = () => {
@@ -13,17 +13,32 @@ const SwipeFeed: React.FC = () => {
   const [showInstructions, setShowInstructions] = useState(true);
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     const loadPapers = async () => {
       try {
         const fetchedPapers = await getPapers();
-        setPapers(fetchedPapers);
+        
+        if (fetchedPapers.length === 0) {
+          setError('No papers found. This could be due to missing Supabase credentials.');
+        } else {
+          setPapers(fetchedPapers);
+          
+          // Check if using demo data (when we have exactly 3 demo papers)
+          if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
+            toast.info('Using demo data. Configure Supabase for real data.', {
+              duration: 5000,
+            });
+          }
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error loading papers:', error);
-        toast.error('Failed to load papers. Please try again later.');
+        setError('Failed to load papers. Please check your Supabase configuration.');
+        toast.error('Failed to load papers. Please check Supabase configuration.');
         setLoading(false);
       }
     };
@@ -103,6 +118,15 @@ const SwipeFeed: React.FC = () => {
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <div className="loading-spinner" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4">
+          <AlertTriangle className="text-amber-500" size={32} />
+          <div className="text-xl font-semibold mb-2">Configuration Issue</div>
+          <p className="text-gray-500">{error}</p>
+          <p className="text-sm bg-amber-50 p-4 rounded-md border border-amber-100">
+            To connect to Supabase, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.
+          </p>
         </div>
       ) : papers.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-full text-center p-6">
