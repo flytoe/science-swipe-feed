@@ -59,8 +59,10 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     document.dispatchEvent(scrollEvent);
   };
 
-  // Create the DOI URL
-  const doiUrl = doi ? `https://doi.org/${doi}` : undefined;
+  // Create the DOI URL with proper handling
+  const doiUrl = doi ? (
+    doi.startsWith('http') ? doi : `https://doi.org/${doi}`
+  ) : undefined;
 
   return (
     <div className="paper-card-content">
