@@ -69,8 +69,10 @@ if (supabaseUrl && supabaseAnonKey) {
   supabase = {
     from: () => ({
       select: () => ({
-        order: () => ({
-          then: (callback: any) => Promise.resolve(callback({ data: demoData, error: null }))
+        eq: () => ({
+          order: () => ({
+            then: (callback: any) => Promise.resolve(callback({ data: demoData, error: null }))
+          })
         })
       })
     })
@@ -99,6 +101,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     const { data, error } = await supabase
       .from('n8n_table')
       .select('*')
+      .eq('ai_summary_done', true)
       .order('created_at', { ascending: false });
     
     if (error) {

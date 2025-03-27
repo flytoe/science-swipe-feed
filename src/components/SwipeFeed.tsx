@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaperCard from './PaperCard';
@@ -22,7 +21,7 @@ const SwipeFeed: React.FC = () => {
         const fetchedPapers = await getPapers();
         
         if (fetchedPapers.length === 0) {
-          setError('No papers found. This could be due to missing Supabase credentials.');
+          setError('No papers found with completed AI summaries. This could be due to missing Supabase credentials or no papers with ai_summary_done=true.');
         } else {
           setPapers(fetchedPapers);
           
