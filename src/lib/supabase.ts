@@ -1,5 +1,7 @@
 
 import { supabase as supabaseClient } from '../integrations/supabase/client';
+import type { Database } from '../integrations/supabase/types';
+import type { Json } from '../integrations/supabase/types';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
@@ -80,7 +82,32 @@ export const getPapers = async (): Promise<Paper[]> => {
       throw error;
     }
     
-    return data || [];
+    // Transform the data to match the Paper type
+    const papers: Paper[] = data?.map((item: any) => ({
+      id: item.id || item.doi, // Use doi as fallback if id is missing
+      doi: item.doi,
+      title_org: item.title_org,
+      abstract_org: item.abstract_org || '',
+      score: item.score,
+      html_available: !!item.html_available,
+      ai_summary_done: !!item.ai_summary_done,
+      ai_image_prompt: item.ai_image_prompt || '',
+      ai_headline: item.ai_headline || '',
+      ai_key_takeaways: Array.isArray(item.ai_key_takeaways) 
+        ? item.ai_key_takeaways 
+        : (typeof item.ai_key_takeaways === 'string' 
+            ? JSON.parse(item.ai_key_takeaways) 
+            : null),
+      created_at: item.created_at || new Date().toISOString(),
+      category: Array.isArray(item.category) 
+        ? item.category 
+        : (typeof item.category === 'string' 
+            ? [item.category] 
+            : null),
+      image_url: item.image_url || null,
+    })) || [];
+    
+    return papers;
   } catch (error) {
     console.error('Error fetching papers:', error);
     console.info('Using demo data due to connection issue');
