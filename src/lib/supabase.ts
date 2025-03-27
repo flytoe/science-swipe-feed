@@ -83,8 +83,9 @@ export const getPapers = async (): Promise<Paper[]> => {
     }
     
     // Transform the data to match the Paper type
+    // Note: using doi as id since the table doesn't have an id column
     const papers: Paper[] = data?.map((item: any) => ({
-      id: item.id || item.doi, // Use doi as fallback if id is missing
+      id: item.doi, // Use doi as the id
       doi: item.doi,
       title_org: item.title_org,
       abstract_org: item.abstract_org || '',
