@@ -50,7 +50,7 @@ const demoData: Paper[] = [
     ai_summary_done: true,
     ai_image_prompt: 'Brain neural network with glowing pathways',
     ai_headline: 'Groundbreaking Study Maps Complete Neural Pathways of Memory Formation',
-    ai_key_takeaways: ['Identified 3 distinct phases of memory encoding', 'Hippocampal activity patterns predict memory durability', 'Potential therapeutic targets for Alzheimer's treatment'],
+    ai_key_takeaways: ['Identified 3 distinct phases of memory encoding', 'Hippocampal activity patterns predict memory durability', 'Potential therapeutic targets for Alzheimer\'s treatment'],
     created_at: '2023-12-10T11:45:00Z',
     category: ['neuroscience', 'psychology'],
     image_url: 'https://images.unsplash.com/photo-1559757175-7cb036edc7b3?q=80&w=2071'
