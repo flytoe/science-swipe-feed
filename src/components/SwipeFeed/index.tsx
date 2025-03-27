@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import PaperCard from '../PaperCard';
@@ -27,7 +26,6 @@ const SwipeFeed: React.FC = () => {
       isScrolling
     });
   
-  // Update the scrolling state with debounce for better UX
   const setScrollingState = (scrolling: boolean) => {
     setIsScrolling(scrolling);
   };
@@ -72,7 +70,6 @@ const SwipeFeed: React.FC = () => {
       setShowInstructions(false);
     }, 5000);
     
-    // Improved event handling with more explicit function names
     const handleScrollStart = () => {
       console.log('Content scrolling started');
       setScrollingState(true);
