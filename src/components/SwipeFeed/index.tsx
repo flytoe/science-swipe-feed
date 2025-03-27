@@ -16,14 +16,21 @@ const SwipeFeed: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isUsingDemoData, setIsUsingDemoData] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, nextPaper, prevPaper } = 
     useSwipeNavigation({
       currentIndex,
       setCurrentIndex,
-      papersLength: papers.length
+      papersLength: papers.length,
+      isScrolling
     });
+  
+  // Function to check if we're scrolling content
+  const setScrollingState = (scrolling: boolean) => {
+    setIsScrolling(scrolling);
+  };
   
   useEffect(() => {
     const loadPapers = async () => {
@@ -67,17 +74,50 @@ const SwipeFeed: React.FC = () => {
       setShowInstructions(false);
     }, 5000);
     
-    return () => clearTimeout(timeout);
+    // Setup listeners for scroll events in paper content
+    document.addEventListener('scrollContent', () => setScrollingState(true));
+    document.addEventListener('scrollEnd', () => setScrollingState(false));
+    
+    return () => {
+      clearTimeout(timeout);
+      document.removeEventListener('scrollContent', () => setScrollingState(true));
+      document.removeEventListener('scrollEnd', () => setScrollingState(false));
+    };
   }, []);
+
+  // Modified touch handlers that check if we're scrolling content
+  const handleContainerTouchStart = (e: React.TouchEvent) => {
+    if (!isScrolling) {
+      handleTouchStart(e);
+    }
+  };
+  
+  const handleContainerTouchMove = (e: React.TouchEvent) => {
+    if (!isScrolling) {
+      handleTouchMove(e);
+    }
+  };
+  
+  const handleContainerTouchEnd = (e: React.TouchEvent) => {
+    if (!isScrolling) {
+      handleTouchEnd(e);
+    }
+  };
+  
+  const handleContainerWheel = (e: React.WheelEvent) => {
+    if (!isScrolling) {
+      handleWheel(e);
+    }
+  };
 
   return (
     <div 
       className="swipe-feed-container"
       ref={containerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
+      onTouchStart={handleContainerTouchStart}
+      onTouchMove={handleContainerTouchMove}
+      onTouchEnd={handleContainerTouchEnd}
+      onWheel={handleContainerWheel}
     >
       {loading ? (
         <div className="flex items-center justify-center h-full">

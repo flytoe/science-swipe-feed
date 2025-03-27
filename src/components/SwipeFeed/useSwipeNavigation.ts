@@ -6,12 +6,14 @@ interface UseSwipeNavigationProps {
   currentIndex: number;
   setCurrentIndex: (index: number) => void;
   papersLength: number;
+  isScrolling?: boolean;
 }
 
 export const useSwipeNavigation = ({ 
   currentIndex, 
   setCurrentIndex, 
-  papersLength 
+  papersLength,
+  isScrolling = false
 }: UseSwipeNavigationProps) => {
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -37,12 +39,14 @@ export const useSwipeNavigation = ({
   };
   
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isScrolling) return;
+    
     setDragStart(e.touches[0].clientY);
     setIsDragging(true);
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isScrolling) return;
     
     const dragDistance = e.touches[0].clientY - dragStart;
     
@@ -58,10 +62,13 @@ export const useSwipeNavigation = ({
   };
   
   const handleTouchEnd = () => {
+    if (isScrolling) return;
     setIsDragging(false);
   };
   
   const handleWheel = (e: React.WheelEvent) => {
+    if (isScrolling) return;
+    
     if (e.deltaY > 0) {
       nextPaper();
     } else {

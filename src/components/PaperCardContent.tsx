@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Clock, ExternalLink } from 'lucide-react';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import PaperCardTakeaways from './PaperCardTakeaways';
@@ -20,21 +20,34 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   doi,
   takeaways
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Prevent swipe events from bubbling up when scrolling content
+  const handleContentTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="paper-card-content">
       <h2 className="paper-card-title">
         {title}
       </h2>
       
-      <ScrollArea className="flex-1 max-h-[calc(100vh-20rem)]">
-        {takeaways && takeaways.length > 0 ? (
-          <PaperCardTakeaways takeaways={takeaways} />
-        ) : abstract ? (
-          // Fallback to abstract if no takeaways are available
-          <p className="text-sm md:text-base text-gray-700 mb-4">
-            {abstract}
-          </p>
-        ) : null}
+      <ScrollArea 
+        className="flex-1 max-h-[calc(100vh-15rem)]" 
+        ref={scrollRef}
+        onTouchStart={handleContentTouchStart}
+      >
+        <div className="pr-2">
+          {takeaways && takeaways.length > 0 ? (
+            <PaperCardTakeaways takeaways={takeaways} />
+          ) : abstract ? (
+            // Fallback to abstract if no takeaways are available
+            <p className="text-sm md:text-base text-gray-700 mb-4">
+              {abstract}
+            </p>
+          ) : null}
+        </div>
       </ScrollArea>
       
       <div className="paper-card-meta">

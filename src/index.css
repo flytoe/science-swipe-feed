@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -50,24 +51,14 @@
   }
   
   .key-takeaway-icon {
-    @apply text-blue-500 mt-1 flex-shrink-0;
+    @apply mt-1 flex-shrink-0;
   }
   
   .key-takeaway-text {
     @apply flex-1;
   }
   
-  .key-takeaway-why-matters {
-    @apply bg-amber-50 border border-amber-200 p-3 rounded-md;
-  }
-  
-  .key-takeaway-finding {
-    @apply bg-blue-50 border border-blue-200 p-3 rounded-md;
-  }
-  
-  .key-takeaway-methodology {
-    @apply bg-purple-50 border border-purple-200 p-3 rounded-md;
-  }
+  /* Removed the container styling for these classes since we're using badges instead */
   
   .loading-spinner {
     @apply w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin;

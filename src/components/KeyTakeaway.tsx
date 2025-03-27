@@ -15,35 +15,31 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({ text, citation, type }) => {
     switch (type) {
       case 'why_it_matters':
         return {
-          containerClass: 'key-takeaway-why-matters',
           iconColor: 'text-amber-500',
-          borderColor: 'border-amber-200'
+          badgeClass: 'bg-amber-100 text-amber-800 hover:bg-amber-200'
         };
       case 'finding':
         return {
-          containerClass: 'key-takeaway-finding',
           iconColor: 'text-blue-500',
-          borderColor: 'border-blue-200'
+          badgeClass: 'bg-blue-100 text-blue-800 hover:bg-blue-200'
         };
       case 'methodology':
         return {
-          containerClass: 'key-takeaway-methodology',
           iconColor: 'text-purple-500',
-          borderColor: 'border-purple-200'
+          badgeClass: 'bg-purple-100 text-purple-800 hover:bg-purple-200'
         };
       default:
         return {
-          containerClass: '',
           iconColor: 'text-blue-500',
-          borderColor: citation ? 'border-gray-200' : ''
+          badgeClass: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
         };
     }
   };
 
-  const { containerClass, iconColor, borderColor } = getTypeStyles();
+  const { iconColor, badgeClass } = getTypeStyles();
 
   return (
-    <div className={`key-takeaway animate-fade-in ${containerClass} ${citation ? 'p-3 rounded-md ' + borderColor : ''}`}>
+    <div className="key-takeaway animate-fade-in mb-3">
       <div className="flex items-start gap-2">
         <span className={`key-takeaway-icon ${iconColor}`}>
           <ArrowRight size={16} />
@@ -57,10 +53,12 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({ text, citation, type }) => {
               </Badge>
             </div>
           )}
-          {type === 'why_it_matters' && !citation && (
+          {type && !citation && (
             <div className="mt-1">
-              <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs">
-                Why it matters
+              <Badge className={`text-xs ${badgeClass}`}>
+                {type === 'why_it_matters' ? 'Why it matters' : 
+                 type === 'finding' ? 'Key finding' : 
+                 type === 'methodology' ? 'Methodology' : type}
               </Badge>
             </div>
           )}
