@@ -114,7 +114,7 @@ const Index: React.FC = () => {
         </div>
       ) : null}
 
-      <main className="container max-w-md mx-auto px-0 py-4">
+      <main className="container max-w-md mx-auto px-0 py-4 h-[calc(100vh-4rem)]">
         <SwipeFeed />
       </main>
     </div>
