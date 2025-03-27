@@ -18,7 +18,9 @@ const SwipeFeed: React.FC = () => {
   useEffect(() => {
     const loadPapers = async () => {
       try {
+        console.log('Loading papers...');
         const fetchedPapers = await getPapers();
+        console.log('Fetched papers:', fetchedPapers.length);
         
         if (fetchedPapers.length === 0) {
           setError('No papers found with completed AI summaries.');
@@ -29,6 +31,10 @@ const SwipeFeed: React.FC = () => {
           if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
             toast.info('Using demo data.', {
               duration: 5000,
+            });
+          } else {
+            toast.success(`Loaded ${fetchedPapers.length} papers from Supabase`, {
+              duration: 3000,
             });
           }
         }

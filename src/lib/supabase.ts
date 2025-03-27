@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -108,6 +107,7 @@ export const getPapers = async (): Promise<Paper[]> => {
       image_url: item.image_url || null,
     })) || [];
     
+    console.log('Fetched papers:', papers.length);
     return papers;
   } catch (error) {
     console.error('Error fetching papers:', error);
