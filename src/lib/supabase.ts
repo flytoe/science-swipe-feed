@@ -70,6 +70,16 @@ export type Paper = {
 
 export const getPapers = async (): Promise<Paper[]> => {
   try {
+    console.log('Connecting to Supabase to fetch papers...');
+    
+    // Check if we can connect to the Supabase client
+    const connectionTest = await supabaseClient.from('n8n_table').select('count').limit(1);
+    if (connectionTest.error) {
+      console.error('Connection test failed:', connectionTest.error);
+      throw new Error(`Connection test failed: ${connectionTest.error.message}`);
+    }
+    console.log('Connection test successful.');
+    
     // Using the imported Supabase client from integrations
     const { data, error } = await supabaseClient
       .from('n8n_table')
@@ -80,6 +90,13 @@ export const getPapers = async (): Promise<Paper[]> => {
     if (error) {
       console.error('Error fetching papers:', error);
       throw error;
+    }
+    
+    console.log('Raw data from Supabase:', data);
+    
+    if (!data || data.length === 0) {
+      console.info('No data returned from Supabase, using demo data instead');
+      return demoData;
     }
     
     // Transform the data to match the Paper type

@@ -14,6 +14,7 @@ const SwipeFeed: React.FC = () => {
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isUsingDemoData, setIsUsingDemoData] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -30,10 +31,12 @@ const SwipeFeed: React.FC = () => {
           
           // Check if using demo data (when we have exactly 3 demo papers)
           if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
-            toast.info('Using demo data.', {
+            setIsUsingDemoData(true);
+            toast.info('Using demo data. No papers found in your Supabase database.', {
               duration: 5000,
             });
           } else {
+            setIsUsingDemoData(false);
             toast.success(`Loaded ${fetchedPapers.length} papers from Supabase`, {
               duration: 3000,
             });
@@ -138,6 +141,15 @@ const SwipeFeed: React.FC = () => {
         </div>
       ) : (
         <>
+          {isUsingDemoData && (
+            <div className="absolute top-0 left-0 right-0 bg-amber-50 p-3 z-20 shadow-md">
+              <div className="flex items-center gap-2 text-amber-800 text-sm">
+                <AlertTriangle size={16} />
+                <span>Using demo data. No papers found in your Supabase database.</span>
+              </div>
+            </div>
+          )}
+          
           <AnimatePresence mode="wait">
             {showInstructions && (
               <motion.div
