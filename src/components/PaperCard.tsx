@@ -5,21 +5,59 @@ import CategoryTag from './CategoryTag';
 import KeyTakeaway from './KeyTakeaway';
 import { type Paper } from '../lib/supabase';
 import { Clock } from 'lucide-react';
+import { Badge } from './ui/badge';
 
 interface PaperCardProps {
   paper: Paper;
   isActive: boolean;
 }
 
+interface FormattedTakeaway {
+  text: string;
+  tag?: string;
+}
+
 const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showFullAbstract, setShowFullAbstract] = useState(false);
   
   const categories = Array.isArray(paper.category) ? paper.category : 
     (typeof paper.category === 'string' ? [paper.category] : []);
   
-  const keyTakeaways = Array.isArray(paper.ai_key_takeaways) ? paper.ai_key_takeaways : 
-    (typeof paper.ai_key_takeaways === 'string' ? [paper.ai_key_takeaways] : []);
+  // Parse the key takeaways from a string with /n/ separators 
+  // and extract Roman numerals or capital letters as tags
+  const parseKeyTakeaways = (takeaways: string[] | string | null): FormattedTakeaway[] => {
+    if (!takeaways) return [];
+    
+    // Handle if it's already an array of strings
+    if (Array.isArray(takeaways)) {
+      return takeaways.map(takeaway => {
+        const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+        if (match) {
+          return { text: match[2], tag: match[1] };
+        }
+        return { text: takeaway };
+      });
+    }
+    
+    // Handle if it's a single string that needs to be split
+    if (typeof takeaways === 'string') {
+      // Split by /n/ separator
+      const parts = takeaways.split('/n/').filter(part => part.trim() !== '');
+      
+      return parts.map(part => {
+        // Check for Roman numeral or capital letter at the beginning
+        const match = part.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+        if (match) {
+          return { text: match[2], tag: match[1] };
+        }
+        return { text: part };
+      });
+    }
+    
+    return [];
+  };
+  
+  const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
     
   // Make sure date parsing is safe
   const formattedDate = (() => {
@@ -90,42 +128,28 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
           {displayTitle}
         </h2>
         
-        {paper.abstract_org && (
-          <>
-            <p className={`${showFullAbstract ? 'text-sm md:text-base text-gray-700 mb-4' : 'paper-card-abstract'}`}>
-              {paper.abstract_org}
-            </p>
-            
-            {!showFullAbstract && paper.abstract_org.length > 150 && (
-              <button 
-                onClick={() => setShowFullAbstract(true)}
-                className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
-              >
-                Read more
-              </button>
-            )}
-            
-            {showFullAbstract && (
-              <button 
-                onClick={() => setShowFullAbstract(false)}
-                className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
-              >
-                Show less
-              </button>
-            )}
-          </>
-        )}
-        
-        {keyTakeaways && keyTakeaways.length > 0 && (
+        {formattedTakeaways && formattedTakeaways.length > 0 ? (
           <div className="mt-4 mb-6">
             <h3 className="text-sm font-semibold uppercase text-gray-500 mb-2">Key Takeaways</h3>
-            <div className="space-y-2">
-              {keyTakeaways.slice(0, 3).map((takeaway: string, index: number) => (
-                <KeyTakeaway key={index} text={takeaway} />
+            <div className="space-y-4">
+              {formattedTakeaways.map((takeaway, index) => (
+                <div key={index} className="flex flex-col gap-1">
+                  {takeaway.tag && (
+                    <Badge variant="outline" className="self-start text-xs">
+                      {takeaway.tag}
+                    </Badge>
+                  )}
+                  <KeyTakeaway text={takeaway.text} />
+                </div>
               ))}
             </div>
           </div>
-        )}
+        ) : paper.abstract_org ? (
+          // Fallback to abstract if no takeaways are available
+          <p className="text-sm md:text-base text-gray-700 mb-4">
+            {paper.abstract_org}
+          </p>
+        ) : null}
         
         <div className="paper-card-meta">
           <div className="flex items-center">
