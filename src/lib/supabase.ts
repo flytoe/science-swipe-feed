@@ -1,3 +1,4 @@
+
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -73,7 +74,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     const { data, error } = await supabaseClient
       .from('n8n_table')
       .select('*')
-      .eq('ai_summary_done', true)
+      // Removed the filter for ai_summary_done
       .order('created_at', { ascending: false });
     
     if (error) {

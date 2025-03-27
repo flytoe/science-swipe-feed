@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaperCard from './PaperCard';
@@ -23,7 +24,7 @@ const SwipeFeed: React.FC = () => {
         console.log('Fetched papers:', fetchedPapers.length);
         
         if (fetchedPapers.length === 0) {
-          setError('No papers found with completed AI summaries.');
+          setError('No papers found in the database.');
         } else {
           setPapers(fetchedPapers);
           

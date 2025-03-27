@@ -43,6 +43,9 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
     }
   };
 
+  // Use original title if AI headline is not available
+  const displayTitle = paper.ai_headline || paper.title_org;
+
   return (
     <motion.div 
       className="paper-card"
@@ -56,7 +59,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
         <div className={`paper-card-image-container relative overflow-hidden ${!imageLoaded ? 'bg-gray-200 animate-pulse' : ''}`}>
           <motion.img
             src={imageSrc}
-            alt={paper.ai_headline || paper.title_org}
+            alt={displayTitle}
             className="paper-card-image"
             initial={{ opacity: 0 }}
             animate={{ opacity: imageLoaded ? 1 : 0 }}
@@ -76,29 +79,33 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
       
       <div className="paper-card-content">
         <h2 className="paper-card-title">
-          {paper.ai_headline || paper.title_org}
+          {displayTitle}
         </h2>
         
-        <p className={`${showFullAbstract ? 'text-sm md:text-base text-gray-700 mb-4' : 'paper-card-abstract'}`}>
-          {paper.abstract_org}
-        </p>
-        
-        {!showFullAbstract && paper.abstract_org && paper.abstract_org.length > 150 && (
-          <button 
-            onClick={() => setShowFullAbstract(true)}
-            className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
-          >
-            Read more
-          </button>
-        )}
-        
-        {showFullAbstract && (
-          <button 
-            onClick={() => setShowFullAbstract(false)}
-            className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
-          >
-            Show less
-          </button>
+        {paper.abstract_org && (
+          <>
+            <p className={`${showFullAbstract ? 'text-sm md:text-base text-gray-700 mb-4' : 'paper-card-abstract'}`}>
+              {paper.abstract_org}
+            </p>
+            
+            {!showFullAbstract && paper.abstract_org.length > 150 && (
+              <button 
+                onClick={() => setShowFullAbstract(true)}
+                className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
+              >
+                Read more
+              </button>
+            )}
+            
+            {showFullAbstract && (
+              <button 
+                onClick={() => setShowFullAbstract(false)}
+                className="text-blue-500 text-sm font-medium mb-4 hover:text-blue-700 transition-colors"
+              >
+                Show less
+              </button>
+            )}
+          </>
         )}
         
         {keyTakeaways && keyTakeaways.length > 0 && (
