@@ -28,30 +28,69 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
   const parseKeyTakeaways = (takeaways: string[] | string | null): FormattedTakeaway[] => {
     if (!takeaways) return [];
     
+    // For debugging - log the raw value to understand its format
+    console.log('Raw takeaways value:', takeaways);
+    
     // Handle if it's already an array of strings
     if (Array.isArray(takeaways)) {
       return takeaways.map(takeaway => {
-        const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-        if (match) {
-          return { text: match[2], tag: match[1] };
+        // First check if this array item might itself be a JSON string
+        if (typeof takeaway === 'string') {
+          try {
+            const parsedItem = JSON.parse(takeaway);
+            if (Array.isArray(parsedItem)) {
+              // If it's a JSON array string, process its first item
+              const item = parsedItem[0] || '';
+              const match = item.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+              if (match) {
+                return { text: match[2], tag: match[1] };
+              }
+              return { text: item };
+            }
+            // If it's another type of JSON, just stringify it as fallback
+            if (typeof parsedItem === 'object') {
+              return { text: JSON.stringify(parsedItem) };
+            }
+            return { text: String(parsedItem) };
+          } catch (e) {
+            // Not JSON, process as regular string
+            const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+            if (match) {
+              return { text: match[2], tag: match[1] };
+            }
+            return { text: takeaway };
+          }
         }
-        return { text: takeaway };
+        // If not a string, stringify it
+        return { text: String(takeaway) };
       });
     }
     
     // Handle if it's a single string that needs to be split
     if (typeof takeaways === 'string') {
-      // Split by /n/ separator
-      const parts = takeaways.split('/n/').filter(part => part.trim() !== '');
-      
-      return parts.map(part => {
-        // Check for Roman numeral or capital letter at the beginning
-        const match = part.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-        if (match) {
-          return { text: match[2], tag: match[1] };
+      // Try to parse if it's a JSON string
+      try {
+        const parsed = JSON.parse(takeaways);
+        if (Array.isArray(parsed)) {
+          // If successfully parsed as array, recursively call with the array
+          return parseKeyTakeaways(parsed);
         }
-        return { text: part };
-      });
+        // If it's an object or other JSON value, handle appropriately
+        return [{ text: JSON.stringify(parsed) }];
+      } catch (e) {
+        // Not valid JSON, treat as string with /n/ separators
+        console.log('Splitting by /n/ separator as it\'s not valid JSON');
+        const parts = takeaways.split('/n/').filter(part => part.trim() !== '');
+        
+        return parts.map(part => {
+          // Check for Roman numeral or capital letter at the beginning
+          const match = part.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
+          if (match) {
+            return { text: match[2], tag: match[1] };
+          }
+          return { text: part };
+        });
+      }
     }
     
     return [];
