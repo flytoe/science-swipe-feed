@@ -4,6 +4,7 @@ import { Clock, ExternalLink } from 'lucide-react';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import PaperCardTakeaways from './PaperCardTakeaways';
 import { ScrollArea } from './ui/scroll-area';
+import { Button } from './ui/button';
 
 interface PaperCardContentProps {
   title: string;
@@ -91,7 +92,8 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
             href={`https://doi.org/${doi}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1"
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+            onClick={(e) => e.stopPropagation()}
           >
             <ExternalLink size={14} />
             <span>View Paper</span>

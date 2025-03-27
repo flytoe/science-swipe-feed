@@ -11,16 +11,16 @@
 
 @layer components {
   .swipe-feed-container {
-    @apply relative h-screen md:h-screen rounded-2xl overflow-hidden bg-gradient-to-b from-white to-gray-50 shadow-xl;
+    @apply relative h-screen md:h-screen overflow-hidden bg-gradient-to-b from-white to-gray-50;
   }
   
   .paper-card {
-    @apply overflow-hidden bg-white rounded-xl shadow-xl flex flex-col h-full mx-auto max-w-md animate-fade-in;
+    @apply overflow-hidden bg-white flex flex-col h-full w-full animate-fade-in;
   }
   
-  /* Overlapping design styling */
+  /* Full-screen design styling */
   .paper-card.overlapping-design {
-    @apply relative;
+    @apply relative h-full;
   }
   
   .paper-card-image-container {

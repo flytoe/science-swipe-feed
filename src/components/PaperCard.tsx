@@ -42,7 +42,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
       transition: { duration: 0.3, ease: 'easeOut' }
     },
     inactive: {
-      scale: 0.9,
+      scale: 0.98,
       opacity: 0,
       transition: { duration: 0.3, ease: 'easeIn' }
     }
