@@ -84,7 +84,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     const { data, error } = await supabaseClient
       .from('n8n_table')
       .select('*')
-      // Removed the filter for ai_summary_done
+      .eq('ai_summary_done', true) // Only fetch papers with ai_summary_done = true
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -96,7 +96,8 @@ export const getPapers = async (): Promise<Paper[]> => {
     
     if (!data || data.length === 0) {
       console.info('No data returned from Supabase, using demo data instead');
-      return demoData;
+      // Filter demo data to match the same condition
+      return demoData.filter(paper => paper.ai_summary_done === true);
     }
     
     // Transform the data to match the Paper type
@@ -167,7 +168,8 @@ export const getPapers = async (): Promise<Paper[]> => {
   } catch (error) {
     console.error('Error fetching papers:', error);
     console.info('Using demo data due to connection issue');
-    return demoData;
+    // Filter demo data to match the same condition
+    return demoData.filter(paper => paper.ai_summary_done === true);
   }
 };
 

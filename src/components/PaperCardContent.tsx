@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, ExternalLink } from 'lucide-react';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import PaperCardTakeaways from './PaperCardTakeaways';
+import { ScrollArea } from './ui/scroll-area';
 
 interface PaperCardContentProps {
   title: string;
@@ -25,14 +26,16 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         {title}
       </h2>
       
-      {takeaways && takeaways.length > 0 ? (
-        <PaperCardTakeaways takeaways={takeaways} />
-      ) : abstract ? (
-        // Fallback to abstract if no takeaways are available
-        <p className="text-sm md:text-base text-gray-700 mb-4">
-          {abstract}
-        </p>
-      ) : null}
+      <ScrollArea className="flex-1 max-h-[calc(100vh-20rem)]">
+        {takeaways && takeaways.length > 0 ? (
+          <PaperCardTakeaways takeaways={takeaways} />
+        ) : abstract ? (
+          // Fallback to abstract if no takeaways are available
+          <p className="text-sm md:text-base text-gray-700 mb-4">
+            {abstract}
+          </p>
+        ) : null}
+      </ScrollArea>
       
       <div className="paper-card-meta">
         <div className="flex items-center">
@@ -44,9 +47,10 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
             href={`https://doi.org/${doi}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 transition-colors"
+            className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-1"
           >
-            View Source
+            <ExternalLink size={14} />
+            <span>View Paper</span>
           </a>
         )}
       </div>
