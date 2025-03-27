@@ -59,6 +59,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     document.dispatchEvent(scrollEvent);
   };
 
+  // Create the DOI URL
+  const doiUrl = doi ? `https://doi.org/${doi}` : undefined;
+
   return (
     <div className="paper-card-content">
       <h2 className="paper-card-title">
@@ -87,9 +90,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           <Clock size={14} className="mr-1" />
           <span>{formattedDate}</span>
         </div>
-        {doi && (
+        {doiUrl && (
           <a 
-            href={`https://doi.org/${doi}`}
+            href={doiUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
