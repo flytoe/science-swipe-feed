@@ -75,11 +75,13 @@ const SwipeFeed: React.FC = () => {
     }, 5000);
     
     // Setup listeners for scroll events in paper content
+    // Fix: Use a callback function without arguments for addEventListener
     document.addEventListener('scrollContent', () => setScrollingState(true));
     document.addEventListener('scrollEnd', () => setScrollingState(false));
     
     return () => {
       clearTimeout(timeout);
+      // Fix: Use the same callback function signatures for removeEventListener
       document.removeEventListener('scrollContent', () => setScrollingState(true));
       document.removeEventListener('scrollEnd', () => setScrollingState(false));
     };
