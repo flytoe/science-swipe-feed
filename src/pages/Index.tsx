@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
 import { Info } from 'lucide-react';
@@ -10,12 +9,10 @@ const Index: React.FC = () => {
   const [hasPapers, setHasPapers] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Check if we have any papers in the database
   useEffect(() => {
     const checkDatabase = async () => {
       try {
         setIsLoading(true);
-        // Make a simple query to check if the table has any rows
         const { data, error, count } = await supabase
           .from('n8n_table')
           .select('doi', { count: 'exact' })
@@ -46,7 +43,6 @@ const Index: React.FC = () => {
     checkDatabase();
   }, []);
 
-  // Function to add a sample paper
   const addSamplePaper = async () => {
     try {
       const samplePaper = {
@@ -114,9 +110,9 @@ const Index: React.FC = () => {
         </div>
       ) : null}
 
-      <main className="container max-w-md mx-auto px-0 py-4 h-[calc(100vh-4rem)]">
+      <div className="h-[calc(100vh-4rem)]">
         <SwipeFeed />
-      </main>
+      </div>
     </div>
   );
 };
