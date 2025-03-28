@@ -61,11 +61,24 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
   const displayTitle = paper.ai_headline || paper.title_org;
   
   // Extract first paragraph from key takeaways as highlight
-  const firstTakeaway = paper.ai_key_takeaways && Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways[0]
-    ? paper.ai_key_takeaways[0]
-    : typeof paper.ai_key_takeaways === 'string' 
-      ? paper.ai_key_takeaways.split('\n')[0]
-      : '';
+  const firstTakeaway = (() => {
+    if (!paper.ai_key_takeaways) return '';
+    
+    if (Array.isArray(paper.ai_key_takeaways)) {
+      if (paper.ai_key_takeaways.length > 0) {
+        // Handle if the first item is an object or string
+        const firstItem = paper.ai_key_takeaways[0];
+        if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
+          return firstItem.text;
+        }
+        return String(firstItem);
+      }
+    } else if (typeof paper.ai_key_takeaways === 'string') {
+      // Handle string format, split by newline and take first
+      return paper.ai_key_takeaways.split('\n')[0];
+    }
+    return '';
+  })();
 
   return (
     <motion.div 

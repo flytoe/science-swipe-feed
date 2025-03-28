@@ -155,9 +155,10 @@ const PaperDetail: React.FC = () => {
                       <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
                     </div>
                     <div>
-                      <h3 className="font-medium mb-1">{takeaway.title}</h3>
-                      {takeaway.description && (
-                        <p className="text-white/70 text-sm">{takeaway.description}</p>
+                      {/* Use text property for the main content */}
+                      <h3 className="font-medium mb-1">{takeaway.text}</h3>
+                      {takeaway.citation && (
+                        <p className="text-white/70 text-sm">{takeaway.citation}</p>
                       )}
                     </div>
                   </div>

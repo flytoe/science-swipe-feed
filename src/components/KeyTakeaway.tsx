@@ -37,6 +37,10 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({ text, citation, type }) => {
   };
 
   const { iconColor, badgeClass } = getTypeStyles();
+  
+  // Ensure text is a string
+  const displayText = typeof text === 'string' ? text : 
+    (text && typeof text === 'object' && 'text' in text) ? String(text.text) : 'No content';
 
   return (
     <div className="key-takeaway animate-fade-in mb-3">
@@ -45,7 +49,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({ text, citation, type }) => {
           <ArrowRight size={16} />
         </span>
         <div className="flex flex-col gap-1 flex-1">
-          <span className="key-takeaway-text">{text}</span>
+          <span className="key-takeaway-text">{displayText}</span>
           {citation && (
             <div className="mt-1">
               <Badge variant="outline" className="text-xs font-normal text-gray-500">

@@ -1,3 +1,4 @@
+
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -200,7 +201,7 @@ export const getPapers = async (): Promise<Paper[]> => {
 export async function getPaperById(id: string): Promise<Paper | null> {
   try {
     // Try to find by id first
-    let { data, error } = await supabase
+    let { data, error } = await supabaseClient
       .from('n8n_table')
       .select('*')
       .eq('id', id)
@@ -208,7 +209,7 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     
     // If not found by id, try with doi
     if (error || !data) {
-      ({ data, error } = await supabase
+      ({ data, error } = await supabaseClient
         .from('n8n_table')
         .select('*')
         .eq('doi', id)
