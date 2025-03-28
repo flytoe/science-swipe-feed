@@ -60,13 +60,13 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
   // Use original title if AI headline is not available, with null check
   const displayTitle = paper?.ai_headline || paper?.title_org || 'Untitled Paper';
   
-  // Extract first paragraph from key takeaways as highlight
+  // Extract first paragraph from key takeaways as highlight - Fix TS errors with proper null checks
   const firstTakeaway = (() => {
     if (!paper || !paper.ai_key_takeaways) return '';
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
-      if (firstItem !== null && typeof firstItem === 'object' && 'text' in firstItem) {
+      if (firstItem !== null && firstItem !== undefined && typeof firstItem === 'object' && 'text' in firstItem) {
         return firstItem.text || '';
       }
       return String(firstItem ?? '');
