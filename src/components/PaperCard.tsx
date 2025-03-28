@@ -67,10 +67,10 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
         if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
           return firstItem.text;
         }
-        return String(firstItem);
+        return String(firstItem || '');
       }
     } else if (typeof paper.ai_key_takeaways === 'string') {
-      return paper.ai_key_takeaways.split('\n')[0];
+      return paper.ai_key_takeaways.split('\n')[0] || '';
     }
     return '';
   })();
@@ -90,7 +90,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
 
   return (
     <motion.div 
-      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer h-full"
+      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer h-full w-full"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
@@ -171,12 +171,13 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
               <PaperCardContent
                 title={displayTitle}
                 title_org={paper.title_org}
-                abstract={paper.abstract}
+                abstract={paper.abstract_org}
                 abstract_org={paper.abstract_org}
                 formattedDate={formattedDate}
                 doi={paper.doi}
                 takeaways={formattedTakeaways}
                 creator={paper.creator}
+                imageSrc={imageSrc}
               />
             </div>
           </motion.div>

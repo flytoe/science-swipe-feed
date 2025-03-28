@@ -49,6 +49,7 @@ const SwipeFeed: React.FC = () => {
       const currentPaper = papers[currentIndex];
       if (!currentPaper) return;
       
+      // Only generate if we have a prompt AND the image_url is empty
       if (currentPaper.ai_image_prompt && !currentPaper.image_url) {
         setIsGeneratingImage(true);
         
@@ -161,7 +162,7 @@ const SwipeFeed: React.FC = () => {
 
   return (
     <div 
-      className="swipe-feed-container bg-black h-full"
+      className="swipe-feed-container bg-black h-full w-full"
       ref={containerRef}
       onTouchStart={handleContainerTouchStart}
       onTouchMove={handleContainerTouchMove}

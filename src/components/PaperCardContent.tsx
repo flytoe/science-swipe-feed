@@ -17,6 +17,7 @@ interface PaperCardContentProps {
   doi?: string;
   takeaways: FormattedTakeaway[];
   creator?: string[] | string | null;
+  imageSrc?: string;
 }
 
 const PaperCardContent: React.FC<PaperCardContentProps> = ({
@@ -27,7 +28,8 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   formattedDate,
   doi,
   takeaways,
-  creator
+  creator,
+  imageSrc
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -95,13 +97,19 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   const doiUrl = doi ? (
     doi.startsWith('http') ? doi : `https://doi.org/${doi}`
   ) : undefined;
+  
+  // Handle collapsible triggers to prevent propagation
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
 
   return (
     <div className="paper-card-content h-full flex flex-col">
+      {/* Hero Image Section */}
       <div className="relative h-40 min-h-40 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-transparent z-10" />
         <img 
-          src={doiUrl ? `https://opengraph.githubassets.com/1/${encodeURIComponent(doiUrl)}` : 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'} 
+          src={imageSrc || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'}
           alt={title} 
           className="w-full h-full object-cover" 
         />
@@ -156,7 +164,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                     <p className="text-sm text-white/70">{shortAbstract}</p>
                     
                     {cleanAbstract.length > 120 && (
-                      <CollapsibleTrigger asChild>
+                      <CollapsibleTrigger asChild onClick={handleTriggerClick}>
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -172,7 +180,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                 <CollapsibleContent>
                   <p className="text-sm text-white/70">{cleanAbstract}</p>
                   {cleanAbstract.length > 120 && (
-                    <CollapsibleTrigger asChild>
+                    <CollapsibleTrigger asChild onClick={handleTriggerClick}>
                       <Button 
                         variant="ghost" 
                         size="sm" 

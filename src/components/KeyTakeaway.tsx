@@ -1,72 +1,56 @@
 
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { Badge } from './ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { AlertCircle, AlertOctagon, ArrowUpRight } from 'lucide-react';
 
-type KeyTakeawayProps = {
+interface KeyTakeawayProps {
   text: string;
   citation?: string;
-  type?: string;
-};
+  type?: 'default' | 'why_it_matters';
+}
 
-const KeyTakeaway: React.FC<KeyTakeawayProps> = ({ text, citation, type }) => {
-  // Get the appropriate styling based on the takeaway type
-  const getTypeStyles = () => {
-    switch (type) {
-      case 'why_it_matters':
-        return {
-          iconColor: 'text-amber-500',
-          badgeClass: 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-        };
-      case 'finding':
-        return {
-          iconColor: 'text-blue-500',
-          badgeClass: 'bg-blue-100 text-blue-800 hover:bg-blue-200'
-        };
-      case 'methodology':
-        return {
-          iconColor: 'text-purple-500',
-          badgeClass: 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-        };
-      default:
-        return {
-          iconColor: 'text-blue-500',
-          badgeClass: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-        };
-    }
-  };
-
-  const { iconColor, badgeClass } = getTypeStyles();
-  
-  // Ensure text is a string
-  const displayText = typeof text === 'string' ? text : 
-    (text && typeof text === 'object' && 'text' in text) ? String(text.text) : 'No content';
+const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
+  text,
+  citation,
+  type = 'default',
+}) => {
+  // Different styling for "why it matters" takeaways
+  const isWhyItMatters = type === 'why_it_matters';
 
   return (
-    <div className="key-takeaway animate-fade-in mb-3">
-      <div className="flex items-start gap-2">
-        <span className={`key-takeaway-icon ${iconColor}`}>
-          <ArrowRight size={16} />
-        </span>
-        <div className="flex flex-col gap-1 flex-1">
-          <span className="key-takeaway-text">{displayText}</span>
+    <div 
+      className={`rounded-lg p-3 ${
+        isWhyItMatters 
+          ? 'bg-indigo-950/40 border border-indigo-800/30' 
+          : 'bg-white/5'
+      }`}
+    >
+      <div className="flex">
+        <div className="mr-3 flex-shrink-0">
+          <div className={`w-1 h-full ${
+            isWhyItMatters 
+              ? 'bg-gradient-to-b from-indigo-400 to-purple-500' 
+              : 'bg-gradient-to-b from-blue-400 to-purple-500'
+          } rounded-full`} />
+        </div>
+        
+        <div>
+          <p className="text-white/90">
+            {text}
+          </p>
+          
           {citation && (
-            <div className="mt-1">
-              <Badge variant="outline" className="text-xs font-normal text-gray-500">
-                {citation}
-              </Badge>
-            </div>
-          )}
-          {type && !citation && (
-            <div className="mt-1">
-              <Badge className={`text-xs ${badgeClass}`}>
-                {type === 'why_it_matters' ? 'Why it matters' : 
-                 type === 'finding' ? 'Key finding' : 
-                 type === 'methodology' ? 'Methodology' : type}
-              </Badge>
+            <div className="text-xs text-white/60 mt-1 italic">
+              {citation}
             </div>
           )}
         </div>
+        
+        {isWhyItMatters && (
+          <div className="ml-auto pl-3">
+            <AlertCircle size={16} className="text-indigo-400" />
+          </div>
+        )}
       </div>
     </div>
   );
