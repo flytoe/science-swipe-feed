@@ -27,8 +27,9 @@ const SwipeFeed: React.FC = () => {
       isScrolling
     });
   
-  const setScrollingState = (scrolling: boolean) => {
-    setIsScrolling(scrolling);
+  // Fixed: Removed the parameter from setScrollingState function
+  const setScrollingState = () => {
+    setIsScrolling(true);
   };
   
   useEffect(() => {
@@ -71,14 +72,15 @@ const SwipeFeed: React.FC = () => {
       setShowInstructions(false);
     }, 5000);
     
+    // Fixed: Updated event handlers to set isScrolling directly instead of calling setScrollingState with a parameter
     const handleScrollStart = () => {
       console.log('Content scrolling started');
-      setScrollingState(true);
+      setIsScrolling(true);
     };
     
     const handleScrollEnded = () => {
       console.log('Content scrolling ended');
-      setScrollingState(false);
+      setIsScrolling(false);
     };
     
     document.addEventListener('scrollContent', handleScrollStart);
