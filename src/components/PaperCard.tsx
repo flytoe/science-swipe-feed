@@ -9,9 +9,10 @@ import PaperCardContent from './PaperCardContent';
 interface PaperCardProps {
   paper: Paper;
   isActive: boolean;
+  isGeneratingImage?: boolean;
 }
 
-const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
+const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false }) => {
   const categories = Array.isArray(paper.category) ? paper.category : 
     (typeof paper.category === 'string' ? [paper.category] : []);
   
@@ -64,6 +65,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
         imageSrc={imageSrc}
         imageAlt={displayTitle}
         categories={categories}
+        isGenerating={isGeneratingImage}
       />
       
       <PaperCardContent

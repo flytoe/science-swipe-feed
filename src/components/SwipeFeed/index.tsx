@@ -8,6 +8,7 @@ import SwipeControls from './SwipeControls';
 import SwipeInstructions from './SwipeInstructions';
 import { useSwipeNavigation } from './useSwipeNavigation';
 import { getPapers, type Paper } from '../../lib/supabase';
+import { checkAndGenerateImageIfNeeded } from '../../lib/imageGenerationService';
 
 const SwipeFeed: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -17,6 +18,7 @@ const SwipeFeed: React.FC = () => {
   const [isUsingDemoData, setIsUsingDemoData] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, nextPaper, prevPaper } = 
@@ -31,6 +33,42 @@ const SwipeFeed: React.FC = () => {
   const setScrollingState = () => {
     setIsScrolling(true);
   };
+  
+  // Check for image generation when current paper changes
+  useEffect(() => {
+    const generateImageForCurrentPaper = async () => {
+      if (papers.length === 0 || isGeneratingImage) return;
+      
+      const currentPaper = papers[currentIndex];
+      if (!currentPaper) return;
+      
+      // If paper has an AI image prompt but no image URL, generate one
+      if (currentPaper.ai_image_prompt && !currentPaper.image_url) {
+        setIsGeneratingImage(true);
+        
+        try {
+          const newImageUrl = await checkAndGenerateImageIfNeeded(currentPaper);
+          
+          if (newImageUrl) {
+            // Update the papers array with the new image URL
+            setPapers(prevPapers => 
+              prevPapers.map(paper => 
+                paper.doi === currentPaper.doi 
+                  ? { ...paper, image_url: newImageUrl } 
+                  : paper
+              )
+            );
+          }
+        } catch (error) {
+          console.error('Error generating image:', error);
+        } finally {
+          setIsGeneratingImage(false);
+        }
+      }
+    };
+    
+    generateImageForCurrentPaper();
+  }, [currentIndex, papers]);
   
   useEffect(() => {
     const loadPapers = async () => {
