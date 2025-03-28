@@ -97,20 +97,30 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   ) : undefined;
 
   return (
-    <div className="paper-card-content">
-      <h2 className="paper-card-title">
-        {title}
-      </h2>
-      
-      {/* Display Creator if available */}
-      {formatCreator(creator) && (
-        <p className="text-sm text-gray-600 mt-1 mb-3">
-          {formatCreator(creator)}
-        </p>
-      )}
+    <div className="paper-card-content h-full flex flex-col">
+      <div className="relative h-40 min-h-40 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-transparent z-10" />
+        <img 
+          src={doiUrl ? `https://opengraph.githubassets.com/1/${encodeURIComponent(doiUrl)}` : 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'} 
+          alt={title} 
+          className="w-full h-full object-cover" 
+        />
+        <div className="absolute inset-0 flex flex-col justify-end p-4 z-20">
+          <h2 className="text-2xl font-bold text-white drop-shadow-md leading-tight">
+            {title}
+          </h2>
+          
+          {/* Display Creator if available */}
+          {formatCreator(creator) && (
+            <p className="text-sm text-white/80 mt-1 drop-shadow-md">
+              {formatCreator(creator)}
+            </p>
+          )}
+        </div>
+      </div>
       
       <ScrollArea 
-        className="flex-1 max-h-[calc(100vh-15rem)]"
+        className="flex-1 h-full overflow-auto p-4"
         ref={scrollRef}
         onTouchStart={handleContentTouchStart}
       >
@@ -119,23 +129,23 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
             <PaperCardTakeaways takeaways={takeaways} />
           ) : abstract ? (
             // Fallback to abstract if no takeaways are available
-            <p className="text-sm md:text-base text-gray-700 mb-4">
+            <p className="text-sm md:text-base text-white/80 mb-4">
               {abstract}
             </p>
           ) : null}
           
           {/* Original Title Section */}
           {title_org && title_org !== title && (
-            <div className="mt-6 border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Original Title</h3>
-              <p className="text-sm text-gray-700">{title_org}</p>
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <h3 className="text-sm font-medium text-white/80 mb-2">Original Title</h3>
+              <p className="text-sm text-white/70">{title_org}</p>
             </div>
           )}
           
           {/* Original Abstract Section with Collapsible */}
           {abstract_org && (
-            <div className="mt-4 border-t border-gray-100 pt-4">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Abstract</h3>
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <h3 className="text-sm font-medium text-white/80 mb-2">Abstract</h3>
               <Collapsible 
                 open={isAbstractOpen} 
                 onOpenChange={setIsAbstractOpen}
@@ -143,14 +153,14 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
               >
                 {!isAbstractOpen ? (
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm text-gray-700">{shortAbstract}</p>
+                    <p className="text-sm text-white/70">{shortAbstract}</p>
                     
                     {cleanAbstract.length > 120 && (
                       <CollapsibleTrigger asChild>
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="self-start -ml-2 text-blue-600"
+                          className="self-start -ml-2 text-blue-400"
                         >
                           <span className="flex items-center gap-1">Read more <ChevronRight size={14} /></span>
                         </Button>
@@ -160,13 +170,13 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                 ) : null}
                 
                 <CollapsibleContent>
-                  <p className="text-sm text-gray-700">{cleanAbstract}</p>
+                  <p className="text-sm text-white/70">{cleanAbstract}</p>
                   {cleanAbstract.length > 120 && (
                     <CollapsibleTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="self-start -ml-2 mt-2 text-blue-600"
+                        className="self-start -ml-2 mt-2 text-blue-400"
                       >
                         <span className="flex items-center gap-1">Read less <ChevronDown size={14} /></span>
                       </Button>
@@ -179,16 +189,16 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         </div>
       </ScrollArea>
       
-      <div className="paper-card-meta">
+      <div className="paper-card-meta border-t border-white/10 p-4 flex justify-between items-center">
         <div className="flex items-center">
-          <Clock size={14} className="mr-1" />
-          <span>{formattedDate}</span>
+          <Clock size={14} className="mr-1 text-white/60" />
+          <span className="text-white/60">{formattedDate}</span>
         </div>
         {doiUrl && (
           <Button 
             variant="outline"
             size="sm"
-            className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-100"
+            className="inline-flex items-center gap-1 text-xs bg-blue-950/40 hover:bg-blue-900/60 text-blue-400 border-blue-900/40"
             asChild
             onClick={(e) => e.stopPropagation()}
           >

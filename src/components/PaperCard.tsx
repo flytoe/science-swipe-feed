@@ -1,19 +1,24 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
 import PaperCardMedia from './PaperCardMedia';
-import { motion } from 'framer-motion';
-import { ChevronRight, Calendar } from 'lucide-react';
+import PaperCardContent from './PaperCardContent';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, X } from 'lucide-react';
 import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { parseKeyTakeaways } from '../utils/takeawayParser';
 
 interface PaperCardProps {
   paper: Paper;
   isActive: boolean;
   isGeneratingImage?: boolean;
+  onDetailToggle?: (isOpen: boolean) => void;
 }
 
-const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false }) => {
+const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false, onDetailToggle }) => {
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const navigate = useNavigate();
   
   const categories = Array.isArray(paper.category) ? paper.category : 
@@ -49,14 +54,6 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     }
   };
 
-  const handleCardClick = () => {
-    // Navigate to detail page using paper id or doi as identifier
-    const id = paper.doi || paper.id;
-    if (id) {
-      navigate(`/paper/${id}`);
-    }
-  };
-
   // Use original title if AI headline is not available
   const displayTitle = paper.ai_headline || paper.title_org;
   
@@ -66,7 +63,6 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     
     if (Array.isArray(paper.ai_key_takeaways)) {
       if (paper.ai_key_takeaways.length > 0) {
-        // Handle if the first item is an object or string
         const firstItem = paper.ai_key_takeaways[0];
         if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
           return firstItem.text;
@@ -74,66 +70,118 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
         return String(firstItem);
       }
     } else if (typeof paper.ai_key_takeaways === 'string') {
-      // Handle string format, split by newline and take first
       return paper.ai_key_takeaways.split('\n')[0];
     }
     return '';
   })();
 
+  const toggleDetail = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const newState = !isDetailOpen;
+    setIsDetailOpen(newState);
+    if (onDetailToggle) onDetailToggle(newState);
+  };
+
+  const handleCardClick = () => {
+    toggleDetail();
+  };
+
+  const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
+
   return (
     <motion.div 
-      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer"
+      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer h-full"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
       exit="inactive"
-      layout
       onClick={handleCardClick}
+      layout
     >
-      <PaperCardMedia 
-        imageSrc={imageSrc}
-        imageAlt={displayTitle}
-        categories={[]}
-        isGenerating={isGeneratingImage}
-      />
-      
-      <div className="p-4 space-y-4">
-        {/* Date and categories */}
-        <div className="flex flex-wrap gap-2 mb-2">
-          <Badge variant="outline" className="bg-white/10 text-white border-none">
-            {formattedDate}
-          </Badge>
-          
-          {categories.slice(0, 2).map((category, idx) => (
-            <Badge 
-              key={idx}
-              variant="outline" 
-              className="bg-white/10 text-white border-none capitalize"
+      <AnimatePresence mode="wait">
+        {!isDetailOpen ? (
+          <motion.div
+            className="h-full flex flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            key="card-preview"
+          >
+            <div className="flex-1">
+              <PaperCardMedia 
+                imageSrc={imageSrc}
+                imageAlt={displayTitle}
+                categories={[]}
+                isGenerating={isGeneratingImage}
+              />
+              
+              <div className="p-4 space-y-4">
+                {/* Date and categories */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge variant="outline" className="bg-white/10 text-white border-none">
+                    {formattedDate}
+                  </Badge>
+                  
+                  {categories.slice(0, 2).map((category, idx) => (
+                    <Badge 
+                      key={idx}
+                      variant="outline" 
+                      className="bg-white/10 text-white border-none capitalize"
+                    >
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+                
+                {/* Title */}
+                <h2 className="text-2xl font-bold leading-tight">
+                  {displayTitle}
+                </h2>
+                
+                {/* First highlight */}
+                {firstTakeaway && (
+                  <div className="border-l-2 border-yellow-400 pl-3 py-1">
+                    <p className="text-white/80">{firstTakeaway}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="h-full flex flex-col relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            key="card-detail"
+          >
+            {/* Close button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-2 right-2 z-10 bg-black/50 text-white hover:bg-black/70"
+              onClick={(e) => toggleDetail(e)}
             >
-              {category}
-            </Badge>
-          ))}
-        </div>
-        
-        {/* Title */}
-        <h2 className="text-2xl font-bold leading-tight">
-          {displayTitle}
-        </h2>
-        
-        {/* First highlight */}
-        {firstTakeaway && (
-          <div className="border-l-2 border-yellow-400 pl-3 py-1">
-            <p className="text-white/80">{firstTakeaway}</p>
-          </div>
+              <X size={18} />
+            </Button>
+            
+            <div className="flex-1 overflow-hidden h-full">
+              <PaperCardContent
+                title={displayTitle}
+                title_org={paper.title_org}
+                abstract={paper.abstract}
+                abstract_org={paper.abstract_org}
+                formattedDate={formattedDate}
+                doi={paper.doi}
+                takeaways={formattedTakeaways}
+                creator={paper.creator}
+              />
+            </div>
+          </motion.div>
         )}
-        
-        {/* View more button */}
-        <div className="flex justify-end mt-4">
-          <button className="flex items-center text-blue-400 hover:text-blue-300 transition-colors">
-            Read More <ChevronRight className="ml-1 h-4 w-4" />
-          </button>
-        </div>
-      </div>
+      </AnimatePresence>
     </motion.div>
   );
 };

@@ -19,6 +19,7 @@ const SwipeFeed: React.FC = () => {
   const [showInstructions, setShowInstructions] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [detailViewActive, setDetailViewActive] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, nextPaper, prevPaper } = 
@@ -31,6 +32,14 @@ const SwipeFeed: React.FC = () => {
   
   const setScrollingState = () => {
     setIsScrolling(true);
+  };
+  
+  const handleDetailToggle = (isOpen: boolean) => {
+    setDetailViewActive(isOpen);
+    // When detail view closes, reset scrolling state
+    if (!isOpen) {
+      setIsScrolling(false);
+    }
   };
   
   useEffect(() => {
@@ -152,7 +161,7 @@ const SwipeFeed: React.FC = () => {
 
   return (
     <div 
-      className="swipe-feed-container bg-black"
+      className="swipe-feed-container bg-black h-full"
       ref={containerRef}
       onTouchStart={handleContainerTouchStart}
       onTouchMove={handleContainerTouchMove}
@@ -186,7 +195,7 @@ const SwipeFeed: React.FC = () => {
           )}
           
           <AnimatePresence mode="wait">
-            {showInstructions && <SwipeInstructions />}
+            {showInstructions && !detailViewActive && <SwipeInstructions />}
           </AnimatePresence>
           
           <div className="absolute inset-0">
@@ -195,12 +204,13 @@ const SwipeFeed: React.FC = () => {
                 index === currentIndex && (
                   <motion.div
                     key={paper.id || index}
-                    className="absolute inset-0 p-4"
+                    className="absolute inset-0"
                   >
                     <PaperCard 
                       paper={paper} 
                       isActive={index === currentIndex} 
-                      isGeneratingImage={isGeneratingImage && paper.doi === papers[currentIndex].doi} 
+                      isGeneratingImage={isGeneratingImage && paper.doi === papers[currentIndex].doi}
+                      onDetailToggle={handleDetailToggle}
                     />
                   </motion.div>
                 )
