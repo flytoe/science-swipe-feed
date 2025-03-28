@@ -38,15 +38,16 @@ export const usePaperData = (paper: Paper | undefined) => {
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
-      // Add proper null checks for firstItem before using it
-      if (firstItem !== null && firstItem !== undefined) {
-        if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
-          return firstItem.text || '';
-        }
-        // Safe conversion to string with null check
-        return String(firstItem || '');
+      // Fix TypeScript errors with proper null checks
+      if (firstItem === null || firstItem === undefined) {
+        return '';
       }
-      return '';
+      
+      if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
+        return firstItem.text || '';
+      }
+      // Safe conversion to string with null check
+      return String(firstItem);
     } else if (typeof paper.ai_key_takeaways === 'string') {
       const takeawaysStr = String(paper.ai_key_takeaways);
       const lines = takeawaysStr.split('\n');
