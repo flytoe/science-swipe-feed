@@ -65,12 +65,13 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
       if (paper.ai_key_takeaways.length > 0) {
         const firstItem = paper.ai_key_takeaways[0];
         if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
-          return firstItem.text;
+          return firstItem.text || '';
         }
         return String(firstItem || '');
       }
     } else if (typeof paper.ai_key_takeaways === 'string') {
-      return paper.ai_key_takeaways.split('\n')[0] || '';
+      const firstLine = paper.ai_key_takeaways.split('\n')[0];
+      return firstLine || '';
     }
     return '';
   })();

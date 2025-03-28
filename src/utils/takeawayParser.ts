@@ -3,7 +3,7 @@ export interface FormattedTakeaway {
   text: string;
   citation?: string;
   tag?: string;
-  type?: string;
+  type?: 'default' | 'why_it_matters';
 }
 
 /**
@@ -20,7 +20,7 @@ export const parseKeyTakeaways = (takeaways: string[] | string | null): Formatte
     return takeaways.map((item: any) => ({
       text: item.text || '',
       citation: item.citation || undefined,
-      type: item.type || undefined
+      type: item.type === 'why_it_matters' ? 'why_it_matters' : 'default'
     }));
   }
   
@@ -35,25 +35,25 @@ export const parseKeyTakeaways = (takeaways: string[] | string | null): Formatte
             return {
               text: parsedItem.text || '',
               citation: parsedItem.citation || undefined,
-              type: parsedItem.type || undefined
+              type: parsedItem.type === 'why_it_matters' ? 'why_it_matters' : 'default'
             };
           }
           // If it parsed but isn't the expected format, use old format
           const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
           if (match) {
-            return { text: match[2], tag: match[1] };
+            return { text: match[2], tag: match[1], type: 'default' };
           }
-          return { text: takeaway };
+          return { text: takeaway, type: 'default' };
         } catch (e) {
           // Not JSON, process as regular string using old format
           const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
           if (match) {
-            return { text: match[2], tag: match[1] };
+            return { text: match[2], tag: match[1], type: 'default' };
           }
-          return { text: takeaway };
+          return { text: takeaway, type: 'default' };
         }
       }
-      return { text: String(takeaway) };
+      return { text: String(takeaway), type: 'default' };
     });
   }
   
@@ -69,18 +69,18 @@ export const parseKeyTakeaways = (takeaways: string[] | string | null): Formatte
             return {
               text: item.text || '',
               citation: item.citation || undefined,
-              type: item.type || undefined
+              type: item.type === 'why_it_matters' ? 'why_it_matters' : 'default'
             };
           }
           // If array item is a string, use old format
           if (typeof item === 'string') {
             const match = item.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
             if (match) {
-              return { text: match[2], tag: match[1] };
+              return { text: match[2], tag: match[1], type: 'default' };
             }
-            return { text: item };
+            return { text: item, type: 'default' };
           }
-          return { text: String(item) };
+          return { text: String(item), type: 'default' };
         });
       }
       
@@ -89,12 +89,12 @@ export const parseKeyTakeaways = (takeaways: string[] | string | null): Formatte
         return [{ 
           text: parsed.text || '',
           citation: parsed.citation || undefined,
-          type: parsed.type || undefined
+          type: parsed.type === 'why_it_matters' ? 'why_it_matters' : 'default'
         }];
       }
       
       // Fallback for other JSON types
-      return [{ text: JSON.stringify(parsed) }];
+      return [{ text: JSON.stringify(parsed), type: 'default' }];
     } catch (e) {
       // Not valid JSON, use the old format with /n/ separators
       console.log('Splitting by /n/ separator as it\'s not valid JSON');
@@ -104,9 +104,9 @@ export const parseKeyTakeaways = (takeaways: string[] | string | null): Formatte
         // Check for Roman numeral or capital letter at the beginning
         const match = part.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
         if (match) {
-          return { text: match[2], tag: match[1] };
+          return { text: match[2], tag: match[1], type: 'default' };
         }
-        return { text: part };
+        return { text: part, type: 'default' };
       });
     }
   }

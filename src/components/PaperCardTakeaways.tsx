@@ -32,7 +32,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
               <KeyTakeaway 
                 text={takeaway.text} 
                 citation={takeaway.citation}
-                type={takeaway.type}
+                type="why_it_matters"
               />
             </div>
           ))}
@@ -51,7 +51,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
             <KeyTakeaway 
               text={takeaway.text} 
               citation={takeaway.citation}
-              type={takeaway.type}
+              type="default"
             />
           </div>
         ))}
