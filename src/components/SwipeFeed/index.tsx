@@ -13,16 +13,7 @@ interface SwipeFeedProps {
 const SwipeFeed: React.FC<SwipeFeedProps> = ({ papers }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
-  if (!papers || papers.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-white/70">No papers available</p>
-      </div>
-    );
-  }
-
-  const currentPaper = papers[currentIndex];
-  
+  // Always call hooks at the top level, regardless of conditions
   const {
     nextPaper,
     prevPaper,
@@ -33,8 +24,19 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({ papers }) => {
   } = useSwipeNavigation({ 
     currentIndex, 
     setCurrentIndex, 
-    papersLength: papers.length 
+    papersLength: papers?.length || 0 
   });
+  
+  // Check for empty papers after hooks are called
+  if (!papers || papers.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-white/70">No papers available</p>
+      </div>
+    );
+  }
+
+  const currentPaper = papers[currentIndex];
   
   return (
     <div 
