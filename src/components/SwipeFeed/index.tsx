@@ -154,7 +154,7 @@ const SwipeFeed: React.FC = () => {
             {showInstructions && <SwipeInstructions />}
           </AnimatePresence>
           
-          <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0">
             <AnimatePresence mode="wait">
               {papers.map((paper, index) => (
                 index === currentIndex && (
