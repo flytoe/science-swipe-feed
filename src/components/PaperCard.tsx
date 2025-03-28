@@ -66,10 +66,12 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
+      // Add proper null checks for firstItem before using it
       if (firstItem !== null && firstItem !== undefined && typeof firstItem === 'object' && 'text' in firstItem) {
         return firstItem.text || '';
       }
-      return String(firstItem ?? '');
+      // If firstItem is null or undefined, return an empty string instead of using it directly
+      return firstItem ? String(firstItem) : '';
     } else if (typeof paper.ai_key_takeaways === 'string') {
       const takeawaysStr = String(paper.ai_key_takeaways);
       const lines = takeawaysStr.split('\n');
