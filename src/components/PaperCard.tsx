@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
@@ -62,7 +63,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
-      if (firstItem && typeof firstItem === 'object' && 'text' in firstItem) {
+      if (firstItem !== null && typeof firstItem === 'object' && 'text' in firstItem) {
         return firstItem.text || '';
       }
       return String(firstItem || '');
