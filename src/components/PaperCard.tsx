@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
@@ -33,7 +32,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
         year: 'numeric'
       }).replace(/\//g, '.');
     } catch (e) {
-      console.warn(`Invalid date format for paper ${paper.id}:`, e);
+      console.warn(`Invalid date format for paper ${paper.doi}:`, e);
       return 'Unknown date';
     }
   })();
@@ -63,12 +62,13 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
-      if (firstItem !== null && typeof firstItem === 'object' && 'text' in firstItem) {
+      if (firstItem && typeof firstItem === 'object' && 'text' in firstItem) {
         return firstItem.text || '';
       }
       return String(firstItem || '');
     } else if (typeof paper.ai_key_takeaways === 'string') {
-      const lines = paper.ai_key_takeaways.split('\n');
+      const takeawaysStr = String(paper.ai_key_takeaways);
+      const lines = takeawaysStr.split('\n');
       return lines.length > 0 ? lines[0] : '';
     }
     return '';

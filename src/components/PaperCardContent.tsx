@@ -1,6 +1,6 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Clock, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
+import { Clock, ExternalLink, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import PaperCardTakeaways from './PaperCardTakeaways';
 import { ScrollArea } from './ui/scroll-area';
@@ -103,6 +103,18 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     e.stopPropagation();
   };
 
+  // Fix: Prevent the Read More action from closing the detail view
+  const handleReadMore = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsAbstractOpen(true);
+  };
+
+  // Fix: Prevent the Read Less action from closing the detail view
+  const handleReadLess = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsAbstractOpen(false);
+  };
+
   return (
     <div className="paper-card-content h-full flex flex-col">
       {/* Hero Image Section */}
@@ -164,7 +176,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                     <p className="text-sm text-white/70">{shortAbstract}</p>
                     
                     {cleanAbstract.length > 120 && (
-                      <CollapsibleTrigger asChild onClick={handleTriggerClick}>
+                      <CollapsibleTrigger asChild onClick={handleReadMore}>
                         <Button 
                           variant="ghost" 
                           size="sm" 
@@ -180,7 +192,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                 <CollapsibleContent>
                   <p className="text-sm text-white/70">{cleanAbstract}</p>
                   {cleanAbstract.length > 120 && (
-                    <CollapsibleTrigger asChild onClick={handleTriggerClick}>
+                    <CollapsibleTrigger asChild onClick={handleReadLess}>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -194,6 +206,26 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
               </Collapsible>
             </div>
           )}
+          
+          {/* AI Disclaimer */}
+          <div className="mt-6 border-t border-white/10 pt-4 pb-2">
+            <div className="bg-white/5 rounded-md p-3 flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <AlertTriangle size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-white/70">
+                  This content was generated using AI and may contain inaccuracies or errors.
+                </p>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="self-start text-xs border-white/10 hover:bg-white/10"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Report a problem
+              </Button>
+            </div>
+          </div>
         </div>
       </ScrollArea>
       

@@ -1,234 +1,188 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { type Paper } from '../lib/supabase';
+import PaperCardMedia from './PaperCardMedia';
+import PaperCardContent from './PaperCardContent';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, X } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { parseKeyTakeaways } from '../utils/takeawayParser';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import PaperCard from '../PaperCard';
-import { AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner';
-import SwipeControls from './SwipeControls';
-import SwipeInstructions from './SwipeInstructions';
-import { useSwipeNavigation } from './useSwipeNavigation';
-import { getPapers, type Paper } from '../../lib/supabase';
-import { checkAndGenerateImageIfNeeded } from '../../lib/imageGenerationService';
+interface PaperCardProps {
+  paper: Paper;
+  isActive: boolean;
+  isGeneratingImage?: boolean;
+  onDetailToggle?: (isOpen: boolean) => void;
+}
 
-const SwipeFeed: React.FC = () => {
-  const [papers, setPapers] = useState<Paper[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isUsingDemoData, setIsUsingDemoData] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(true);
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [detailViewActive, setDetailViewActive] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false, onDetailToggle }) => {
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const navigate = useNavigate();
   
-  const { handleTouchStart, handleTouchMove, handleTouchEnd, handleWheel, nextPaper, prevPaper } = 
-    useSwipeNavigation({
-      currentIndex,
-      setCurrentIndex,
-      papersLength: papers.length,
-      isScrolling
-    });
+  const categories = Array.isArray(paper.category) ? paper.category : 
+    (typeof paper.category === 'string' ? [paper.category] : []);
   
-  const setScrollingState = () => {
-    setIsScrolling(true);
-  };
+  // Format date as DD.MM.YYYY
+  const formattedDate = (() => {
+    try {
+      return new Date(paper.created_at).toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).replace(/\//g, '.');
+    } catch (e) {
+      console.warn(`Invalid date format for paper ${paper.id}:`, e);
+      return 'Unknown date';
+    }
+  })();
   
-  const handleDetailToggle = (isOpen: boolean) => {
-    setDetailViewActive(isOpen);
-    // When detail view closes, reset scrolling state
-    if (!isOpen) {
-      setIsScrolling(false);
+  // Default image if none is provided
+  const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop';
+  
+  const cardVariants = {
+    active: {
+      scale: 1,
+      opacity: 1,
+      transition: { duration: 0.3, ease: 'easeOut' }
+    },
+    inactive: {
+      scale: 0.98,
+      opacity: 0,
+      transition: { duration: 0.3, ease: 'easeIn' }
     }
   };
+
+  // Use original title if AI headline is not available
+  const displayTitle = paper.ai_headline || paper.title_org;
   
-  useEffect(() => {
-    const generateImageForCurrentPaper = async () => {
-      if (papers.length === 0 || isGeneratingImage) return;
-      
-      const currentPaper = papers[currentIndex];
-      if (!currentPaper) return;
-      
-      // Only generate if we have a prompt AND the image_url is empty
-      if (currentPaper.ai_image_prompt && !currentPaper.image_url) {
-        setIsGeneratingImage(true);
-        
-        try {
-          const newImageUrl = await checkAndGenerateImageIfNeeded(currentPaper);
-          
-          if (newImageUrl) {
-            setPapers(prevPapers => 
-              prevPapers.map(paper => 
-                paper.doi === currentPaper.doi 
-                  ? { ...paper, image_url: newImageUrl } 
-                  : paper
-              )
-            );
-          }
-        } catch (error) {
-          console.error('Error generating image:', error);
-        } finally {
-          setIsGeneratingImage(false);
-        }
+  // Extract first paragraph from key takeaways as highlight
+  const firstTakeaway = (() => {
+    if (!paper.ai_key_takeaways) return '';
+    
+    if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
+      const firstItem = paper.ai_key_takeaways[0];
+      if (firstItem !== null && typeof firstItem === 'object' && 'text' in firstItem) {
+        return firstItem.text || '';
       }
-    };
-    
-    generateImageForCurrentPaper();
-  }, [currentIndex, papers, isGeneratingImage]);
-  
-  useEffect(() => {
-    const loadPapers = async () => {
-      try {
-        console.log('Loading papers...');
-        const fetchedPapers = await getPapers();
-        console.log('Fetched papers:', fetchedPapers.length);
-        
-        if (fetchedPapers.length === 0) {
-          setError('No papers found in the database.');
-        } else {
-          setPapers(fetchedPapers);
-          
-          if (fetchedPapers.length === 3 && fetchedPapers[0].id === '1' && fetchedPapers[1].id === '2' && fetchedPapers[2].id === '3') {
-            setIsUsingDemoData(true);
-            toast.info('Using demo data. No papers found in your Supabase database.', {
-              duration: 5000,
-            });
-          } else {
-            setIsUsingDemoData(false);
-            toast.success(`Loaded ${fetchedPapers.length} papers from Supabase`, {
-              duration: 3000,
-            });
-          }
-        }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('Error loading papers:', error);
-        setError('Failed to load papers. Please check the console for more details.');
-        toast.error('Failed to load papers.');
-        setLoading(false);
-      }
-    };
-    
-    loadPapers();
-    
-    const timeout = setTimeout(() => {
-      setShowInstructions(false);
-    }, 5000);
-    
-    const handleScrollStart = () => {
-      console.log('Content scrolling started');
-      setIsScrolling(true);
-    };
-    
-    const handleScrollEnded = () => {
-      console.log('Content scrolling ended');
-      setIsScrolling(false);
-    };
-    
-    document.addEventListener('scrollContent', handleScrollStart);
-    document.addEventListener('scrollEnd', handleScrollEnded);
-    
-    return () => {
-      clearTimeout(timeout);
-      document.removeEventListener('scrollContent', handleScrollStart);
-      document.removeEventListener('scrollEnd', handleScrollEnded);
-    };
-  }, []);
+      return String(firstItem || '');
+    } else if (typeof paper.ai_key_takeaways === 'string') {
+      const lines = paper.ai_key_takeaways.split('\n');
+      return lines.length > 0 ? lines[0] : '';
+    }
+    return '';
+  })();
 
-  const handleContainerTouchStart = (e: React.TouchEvent) => {
-    if (!isScrolling) {
-      handleTouchStart(e);
-    }
+  const toggleDetail = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const newState = !isDetailOpen;
+    setIsDetailOpen(newState);
+    if (onDetailToggle) onDetailToggle(newState);
   };
-  
-  const handleContainerTouchMove = (e: React.TouchEvent) => {
-    if (!isScrolling) {
-      handleTouchMove(e);
-    }
+
+  const handleCardClick = () => {
+    toggleDetail();
   };
-  
-  const handleContainerTouchEnd = (e: React.TouchEvent) => {
-    if (!isScrolling) {
-      handleTouchEnd(e);
-    }
-  };
-  
-  const handleContainerWheel = (e: React.WheelEvent) => {
-    if (!isScrolling) {
-      handleWheel(e);
-    }
-  };
+
+  const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
 
   return (
-    <div 
-      className="swipe-feed-container bg-black h-full w-full"
-      ref={containerRef}
-      onTouchStart={handleContainerTouchStart}
-      onTouchMove={handleContainerTouchMove}
-      onTouchEnd={handleContainerTouchEnd}
-      onWheel={handleContainerWheel}
+    <motion.div 
+      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer h-full w-full"
+      variants={cardVariants}
+      initial="inactive"
+      animate={isActive ? "active" : "inactive"}
+      exit="inactive"
+      onClick={handleCardClick}
+      layout
     >
-      {loading ? (
-        <div className="flex items-center justify-center h-full">
-          <div className="loading-spinner" />
-        </div>
-      ) : error ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4 text-white">
-          <AlertTriangle className="text-amber-500" size={32} />
-          <div className="text-xl font-semibold mb-2">Data Issue</div>
-          <p className="text-gray-400">{error}</p>
-        </div>
-      ) : papers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6 text-white">
-          <div className="text-xl font-semibold mb-2">No papers found</div>
-          <p className="text-gray-400">Check back soon for new scientific content</p>
-        </div>
-      ) : (
-        <>
-          {isUsingDemoData && (
-            <div className="absolute top-0 left-0 right-0 bg-amber-900/50 p-3 z-20">
-              <div className="flex items-center gap-2 text-amber-200 text-sm">
-                <AlertTriangle size={16} />
-                <span>Using demo data. No papers found in your Supabase database.</span>
+      <AnimatePresence mode="wait">
+        {!isDetailOpen ? (
+          <motion.div
+            className="h-full flex flex-col"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            key="card-preview"
+          >
+            <div className="flex-1">
+              <PaperCardMedia 
+                imageSrc={imageSrc}
+                imageAlt={displayTitle}
+                categories={[]}
+                isGenerating={isGeneratingImage}
+              />
+              
+              <div className="p-4 space-y-4">
+                {/* Date and categories */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Badge variant="outline" className="bg-white/10 text-white border-none">
+                    {formattedDate}
+                  </Badge>
+                  
+                  {categories.slice(0, 2).map((category, idx) => (
+                    <Badge 
+                      key={idx}
+                      variant="outline" 
+                      className="bg-white/10 text-white border-none capitalize"
+                    >
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+                
+                {/* Title */}
+                <h2 className="text-2xl font-bold leading-tight">
+                  {displayTitle}
+                </h2>
+                
+                {/* First highlight */}
+                {firstTakeaway && (
+                  <div className="border-l-2 border-yellow-400 pl-3 py-1">
+                    <p className="text-white/80">{firstTakeaway}</p>
+                  </div>
+                )}
               </div>
             </div>
-          )}
-          
-          <AnimatePresence mode="wait">
-            {showInstructions && !detailViewActive && <SwipeInstructions />}
-          </AnimatePresence>
-          
-          <div className="absolute inset-0">
-            <AnimatePresence mode="wait">
-              {papers.map((paper, index) => (
-                index === currentIndex && (
-                  <motion.div
-                    key={paper.id || index}
-                    className="absolute inset-0"
-                  >
-                    <PaperCard 
-                      paper={paper} 
-                      isActive={index === currentIndex} 
-                      isGeneratingImage={isGeneratingImage && paper.doi === papers[currentIndex].doi}
-                      onDetailToggle={handleDetailToggle}
-                    />
-                  </motion.div>
-                )
-              ))}
-            </AnimatePresence>
-          </div>
-          
-          <SwipeControls 
-            currentIndex={currentIndex} 
-            total={papers.length} 
-            onNext={nextPaper} 
-            onPrev={prevPaper} 
-          />
-        </>
-      )}
-    </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            className="h-full flex flex-col relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            key="card-detail"
+          >
+            {/* Close button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-2 right-2 z-10 bg-black/50 text-white hover:bg-black/70"
+              onClick={(e) => toggleDetail(e)}
+            >
+              <X size={18} />
+            </Button>
+            
+            <div className="flex-1 overflow-hidden h-full">
+              <PaperCardContent
+                title={displayTitle}
+                title_org={paper.title_org}
+                abstract={paper.abstract_org}
+                abstract_org={paper.abstract_org}
+                formattedDate={formattedDate}
+                doi={paper.doi}
+                takeaways={formattedTakeaways}
+                creator={paper.creator}
+                imageSrc={imageSrc}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
-export default SwipeFeed;
+export default PaperCard;
