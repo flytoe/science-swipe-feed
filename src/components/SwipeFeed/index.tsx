@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import PaperCard from '../PaperCard';
@@ -29,12 +28,10 @@ const SwipeFeed: React.FC = () => {
       isScrolling
     });
   
-  // Fixed: Remove the parameter from setScrollingState function
   const setScrollingState = () => {
     setIsScrolling(true);
   };
   
-  // Check for image generation when current paper changes
   useEffect(() => {
     const generateImageForCurrentPaper = async () => {
       if (papers.length === 0 || isGeneratingImage) return;
@@ -42,7 +39,6 @@ const SwipeFeed: React.FC = () => {
       const currentPaper = papers[currentIndex];
       if (!currentPaper) return;
       
-      // If paper has an AI image prompt but no image URL, generate one
       if (currentPaper.ai_image_prompt && !currentPaper.image_url) {
         setIsGeneratingImage(true);
         
@@ -50,7 +46,6 @@ const SwipeFeed: React.FC = () => {
           const newImageUrl = await checkAndGenerateImageIfNeeded(currentPaper);
           
           if (newImageUrl) {
-            // Update the papers array with the new image URL
             setPapers(prevPapers => 
               prevPapers.map(paper => 
                 paper.doi === currentPaper.doi 
@@ -68,7 +63,7 @@ const SwipeFeed: React.FC = () => {
     };
     
     generateImageForCurrentPaper();
-  }, [currentIndex, papers]);
+  }, [currentIndex, papers, isGeneratingImage]);
   
   useEffect(() => {
     const loadPapers = async () => {
@@ -110,7 +105,6 @@ const SwipeFeed: React.FC = () => {
       setShowInstructions(false);
     }, 5000);
     
-    // Fixed: Updated event handlers to set isScrolling directly instead of calling setScrollingState with a parameter
     const handleScrollStart = () => {
       console.log('Content scrolling started');
       setIsScrolling(true);
@@ -202,7 +196,11 @@ const SwipeFeed: React.FC = () => {
                     key={paper.id || index}
                     className="absolute inset-0 p-4"
                   >
-                    <PaperCard paper={paper} isActive={index === currentIndex} />
+                    <PaperCard 
+                      paper={paper} 
+                      isActive={index === currentIndex} 
+                      isGeneratingImage={isGeneratingImage && paper.doi === papers[currentIndex].doi} 
+                    />
                   </motion.div>
                 )
               ))}

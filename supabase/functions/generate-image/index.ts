@@ -10,11 +10,12 @@ const corsHeaders = {
 // Get environment variables
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const RUNWARE_API_KEY = Deno.env.get("RUNWARE_API_KEY") || "";
 const API_ENDPOINT = "https://api.runware.ai/v1";
 
-// Create Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create Supabase client with SERVICE ROLE KEY for admin access
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Generate image using Runware API
 async function generateImage(prompt: string): Promise<{imageURL: string, error?: string}> {
@@ -130,6 +131,23 @@ serve(async (req) => {
       );
     }
 
+    // Check if the paper already has an image
+    const { data: existingPaper, error: queryError } = await supabase
+      .from("n8n_table")
+      .select("image_url")
+      .eq("doi", paperId)
+      .single();
+      
+    if (queryError) {
+      console.error("Error checking existing paper:", queryError);
+    } else if (existingPaper?.image_url) {
+      console.log(`Paper ${paperId} already has an image: ${existingPaper.image_url}`);
+      return new Response(
+        JSON.stringify({ imageUrl: existingPaper.image_url }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Generate the image
     const { imageURL, error: genError } = await generateImage(prompt);
     if (genError || !imageURL) {
@@ -156,8 +174,13 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Error updating paper record:", updateError);
-      // Continue anyway since we have the image URL
+      return new Response(
+        JSON.stringify({ error: "Failed to update paper record", details: updateError.message, imageUrl: path }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
+
+    console.log(`Successfully updated paper ${paperId} with image URL: ${path}`);
 
     return new Response(
       JSON.stringify({ imageUrl: path }),
@@ -166,7 +189,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(
-      JSON.stringify({ error: "An unexpected error occurred" }),
+      JSON.stringify({ error: "An unexpected error occurred", details: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
