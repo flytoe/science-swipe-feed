@@ -68,7 +68,9 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
       
       <PaperCardContent
         title={displayTitle}
+        title_org={paper.title_org}
         abstract={paper.abstract_org}
+        abstract_org={paper.abstract_org}
         formattedDate={formattedDate}
         doi={paper.doi}
         takeaways={formattedTakeaways}

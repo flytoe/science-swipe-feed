@@ -18,8 +18,10 @@ export type Database = {
           ai_summary_done: boolean | null
           category: Json | null
           created_at: string | null
+          creator: Json | null
           doi: string
           html_available: boolean | null
+          html_url: string | null
           image_url: string | null
           score: Json | null
           title_org: string
@@ -32,8 +34,10 @@ export type Database = {
           ai_summary_done?: boolean | null
           category?: Json | null
           created_at?: string | null
+          creator?: Json | null
           doi: string
           html_available?: boolean | null
+          html_url?: string | null
           image_url?: string | null
           score?: Json | null
           title_org: string
@@ -46,8 +50,10 @@ export type Database = {
           ai_summary_done?: boolean | null
           category?: Json | null
           created_at?: string | null
+          creator?: Json | null
           doi?: string
           html_available?: boolean | null
+          html_url?: string | null
           image_url?: string | null
           score?: Json | null
           title_org?: string
