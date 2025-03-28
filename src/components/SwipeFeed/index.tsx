@@ -27,7 +27,7 @@ const SwipeFeed: React.FC = () => {
       isScrolling
     });
   
-  // Fixed: Removed the parameter from setScrollingState function
+  // Fixed: Removed the parameter from setScrollingState function and made it directly set isScrolling
   const setScrollingState = () => {
     setIsScrolling(true);
   };
