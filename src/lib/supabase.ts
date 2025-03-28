@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -197,6 +196,36 @@ export const getPapers = async (): Promise<Paper[]> => {
     return demoData.filter(paper => paper.ai_summary_done === true);
   }
 };
+
+export async function getPaperById(id: string): Promise<Paper | null> {
+  try {
+    // Try to find by id first
+    let { data, error } = await supabase
+      .from('n8n_table')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    // If not found by id, try with doi
+    if (error || !data) {
+      ({ data, error } = await supabase
+        .from('n8n_table')
+        .select('*')
+        .eq('doi', id)
+        .single());
+    }
+    
+    if (error) {
+      console.error('Error fetching paper by ID:', error);
+      return null;
+    }
+    
+    return data as Paper;
+  } catch (error) {
+    console.error('Error in getPaperById:', error);
+    return null;
+  }
+}
 
 // Export the client for potential use elsewhere
 export default supabaseClient;

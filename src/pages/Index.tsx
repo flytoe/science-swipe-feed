@@ -1,8 +1,10 @@
+
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
-import { Info } from 'lucide-react';
+import { Info, SearchIcon } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -79,13 +81,13 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <header className="sticky top-0 z-30 w-full backdrop-blur-sm bg-white/80 border-b border-gray-200">
-        <div className="container max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
-            ScienceSwipe
-          </h1>
-          <div className="text-sm text-gray-500">Latest Research</div>
+    <div className="min-h-screen bg-black text-white">
+      <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
+        <div className="container max-w-md mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold">Research Feed</h1>
+          <Button variant="ghost" size="icon" className="text-white">
+            <SearchIcon className="h-5 w-5" />
+          </Button>
         </div>
       </header>
 
@@ -95,14 +97,14 @@ const Index: React.FC = () => {
         </div>
       ) : hasPapers === false && !isSample ? (
         <div className="max-w-md mx-auto mt-2 px-4">
-          <div className="flex flex-col items-center gap-2 bg-amber-50 p-4 rounded-md border border-amber-100 text-sm text-amber-800">
+          <div className="flex flex-col items-center gap-2 bg-amber-950/50 p-4 rounded-md border border-amber-800/30 text-sm text-amber-200">
             <Info size={16} />
             <span>
               No papers found in your database. Would you like to add a sample paper?
             </span>
             <button 
               onClick={addSamplePaper}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Add Sample Paper
             </button>

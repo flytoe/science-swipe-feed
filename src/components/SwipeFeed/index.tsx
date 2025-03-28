@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import PaperCard from '../PaperCard';
@@ -151,7 +152,7 @@ const SwipeFeed: React.FC = () => {
 
   return (
     <div 
-      className="swipe-feed-container"
+      className="swipe-feed-container bg-black"
       ref={containerRef}
       onTouchStart={handleContainerTouchStart}
       onTouchMove={handleContainerTouchMove}
@@ -163,21 +164,21 @@ const SwipeFeed: React.FC = () => {
           <div className="loading-spinner" />
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4">
+        <div className="flex flex-col items-center justify-center h-full text-center p-6 gap-4 text-white">
           <AlertTriangle className="text-amber-500" size={32} />
           <div className="text-xl font-semibold mb-2">Data Issue</div>
-          <p className="text-gray-500">{error}</p>
+          <p className="text-gray-400">{error}</p>
         </div>
       ) : papers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full text-center p-6">
+        <div className="flex flex-col items-center justify-center h-full text-center p-6 text-white">
           <div className="text-xl font-semibold mb-2">No papers found</div>
-          <p className="text-gray-500">Check back soon for new scientific content</p>
+          <p className="text-gray-400">Check back soon for new scientific content</p>
         </div>
       ) : (
         <>
           {isUsingDemoData && (
-            <div className="absolute top-0 left-0 right-0 bg-amber-50 p-3 z-20 shadow-md">
-              <div className="flex items-center gap-2 text-amber-800 text-sm">
+            <div className="absolute top-0 left-0 right-0 bg-amber-900/50 p-3 z-20">
+              <div className="flex items-center gap-2 text-amber-200 text-sm">
                 <AlertTriangle size={16} />
                 <span>Using demo data. No papers found in your Supabase database.</span>
               </div>
