@@ -170,8 +170,9 @@ export const getPapers = async (): Promise<Paper[]> => {
         createdAt = new Date().toISOString();
       }
 
+      // Critical change: Use doi as the id
       return {
-        id: item.doi, // Use doi as the id
+        id: item.doi, // Using doi as the id
         doi: item.doi,
         title_org: item.title_org || '',
         abstract_org: item.abstract_org || '',
@@ -200,31 +201,91 @@ export const getPapers = async (): Promise<Paper[]> => {
 
 export async function getPaperById(id: string): Promise<Paper | null> {
   try {
-    // Try to find by id first
+    // Try to find by id first (which is actually the DOI)
     let { data, error } = await supabaseClient
       .from('n8n_table')
       .select('*')
-      .eq('id', id)
+      .eq('doi', id)
       .single();
     
-    // If not found by id, try with doi
     if (error || !data) {
-      ({ data, error } = await supabaseClient
-        .from('n8n_table')
-        .select('*')
-        .eq('doi', id)
-        .single());
-    }
-    
-    if (error) {
       console.error('Error fetching paper by ID:', error);
       return null;
     }
     
-    return data as Paper;
+    // Transform the data to match the Paper type
+    const paper: Paper = {
+      id: data.doi, // Use doi as id
+      doi: data.doi,
+      title_org: data.title_org || '',
+      abstract_org: data.abstract_org || '',
+      score: data.score,
+      html_available: !!data.html_available,
+      ai_summary_done: !!data.ai_summary_done,
+      ai_image_prompt: data.ai_image_prompt || '',
+      ai_headline: data.ai_headline || '',
+      ai_key_takeaways: parseKeyTakeaways(data.ai_key_takeaways),
+      created_at: data.created_at || new Date().toISOString(),
+      category: parseCategory(data.category),
+      image_url: data.image_url || null,
+      creator: parseCreator(data.creator),
+    };
+    
+    return paper;
   } catch (error) {
     console.error('Error in getPaperById:', error);
     return null;
+  }
+}
+
+// Helper functions to parse data
+function parseKeyTakeaways(takeaways: any): string[] | null {
+  if (!takeaways) return null;
+  
+  try {
+    if (Array.isArray(takeaways)) {
+      return takeaways;
+    } else if (typeof takeaways === 'string') {
+      return JSON.parse(takeaways);
+    }
+    return null;
+  } catch (e) {
+    console.warn('Could not parse takeaways:', e);
+    return typeof takeaways === 'string' ? [takeaways] : null;
+  }
+}
+
+function parseCategory(category: any): string[] | null {
+  if (!category) return null;
+  
+  try {
+    if (Array.isArray(category)) {
+      return category;
+    } else if (typeof category === 'string') {
+      return [category];
+    }
+    return null;
+  } catch (e) {
+    console.warn('Could not parse category:', e);
+    return typeof category === 'string' ? [category] : null;
+  }
+}
+
+function parseCreator(creator: any): string[] | string | null {
+  if (!creator) return null;
+  
+  try {
+    if (Array.isArray(creator)) {
+      return creator;
+    } else if (typeof creator === 'string') {
+      return creator;
+    } else if (typeof creator === 'object') {
+      return Array.isArray(creator) ? creator : [JSON.stringify(creator)];
+    }
+    return null;
+  } catch (e) {
+    console.warn('Could not parse creator:', e);
+    return typeof creator === 'string' ? creator : null;
   }
 }
 
