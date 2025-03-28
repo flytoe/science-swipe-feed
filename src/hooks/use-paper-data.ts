@@ -1,6 +1,5 @@
 
 import { type Paper } from '../lib/supabase';
-import { useState, useEffect } from 'react';
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 
 /**
