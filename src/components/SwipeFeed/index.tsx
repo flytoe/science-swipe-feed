@@ -5,7 +5,7 @@ import { type Paper } from '../../lib/supabase';
 import PaperCardMedia from '../PaperCardMedia';
 import PaperCardContent from '../PaperCardContent';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { parseKeyTakeaways } from '../../utils/takeawayParser';
@@ -66,7 +66,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
       if (firstItem !== null && typeof firstItem === 'object' && 'text' in firstItem) {
         return firstItem.text || '';
       }
-      return String(firstItem || '');
+      return String(firstItem ?? '');
     } else if (typeof paper.ai_key_takeaways === 'string') {
       const takeawaysStr = String(paper.ai_key_takeaways);
       const lines = takeawaysStr.split('\n');

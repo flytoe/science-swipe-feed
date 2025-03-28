@@ -16,7 +16,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
   onPrev 
 }) => {
   return (
-    <div className="absolute right-4 inset-y-0 flex flex-col items-center justify-center gap-4 z-10">
+    <div className="fixed bottom-4 right-4 flex flex-col items-center justify-center gap-3 z-20">
       <button 
         onClick={onPrev}
         className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm shadow-md flex items-center justify-center text-gray-700 hover:bg-white transition-colors"

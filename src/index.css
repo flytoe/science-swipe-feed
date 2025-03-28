@@ -27,6 +27,13 @@
     @apply w-full h-40 md:h-48 bg-gradient-to-b from-blue-100 to-blue-50;
   }
   
+  /* Mobile optimized: image takes less space on mobile */
+  @media (max-width: 768px) {
+    .paper-card-image-container {
+      @apply h-auto flex-shrink-0;
+    }
+  }
+  
   .paper-card-image {
     @apply w-full h-full object-cover;
   }

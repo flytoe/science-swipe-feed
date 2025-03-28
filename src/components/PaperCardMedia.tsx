@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
+import { useIsMobile } from '../hooks/use-mobile';
 
 interface PaperCardMediaProps {
   imageSrc: string;
@@ -18,6 +19,7 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const isMobile = useIsMobile();
 
   // Reset states when image source changes
   useEffect(() => {
@@ -31,10 +33,13 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
     setImageLoaded(true); // To remove loading state
   };
 
+  // Dynamic aspect ratio for mobile vs desktop
+  const aspectRatio = isMobile ? 'aspect-[16/10]' : 'aspect-[16/9]';
+
   return (
     <div className="relative">
       <div 
-        className={`relative overflow-hidden aspect-[16/9] ${
+        className={`relative overflow-hidden ${aspectRatio} ${
           !imageLoaded || isGenerating ? 'bg-gray-900' : ''
         }`}
       >

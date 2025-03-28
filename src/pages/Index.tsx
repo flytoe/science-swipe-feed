@@ -5,11 +5,13 @@ import { Info, SearchIcon } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Paper } from '../lib/supabase';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
   const [hasPapers, setHasPapers] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [papers, setPapers] = useState<Paper[]>([]);
   
   useEffect(() => {
     const checkDatabase = async () => {
