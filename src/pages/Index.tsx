@@ -5,7 +5,7 @@ import { Info, SearchIcon } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Paper } from '../lib/supabase';
+import { getPapers, Paper } from '../lib/supabase';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -17,6 +17,11 @@ const Index: React.FC = () => {
     const checkDatabase = async () => {
       try {
         setIsLoading(true);
+        
+        // Fetch papers data
+        const papersData = await getPapers();
+        setPapers(papersData);
+        
         const { data, error, count } = await supabase
           .from('n8n_table')
           .select('doi', { count: 'exact' })
@@ -115,7 +120,7 @@ const Index: React.FC = () => {
       ) : null}
 
       <div className="h-[calc(100vh-4rem)]">
-        <SwipeFeed />
+        <SwipeFeed papers={papers} />
       </div>
     </div>
   );
