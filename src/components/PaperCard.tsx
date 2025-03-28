@@ -74,6 +74,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive }) => {
         formattedDate={formattedDate}
         doi={paper.doi}
         takeaways={formattedTakeaways}
+        creator={paper.creator}
       />
     </motion.div>
   );

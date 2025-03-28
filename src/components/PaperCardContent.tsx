@@ -6,7 +6,7 @@ import PaperCardTakeaways from './PaperCardTakeaways';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { Badge } from './ui/badge';
+import { Separator } from './ui/separator';
 
 interface PaperCardContentProps {
   title: string;
@@ -16,6 +16,7 @@ interface PaperCardContentProps {
   formattedDate: string;
   doi?: string;
   takeaways: FormattedTakeaway[];
+  creator?: string[] | string | null;
 }
 
 const PaperCardContent: React.FC<PaperCardContentProps> = ({
@@ -25,7 +26,8 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   abstract_org,
   formattedDate,
   doi,
-  takeaways
+  takeaways,
+  creator
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
@@ -43,6 +45,15 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
       ? cleanAbstract.substring(0, 120) + "..." 
       : cleanAbstract
     : "";
+  
+  // Format creator display
+  const formatCreator = (creator: string[] | string | null) => {
+    if (!creator) return null;
+    if (Array.isArray(creator)) {
+      return creator.join(', ');
+    }
+    return creator;
+  };
   
   // Handle scroll events to prevent card swipes during content scrolling
   const handleContentScroll = (e: Event) => {
@@ -91,6 +102,13 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         {title}
       </h2>
       
+      {/* Display Creator if available */}
+      {formatCreator(creator) && (
+        <p className="text-sm text-gray-600 mt-1 mb-3">
+          {formatCreator(creator)}
+        </p>
+      )}
+      
       <ScrollArea 
         className="flex-1 max-h-[calc(100vh-15rem)]"
         ref={scrollRef}
@@ -109,7 +127,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           {/* Original Title Section */}
           {title_org && title_org !== title && (
             <div className="mt-6 border-t border-gray-100 pt-4">
-              <Badge variant="outline" className="mb-2">Original Title</Badge>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Original Title</h3>
               <p className="text-sm text-gray-700">{title_org}</p>
             </div>
           )}
@@ -117,34 +135,43 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           {/* Original Abstract Section with Collapsible */}
           {abstract_org && (
             <div className="mt-4 border-t border-gray-100 pt-4">
-              <Badge variant="outline" className="mb-2">Abstract</Badge>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Abstract</h3>
               <Collapsible 
                 open={isAbstractOpen} 
                 onOpenChange={setIsAbstractOpen}
                 className="space-y-2"
               >
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm text-gray-700">{shortAbstract}</p>
-                  
+                {!isAbstractOpen ? (
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm text-gray-700">{shortAbstract}</p>
+                    
+                    {cleanAbstract.length > 120 && (
+                      <CollapsibleTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="self-start -ml-2 text-blue-600"
+                        >
+                          <span className="flex items-center gap-1">Read more <ChevronRight size={14} /></span>
+                        </Button>
+                      </CollapsibleTrigger>
+                    )}
+                  </div>
+                ) : null}
+                
+                <CollapsibleContent>
+                  <p className="text-sm text-gray-700">{cleanAbstract}</p>
                   {cleanAbstract.length > 120 && (
                     <CollapsibleTrigger asChild>
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        className="self-start -ml-2 text-blue-600"
+                        className="self-start -ml-2 mt-2 text-blue-600"
                       >
-                        {isAbstractOpen ? (
-                          <span className="flex items-center gap-1">Read less <ChevronDown size={14} /></span>
-                        ) : (
-                          <span className="flex items-center gap-1">Read more <ChevronRight size={14} /></span>
-                        )}
+                        <span className="flex items-center gap-1">Read less <ChevronDown size={14} /></span>
                       </Button>
                     </CollapsibleTrigger>
                   )}
-                </div>
-                
-                <CollapsibleContent>
-                  <p className="text-sm text-gray-700">{cleanAbstract}</p>
                 </CollapsibleContent>
               </Collapsible>
             </div>

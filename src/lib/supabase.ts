@@ -18,7 +18,8 @@ const demoData: Paper[] = [
     ai_key_takeaways: ['Improved qubit stability by 300%', 'New error correction reduces noise by 78%', 'Potential applications in drug discovery and cryptography'],
     created_at: '2023-10-15T09:30:00Z',
     category: ['physics', 'technology'],
-    image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070'
+    image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070',
+    creator: ['John Doe', 'Jane Smith']
   },
   {
     id: '2',
@@ -33,7 +34,8 @@ const demoData: Paper[] = [
     ai_key_takeaways: ['Microplastics detected at 10,000m depths', 'Evidence of bioaccumulation in 87% of species studied', 'Concentration levels highest in coastal areas near urban centers'],
     created_at: '2023-11-28T14:15:00Z',
     category: ['biology', 'environment'],
-    image_url: 'https://images.unsplash.com/photo-1621451066633-97aa60c27376?q=80&w=1974'
+    image_url: 'https://images.unsplash.com/photo-1621451066633-97aa60c27376?q=80&w=1974',
+    creator: ['Marine Research Institute']
   },
   {
     id: '3',
@@ -48,7 +50,8 @@ const demoData: Paper[] = [
     ai_key_takeaways: ['Identified 3 distinct phases of memory encoding', 'Hippocampal activity patterns predict memory durability', 'Potential therapeutic targets for Alzheimer\'s treatment'],
     created_at: '2023-12-10T11:45:00Z',
     category: ['neuroscience', 'psychology'],
-    image_url: 'https://images.unsplash.com/photo-1559757175-7cb036edc7b3?q=80&w=2071'
+    image_url: 'https://images.unsplash.com/photo-1559757175-7cb036edc7b3?q=80&w=2071',
+    creator: null
   }
 ];
 
@@ -66,6 +69,7 @@ export type Paper = {
   created_at: string;
   category: string[] | null;
   image_url: string | null;
+  creator: string[] | string | null;
 };
 
 export const getPapers = async (): Promise<Paper[]> => {
@@ -139,6 +143,26 @@ export const getPapers = async (): Promise<Paper[]> => {
           categories = typeof item.category === 'string' ? [item.category] : null;
         }
       }
+      
+      // Handle creator field safely
+      let creators: string[] | string | null = null;
+      if (item.creator) {
+        try {
+          if (Array.isArray(item.creator)) {
+            creators = item.creator;
+          } else if (typeof item.creator === 'string') {
+            creators = item.creator;
+          } else if (typeof item.creator === 'object') {
+            // Try to parse as JSON if it's an object
+            creators = Array.isArray(item.creator) ? item.creator : [JSON.stringify(item.creator)];
+          } else {
+            creators = null;
+          }
+        } catch (e) {
+          console.warn(`Could not parse creator for doi ${item.doi}:`, e);
+          creators = typeof item.creator === 'string' ? item.creator : null;
+        }
+      }
 
       // Ensure created_at is a valid date string
       let createdAt = item.created_at || new Date().toISOString();
@@ -160,6 +184,7 @@ export const getPapers = async (): Promise<Paper[]> => {
         created_at: createdAt,
         category: categories,
         image_url: item.image_url || null,
+        creator: creators,
       };
     }) || [];
     
