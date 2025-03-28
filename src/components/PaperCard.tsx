@@ -2,13 +2,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
-import PaperCardMedia from './PaperCardMedia';
-import PaperCardContent from './PaperCardContent';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { parseKeyTakeaways } from '../utils/takeawayParser';
+import PaperCardPreview from './PaperCardPreview';
+import PaperCardDetail from './PaperCardDetail';
+import PaperCardPlaceholder from './PaperCardPlaceholder';
+import { usePaperData } from '../hooks/use-paper-data';
 
 interface PaperCardProps {
   paper: Paper;
@@ -20,29 +18,6 @@ interface PaperCardProps {
 const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false, onDetailToggle }) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const navigate = useNavigate();
-  
-  // Add null check for paper and paper.category
-  const categories = paper && paper.category ? (
-    Array.isArray(paper.category) ? paper.category : 
-    (typeof paper.category === 'string' ? [paper.category] : [])
-  ) : [];
-  
-  // Format date as DD.MM.YYYY with null check
-  const formattedDate = (() => {
-    try {
-      return paper && paper.created_at ? new Date(paper.created_at).toLocaleDateString('en-US', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }).replace(/\//g, '.') : 'Unknown date';
-    } catch (e) {
-      console.warn(`Invalid date format for paper ${paper?.doi || 'unknown'}:`, e);
-      return 'Unknown date';
-    }
-  })();
-  
-  // Default image if none is provided, with null check
-  const imageSrc = paper?.image_url || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop';
   
   const cardVariants = {
     active: {
@@ -57,29 +32,6 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     }
   };
 
-  // Use original title if AI headline is not available, with null check
-  const displayTitle = paper?.ai_headline || paper?.title_org || 'Untitled Paper';
-  
-  // Extract first paragraph from key takeaways as highlight - Fix TS errors with proper null checks
-  const firstTakeaway = (() => {
-    if (!paper || !paper.ai_key_takeaways) return '';
-    
-    if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
-      const firstItem = paper.ai_key_takeaways[0];
-      // Add proper null checks for firstItem before using it
-      if (firstItem !== null && firstItem !== undefined && typeof firstItem === 'object' && 'text' in firstItem) {
-        return firstItem.text || '';
-      }
-      // If firstItem is null or undefined, return an empty string instead of using it directly
-      return firstItem ? String(firstItem) : '';
-    } else if (typeof paper.ai_key_takeaways === 'string') {
-      const takeawaysStr = String(paper.ai_key_takeaways);
-      const lines = takeawaysStr.split('\n');
-      return lines.length > 0 ? lines[0] : '';
-    }
-    return '';
-  })();
-
   const toggleDetail = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const newState = !isDetailOpen;
@@ -90,23 +42,21 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
   const handleCardClick = () => {
     toggleDetail();
   };
-
-  const formattedTakeaways = paper ? parseKeyTakeaways(paper.ai_key_takeaways) : [];
   
   // If paper is undefined or null, return a placeholder card
   if (!paper) {
-    return (
-      <motion.div 
-        className="paper-card bg-black text-white rounded-lg overflow-hidden h-full w-full flex items-center justify-center"
-        variants={cardVariants}
-        initial="inactive"
-        animate={isActive ? "active" : "inactive"}
-        exit="inactive"
-      >
-        <p>No paper data available</p>
-      </motion.div>
-    );
+    return <PaperCardPlaceholder variants={cardVariants} isActive={isActive} />;
   }
+
+  // Extract and format paper data using custom hook
+  const {
+    categories,
+    formattedDate,
+    imageSrc, 
+    displayTitle,
+    firstTakeaway,
+    formattedTakeaways
+  } = usePaperData(paper);
 
   return (
     <motion.div 
@@ -120,87 +70,26 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     >
       <AnimatePresence mode="wait">
         {!isDetailOpen ? (
-          <motion.div
-            className="h-full flex flex-col"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            key="card-preview"
-          >
-            <div className="flex-1">
-              <PaperCardMedia 
-                imageSrc={imageSrc}
-                imageAlt={displayTitle}
-                categories={[]}
-                isGenerating={isGeneratingImage}
-              />
-              
-              <div className="p-4 space-y-4">
-                {/* Date and categories */}
-                <div className="flex flex-wrap gap-2 mb-2">
-                  <Badge variant="outline" className="bg-white/10 text-white border-none">
-                    {formattedDate}
-                  </Badge>
-                  
-                  {categories.slice(0, 2).map((category, idx) => (
-                    <Badge 
-                      key={idx}
-                      variant="outline" 
-                      className="bg-white/10 text-white border-none capitalize"
-                    >
-                      {category}
-                    </Badge>
-                  ))}
-                </div>
-                
-                {/* Title */}
-                <h2 className="text-2xl font-bold leading-tight">
-                  {displayTitle}
-                </h2>
-                
-                {/* First highlight */}
-                {firstTakeaway && (
-                  <div className="border-l-2 border-yellow-400 pl-3 py-1">
-                    <p className="text-white/80">{firstTakeaway}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
+          <PaperCardPreview 
+            imageSrc={imageSrc}
+            displayTitle={displayTitle}
+            formattedDate={formattedDate}
+            categories={categories}
+            firstTakeaway={firstTakeaway}
+            isGeneratingImage={isGeneratingImage}
+          />
         ) : (
-          <motion.div
-            className="h-full flex flex-col relative"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            key="card-detail"
-          >
-            {/* Close button */}
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute top-2 right-2 z-10 bg-black/50 text-white hover:bg-black/70"
-              onClick={(e) => toggleDetail(e)}
-            >
-              <X size={18} />
-            </Button>
-            
-            <div className="flex-1 overflow-hidden h-full">
-              <PaperCardContent
-                title={displayTitle}
-                title_org={paper.title_org}
-                abstract={paper.abstract_org}
-                abstract_org={paper.abstract_org}
-                formattedDate={formattedDate}
-                doi={paper.doi}
-                takeaways={formattedTakeaways}
-                creator={paper.creator}
-                imageSrc={imageSrc}
-              />
-            </div>
-          </motion.div>
+          <PaperCardDetail
+            displayTitle={displayTitle}
+            title_org={paper.title_org}
+            abstract_org={paper.abstract_org}
+            formattedDate={formattedDate}
+            doi={paper.doi}
+            takeaways={formattedTakeaways}
+            creator={paper.creator}
+            imageSrc={imageSrc}
+            onClose={toggleDetail}
+          />
         )}
       </AnimatePresence>
     </motion.div>
