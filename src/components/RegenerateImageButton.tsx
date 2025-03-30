@@ -33,7 +33,7 @@ const RegenerateImageButton: React.FC<RegenerateImageButtonProps> = ({
     try {
       setIsGenerating(true);
       onRegenerationStart();
-      toast.info('Regenerating image...');
+      toast.info('Regenerating image...', { duration: 10000 });
       
       const imageUrl = await generateImageForPaper(paper);
       

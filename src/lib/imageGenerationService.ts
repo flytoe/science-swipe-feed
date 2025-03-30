@@ -20,7 +20,8 @@ export async function generateImageForPaper(paper: Paper): Promise<string | null
     const { data, error } = await supabase.functions.invoke('generate-image', {
       body: {
         paperId: paper.doi,
-        prompt: paper.ai_image_prompt
+        prompt: paper.ai_image_prompt,
+        forceRegenerate: true // Force regeneration even if image already exists
       }
     });
     

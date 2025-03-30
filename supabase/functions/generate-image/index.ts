@@ -82,6 +82,20 @@ async function saveImageToStorage(imageUrl: string, paperId: string): Promise<{p
     const filename = `${paperId}-${Date.now()}.webp`;
     const filePath = `${filename}`;
 
+    // Create the bucket if it doesn't exist
+    const { data: bucketData, error: bucketError } = await supabase.storage
+      .getBucket('paper_images');
+      
+    if (bucketError && bucketError.message.includes('The resource was not found')) {
+      console.log('Creating paper_images bucket');
+      const { error: createError } = await supabase.storage
+        .createBucket('paper_images', { public: true });
+        
+      if (createError) {
+        throw new Error(`Failed to create bucket: ${createError.message}`);
+      }
+    }
+
     console.log(`Uploading image to storage: ${filePath}`);
     const { data, error } = await supabase.storage
       .from("paper_images")
@@ -115,7 +129,7 @@ serve(async (req) => {
   }
 
   try {
-    const { paperId, prompt } = await req.json();
+    const { paperId, prompt, forceRegenerate } = await req.json();
     
     if (!paperId) {
       return new Response(
@@ -131,21 +145,23 @@ serve(async (req) => {
       );
     }
 
-    // Check if the paper already has an image
-    const { data: existingPaper, error: queryError } = await supabase
-      .from("n8n_table")
-      .select("image_url")
-      .eq("doi", paperId)
-      .single();
-      
-    if (queryError) {
-      console.error("Error checking existing paper:", queryError);
-    } else if (existingPaper?.image_url) {
-      console.log(`Paper ${paperId} already has an image: ${existingPaper.image_url}`);
-      return new Response(
-        JSON.stringify({ imageUrl: existingPaper.image_url }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Check if the paper already has an image and we're not forcing regeneration
+    if (!forceRegenerate) {
+      const { data: existingPaper, error: queryError } = await supabase
+        .from("n8n_table")
+        .select("image_url")
+        .eq("doi", paperId)
+        .single();
+        
+      if (queryError) {
+        console.error("Error checking existing paper:", queryError);
+      } else if (existingPaper?.image_url) {
+        console.log(`Paper ${paperId} already has an image: ${existingPaper.image_url}`);
+        return new Response(
+          JSON.stringify({ imageUrl: existingPaper.image_url }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     // Generate the image

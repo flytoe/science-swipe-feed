@@ -1,139 +1,142 @@
 
 import React, { useState, useEffect } from 'react';
-import { CheckIcon, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Check, X } from 'lucide-react';
+import { Badge } from './ui/badge';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 import { supabase } from '../integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface CategoryFilterProps {
-  onFilterChange: (selectedCategories: string[]) => void;
+  onFilterChange: (categories: string[]) => void;
 }
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
-  const [open, setOpen] = useState(false);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch all unique categories from the database
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('n8n_table')
+          .select('category');
+        
+        if (error) {
+          console.error('Error fetching categories:', error);
+          toast.error('Failed to load categories');
+          return;
+        }
+
+        // Extract all unique categories
+        const categories = new Set<string>();
+        
+        data?.forEach(item => {
+          if (item.category) {
+            // Handle both string and array types
+            if (Array.isArray(item.category)) {
+              item.category.forEach((cat: string | null) => {
+                if (typeof cat === 'string') categories.add(cat);
+              });
+            } else if (typeof item.category === 'string') {
+              categories.add(item.category);
+            }
+          }
+        });
+        
+        const uniqueCategories = Array.from(categories);
+        setAllCategories(uniqueCategories);
+        
+        console.log('Fetched categories:', uniqueCategories);
+      } catch (error) {
+        console.error('Error in fetchCategories:', error);
+        toast.error('Failed to load categories');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     fetchCategories();
   }, []);
 
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('n8n_table')
-        .select('category')
-        .not('category', 'is', null);
+  useEffect(() => {
+    onFilterChange(selectedCategories);
+  }, [selectedCategories, onFilterChange]);
 
-      if (error) {
-        console.error('Error fetching categories:', error);
-        return;
-      }
-
-      // Extract all categories from the data
-      const allCategories = data
-        .flatMap(item => {
-          if (Array.isArray(item.category)) {
-            return item.category;
-          }
-          return item.category ? [item.category] : [];
-        })
-        .filter(Boolean);
-
-      // Remove duplicates
-      const uniqueCategories = [...new Set(allCategories)].sort();
-      setCategories(uniqueCategories);
-    } catch (error) {
-      console.error('Error processing categories:', error);
-    }
-  };
-
-  const toggleCategory = (category: string) => {
+  const handleToggleCategory = (category: string) => {
     setSelectedCategories(prev => {
-      const isSelected = prev.includes(category);
-      const newSelection = isSelected
-        ? prev.filter(c => c !== category)
-        : [...prev, category];
-      
-      // Notify parent component of the change
-      onFilterChange(newSelection);
-      return newSelection;
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
+      }
     });
   };
 
+  const filteredCategories = allCategories.filter(category => 
+    category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const clearFilters = () => {
     setSelectedCategories([]);
-    onFilterChange([]);
+    setSearchTerm('');
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="outline" 
-          className="border-none bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60"
-        >
-          <span className="text-white">
-            {selectedCategories.length > 0 
-              ? `${selectedCategories.length} selected` 
-              : 'Filter by category'}
-          </span>
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 bg-gray-900 border border-gray-800 text-white">
-        <Command className="bg-transparent">
-          <CommandInput placeholder="Search categories..." className="text-white" />
-          <CommandList>
-            <CommandEmpty>No categories found.</CommandEmpty>
-            <CommandGroup>
-              {categories.map(category => (
-                <CommandItem
-                  key={category}
-                  onSelect={() => toggleCategory(category)}
-                  className="flex items-center cursor-pointer hover:bg-gray-800"
-                >
-                  <div className={`mr-2 flex h-4 w-4 items-center justify-center rounded-sm border ${
-                    selectedCategories.includes(category) 
-                      ? 'border-primary bg-primary text-primary-foreground' 
-                      : 'border-gray-500'
-                  }`}>
-                    {selectedCategories.includes(category) && (
-                      <CheckIcon className="h-3 w-3" />
-                    )}
-                  </div>
-                  <span>{category}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-          {selectedCategories.length > 0 && (
-            <div className="border-t border-gray-800 p-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-white hover:bg-gray-800"
-                onClick={clearFilters}
-              >
-                <X className="mr-2 h-4 w-4" />
-                Clear filters
-              </Button>
-            </div>
-          )}
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="flex flex-col gap-4 p-2">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Filter by category</h3>
+        {selectedCategories.length > 0 && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={clearFilters}
+            className="h-7 px-2 text-xs"
+          >
+            Clear <X className="ml-1 h-3 w-3" />
+          </Button>
+        )}
+      </div>
+      
+      <Input 
+        placeholder="Search categories..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="h-8 text-sm"
+      />
+      
+      {isLoading ? (
+        <p className="text-sm text-gray-400">Loading categories...</p>
+      ) : filteredCategories.length === 0 ? (
+        <p className="text-sm text-gray-400">No categories found</p>
+      ) : (
+        <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+          {filteredCategories.map((category, index) => (
+            <Badge
+              key={index}
+              variant={selectedCategories.includes(category) ? "default" : "outline"}
+              className="cursor-pointer capitalize"
+              onClick={() => handleToggleCategory(category)}
+            >
+              {selectedCategories.includes(category) && (
+                <Check className="mr-1 h-3 w-3" />
+              )}
+              {category}
+            </Badge>
+          ))}
+        </div>
+      )}
+      
+      {selectedCategories.length > 0 && (
+        <div className="text-xs text-gray-400">
+          {selectedCategories.length} categories selected
+        </div>
+      )}
+    </div>
   );
 };
 
