@@ -63,7 +63,8 @@ const PaperDetail: React.FC = () => {
     );
   }
 
-  const formattedDate = new Date(paper.created_at).toLocaleDateString('en-US', {
+  // Format date in European format (DD.MM.YYYY)
+  const formattedDate = new Date(paper.created_at).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric'

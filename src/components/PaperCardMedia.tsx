@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ImageIcon } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 
 interface PaperCardMediaProps {
@@ -64,7 +64,8 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
         )}
         
         {imageError && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900">
+            <ImageIcon className="h-10 w-10 text-gray-600 mb-2" />
             <p className="text-gray-400">Image not available</p>
           </div>
         )}

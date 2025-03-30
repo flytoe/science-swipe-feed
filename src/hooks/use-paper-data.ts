@@ -12,10 +12,10 @@ export const usePaperData = (paper: Paper | undefined) => {
     (typeof paper.category === 'string' ? [paper.category] : [])
   ) : [];
   
-  // Format date as DD.MM.YYYY with null check
+  // Format date as DD.MM.YYYY (European format) with null check
   const formattedDate = (() => {
     try {
-      return paper && paper.created_at ? new Date(paper.created_at).toLocaleDateString('en-US', {
+      return paper && paper.created_at ? new Date(paper.created_at).toLocaleDateString('en-GB', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
@@ -46,11 +46,10 @@ export const usePaperData = (paper: Paper | undefined) => {
       // Since we've already checked for null above, we can now safely assert that firstItem is not null
       // Use type narrowing for the object check
       if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
-        return firstItem.text || '';
+        return String(firstItem.text || '');
       }
       
-      // Safe conversion to string - use empty string as fallback if firstItem is somehow null
-      // (though we've already checked above, this satisfies TypeScript)
+      // Safe conversion to string - use empty string as fallback
       return String(firstItem || '');
     } else if (typeof paper.ai_key_takeaways === 'string') {
       const takeawaysStr = String(paper.ai_key_takeaways);

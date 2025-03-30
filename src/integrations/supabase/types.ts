@@ -23,6 +23,7 @@ export type Database = {
           html_available: boolean | null
           html_url: string | null
           image_url: string | null
+          rerun: boolean | null
           score: Json | null
           title_org: string
         }
@@ -39,6 +40,7 @@ export type Database = {
           html_available?: boolean | null
           html_url?: string | null
           image_url?: string | null
+          rerun?: boolean | null
           score?: Json | null
           title_org: string
         }
@@ -55,6 +57,7 @@ export type Database = {
           html_available?: boolean | null
           html_url?: string | null
           image_url?: string | null
+          rerun?: boolean | null
           score?: Json | null
           title_org?: string
         }

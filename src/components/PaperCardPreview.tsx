@@ -59,13 +59,6 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           <h2 className="text-2xl font-bold leading-tight">
             {displayTitle}
           </h2>
-          
-          {/* First highlight */}
-          {firstTakeaway && (
-            <div className="border-l-2 border-yellow-400 pl-3 py-1">
-              <p className="text-white/80">{firstTakeaway}</p>
-            </div>
-          )}
         </div>
       </div>
     </motion.div>
