@@ -92,13 +92,14 @@ export const usePaperData = (paper: Paper | undefined) => {
     
     if (Array.isArray(paper.ai_key_takeaways) && paper.ai_key_takeaways.length > 0) {
       const firstItem = paper.ai_key_takeaways[0];
+      
       // Fix TypeScript errors with proper null checks
       if (firstItem === null || firstItem === undefined) {
         return '';
       }
       
       // Since we've already checked for null above, we can now safely use firstItem
-      if (typeof firstItem === 'object' && 'text' in firstItem) {
+      if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
         return String(firstItem.text || '');
       }
       
