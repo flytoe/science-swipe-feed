@@ -40,12 +40,11 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           isGenerating={isGeneratingImage}
           imageSourceType={imageSourceType}
         />
-        {/* Gradient overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+        {/* Removed the full overlay div that was blocking interaction */}
       </div>
       
       {/* Content overlaid on the image */}
-      <div className="relative z-10 mt-auto p-4 bg-gradient-to-t from-black/90 via-black/70 to-transparent">
+      <div className="relative z-10 mt-auto p-4 pb-6 bg-gradient-to-t from-black/90 via-black/70 to-transparent">
         {/* Date and categories */}
         <div className="flex flex-wrap gap-2 mb-2">
           <Badge variant="outline" className="bg-white/10 text-white border-none">
