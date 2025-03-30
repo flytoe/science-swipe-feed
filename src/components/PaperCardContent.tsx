@@ -31,7 +31,6 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   creator,
   imageSrc
 }) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [isAbstractOpen, setIsAbstractOpen] = useState(false);
   
   // Process abstract_org to remove "arXiv:..." prefix
@@ -57,42 +56,6 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     return creator;
   };
   
-  // Handle scroll events to prevent card swipes during content scrolling
-  const handleContentScroll = (e: Event) => {
-    // Create and dispatch custom events for scroll state
-    const scrollEvent = new CustomEvent('scrollContent');
-    document.dispatchEvent(scrollEvent);
-  };
-  
-  const handleScrollEnd = () => {
-    // Wait a bit before enabling swiping again
-    setTimeout(() => {
-      const endEvent = new CustomEvent('scrollEnd');
-      document.dispatchEvent(endEvent);
-    }, 200);
-  };
-
-  useEffect(() => {
-    const scrollArea = scrollRef.current;
-    
-    if (scrollArea) {
-      scrollArea.addEventListener('scroll', handleContentScroll, { passive: true });
-      scrollArea.addEventListener('touchend', handleScrollEnd, { passive: true });
-      
-      return () => {
-        scrollArea.removeEventListener('scroll', handleContentScroll);
-        scrollArea.removeEventListener('touchend', handleScrollEnd);
-      };
-    }
-  }, []);
-
-  // Prevent swipe events from bubbling up when interacting with content
-  const handleContentTouchStart = (e: React.TouchEvent) => {
-    e.stopPropagation();
-    const scrollEvent = new CustomEvent('scrollContent');
-    document.dispatchEvent(scrollEvent);
-  };
-
   // Create the DOI URL with proper handling
   const doiUrl = doi ? (
     doi.startsWith('http') ? doi : `https://doi.org/${doi}`
@@ -117,34 +80,36 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
 
   return (
     <div className="paper-card-content h-full flex flex-col">
-      {/* Hero Image Section */}
-      <div className="relative h-40 min-h-40 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-transparent z-10" />
-        <img 
-          src={imageSrc || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'}
-          alt={title} 
-          className="w-full h-full object-cover" 
-        />
-        <div className="absolute inset-0 flex flex-col justify-end p-4 z-20">
-          <h2 className="text-2xl font-bold text-white drop-shadow-md leading-tight">
-            {title}
-          </h2>
+      {/* Full height scroll container */}
+      <ScrollArea className="flex-1 h-full overflow-auto">
+        {/* Hero Image Section - Larger image similar to the reference */}
+        <div className="relative h-[70vh] min-h-[500px] overflow-hidden">
+          <img 
+            src={imageSrc || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'}
+            alt={title} 
+            className="w-full h-full object-cover" 
+          />
           
-          {/* Display Creator if available */}
-          {formatCreator(creator) && (
-            <p className="text-sm text-white/80 mt-1 drop-shadow-md">
-              {formatCreator(creator)}
-            </p>
-          )}
+          {/* Gradient overlay for text visibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+          
+          {/* Title and author positioned at the bottom of the image */}
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <h2 className="text-3xl font-bold text-white drop-shadow-md leading-tight">
+              {title}
+            </h2>
+            
+            {/* Display Creator if available */}
+            {formatCreator(creator) && (
+              <p className="text-base text-white/80 mt-2 drop-shadow-md">
+                {formatCreator(creator)}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
-      
-      <ScrollArea 
-        className="flex-1 h-full overflow-auto p-4"
-        ref={scrollRef}
-        onTouchStart={handleContentTouchStart}
-      >
-        <div className="pr-2">
+        
+        {/* Content section */}
+        <div className="p-6">
           {takeaways && takeaways.length > 0 ? (
             <PaperCardTakeaways takeaways={takeaways} />
           ) : abstract ? (

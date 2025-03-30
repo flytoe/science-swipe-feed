@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, ImageIcon } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
+import { AspectRatio } from './ui/aspect-ratio';
 
 interface PaperCardMediaProps {
   imageSrc: string;
@@ -43,18 +44,11 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
     setImageLoaded(true); // To remove loading state
   };
 
-  // Dynamic aspect ratio for mobile vs desktop
-  const aspectRatio = isMobile ? 'aspect-[16/10]' : 'aspect-[16/9]';
-
   return (
-    <div className="relative">
-      <div 
-        className={`relative overflow-hidden ${aspectRatio} ${
-          !imageLoaded || isGenerating ? 'bg-gray-900' : ''
-        }`}
-      >
+    <div className="relative h-full w-full">
+      <div className="absolute inset-0">
         {(isGenerating || (!imageLoaded && !imageError)) && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
         )}

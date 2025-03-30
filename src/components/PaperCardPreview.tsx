@@ -40,13 +40,12 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           isGenerating={isGeneratingImage}
           imageSourceType={imageSourceType}
         />
-        {/* Removed the full overlay div that was blocking interaction */}
       </div>
       
-      {/* Content overlaid on the image */}
-      <div className="relative z-10 mt-auto p-4 pb-6 bg-gradient-to-t from-black/90 via-black/70 to-transparent">
+      {/* Content overlaid on the image - positioned at the bottom */}
+      <div className="relative z-10 mt-auto p-6 pt-36 pb-8 bg-gradient-to-t from-black/95 via-black/80 to-transparent">
         {/* Date and categories */}
-        <div className="flex flex-wrap gap-2 mb-2">
+        <div className="flex flex-wrap gap-2 mb-3">
           <Badge variant="outline" className="bg-white/10 text-white border-none">
             {formattedDate}
           </Badge>
@@ -63,7 +62,7 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
         </div>
         
         {/* Title with improved visibility */}
-        <h2 className="text-2xl font-bold leading-tight text-white drop-shadow-sm">
+        <h2 className="text-3xl font-bold leading-tight text-white drop-shadow-lg mb-2">
           {displayTitle}
         </h2>
       </div>
