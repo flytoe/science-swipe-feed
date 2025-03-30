@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, ImageIcon } from 'lucide-react';
@@ -10,7 +9,7 @@ interface PaperCardMediaProps {
   imageAlt: string;
   categories: string[];
   isGenerating?: boolean;
-  imageSourceType?: 'default' | 'database' | 'runware';
+  imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
 }
 
 const PaperCardMedia: React.FC<PaperCardMediaProps> = ({ 
@@ -24,7 +23,6 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
   const [imageError, setImageError] = useState(false);
   const isMobile = useIsMobile();
 
-  // Log image source when component mounts or image source changes
   useEffect(() => {
     console.log(`Image source for "${imageAlt}": ${imageSourceType}`, { 
       url: imageSrc,
@@ -32,7 +30,6 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
     });
   }, [imageSrc, imageSourceType, imageAlt, isGenerating]);
 
-  // Reset states when image source changes
   useEffect(() => {
     setImageLoaded(false);
     setImageError(false);

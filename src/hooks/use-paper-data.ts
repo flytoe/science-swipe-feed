@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { type Paper } from '../lib/supabase';
 import { checkAndGenerateImageIfNeeded } from '../lib/imageGenerationService';
 import { format } from 'date-fns';
-import { parseTakeaways } from '../utils/takeawayParser';
+import { parseKeyTakeaways, type FormattedTakeaway } from '../utils/takeawayParser';
 
 interface UsePaperDataReturnType {
   categories: string[];
@@ -11,7 +11,7 @@ interface UsePaperDataReturnType {
   imageSrc: string;
   displayTitle: string;
   firstTakeaway: string | null;
-  formattedTakeaways: { text: string; citation?: string; type?: string }[];
+  formattedTakeaways: FormattedTakeaway[];
   isGeneratingImage: boolean;
   imageSourceType: 'database' | 'default' | 'generated';
 }
@@ -36,7 +36,7 @@ export function usePaperData(paper: Paper): UsePaperDataReturnType {
   const displayTitle = paper.ai_headline || paper.title_org;
 
   // Process takeaways
-  const formattedTakeaways = parseTakeaways(paper.ai_key_takeaways);
+  const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
   
   // Get first takeaway for preview
   const firstTakeaway = formattedTakeaways.length > 0 

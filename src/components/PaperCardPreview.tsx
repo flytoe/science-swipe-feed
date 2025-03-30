@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui/badge';
@@ -11,7 +10,7 @@ interface PaperCardPreviewProps {
   categories: string[];
   firstTakeaway: string;
   isGeneratingImage?: boolean;
-  imageSourceType?: 'default' | 'database' | 'runware';
+  imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
