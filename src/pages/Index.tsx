@@ -6,12 +6,24 @@ import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getPapers, Paper } from '../lib/supabase';
+import CategoryFilter from '../components/CategoryFilter';
+import RegenerateImageButton from '../components/RegenerateImageButton';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
   const [hasPapers, setHasPapers] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [papers, setPapers] = useState<Paper[]>([]);
+  const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [currentPaperIndex, setCurrentPaperIndex] = useState(0);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
   
   useEffect(() => {
     const checkDatabase = async () => {
@@ -21,6 +33,7 @@ const Index: React.FC = () => {
         // Fetch papers data
         const papersData = await getPapers();
         setPapers(papersData);
+        setFilteredPapers(papersData);
         
         const { data, error, count } = await supabase
           .from('n8n_table')
@@ -51,6 +64,28 @@ const Index: React.FC = () => {
     
     checkDatabase();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategories.length === 0) {
+      setFilteredPapers(papers);
+    } else {
+      const filtered = papers.filter(paper => {
+        if (!paper.category) return false;
+        
+        // Handle both string and array categories
+        const paperCategories = Array.isArray(paper.category) 
+          ? paper.category 
+          : [paper.category];
+        
+        return selectedCategories.some(selected => 
+          paperCategories.includes(selected)
+        );
+      });
+      
+      setFilteredPapers(filtered);
+      setCurrentPaperIndex(0); // Reset to first paper when filter changes
+    }
+  }, [selectedCategories, papers]);
 
   const addSamplePaper = async () => {
     try {
@@ -87,14 +122,63 @@ const Index: React.FC = () => {
     }
   };
 
+  const handleFilterChange = (categories: string[]) => {
+    setSelectedCategories(categories);
+  };
+
+  const handleRegenerationStart = () => {
+    setIsRegeneratingImage(true);
+  };
+
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setIsRegeneratingImage(false);
+    
+    if (imageUrl && filteredPapers[currentPaperIndex]) {
+      // Update the paper with the new image URL
+      const updatedPapers = [...papers];
+      const paperIndex = updatedPapers.findIndex(p => 
+        p.doi === filteredPapers[currentPaperIndex].doi
+      );
+      
+      if (paperIndex !== -1) {
+        updatedPapers[paperIndex] = {
+          ...updatedPapers[paperIndex],
+          image_url: imageUrl
+        };
+        
+        setPapers(updatedPapers);
+        // The filtered papers will be updated via the useEffect
+      }
+    }
+  };
+
+  const getCurrentPaper = (): Paper | null => {
+    return filteredPapers.length > currentPaperIndex ? filteredPapers[currentPaperIndex] : null;
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Research Feed</h1>
-          <Button variant="ghost" size="icon" className="text-white">
-            <SearchIcon className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white">
+                  <SearchIcon className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-2 bg-gray-900 border border-gray-800">
+                <CategoryFilter onFilterChange={handleFilterChange} />
+              </PopoverContent>
+            </Popover>
+            
+            <RegenerateImageButton 
+              paper={getCurrentPaper()}
+              onRegenerationStart={handleRegenerationStart}
+              onRegenerationComplete={handleRegenerationComplete}
+            />
+          </div>
         </div>
       </header>
 
@@ -120,7 +204,18 @@ const Index: React.FC = () => {
       ) : null}
 
       <div className="h-[calc(100vh-4rem)]">
-        <SwipeFeed papers={papers} />
+        {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-white/70">No papers match the selected categories</p>
+          </div>
+        ) : (
+          <SwipeFeed 
+            papers={filteredPapers} 
+            currentIndex={currentPaperIndex}
+            setCurrentIndex={setCurrentPaperIndex}
+            isGeneratingImage={isRegeneratingImage}
+          />
+        )}
       </div>
     </div>
   );

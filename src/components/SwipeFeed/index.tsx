@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import React from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { type Paper } from '../../lib/supabase';
 import PaperCard from '../PaperCard';
 import SwipeControls from './SwipeControls';
@@ -8,10 +8,28 @@ import { useSwipeNavigation } from './useSwipeNavigation';
 
 interface SwipeFeedProps {
   papers: Paper[];
+  currentIndex?: number;
+  setCurrentIndex?: (index: number) => void;
+  isGeneratingImage?: boolean;
 }
 
-const SwipeFeed: React.FC<SwipeFeedProps> = ({ papers }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const SwipeFeed: React.FC<SwipeFeedProps> = ({ 
+  papers, 
+  currentIndex: externalIndex, 
+  setCurrentIndex: setExternalIndex,
+  isGeneratingImage = false
+}) => {
+  const [internalIndex, setInternalIndex] = React.useState(0);
+  
+  // Use external or internal state depending on what's provided
+  const currentIndex = externalIndex !== undefined ? externalIndex : internalIndex;
+  const setCurrentIndex = (index: number) => {
+    if (setExternalIndex) {
+      setExternalIndex(index);
+    } else {
+      setInternalIndex(index);
+    }
+  };
   
   // Always call hooks at the top level, regardless of conditions
   const {
@@ -52,6 +70,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({ papers }) => {
             key={currentPaper?.doi || currentIndex}
             paper={currentPaper}
             isActive={true}
+            isGeneratingImage={isGeneratingImage}
           />
         </AnimatePresence>
       </div>
