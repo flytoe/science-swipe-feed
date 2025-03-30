@@ -11,6 +11,7 @@ interface PaperCardPreviewProps {
   categories: string[];
   firstTakeaway: string;
   isGeneratingImage?: boolean;
+  imageSourceType?: 'default' | 'database' | 'runware';
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
@@ -19,7 +20,8 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   formattedDate,
   categories,
   firstTakeaway,
-  isGeneratingImage = false
+  isGeneratingImage = false,
+  imageSourceType = 'database'
 }) => {
   return (
     <motion.div
@@ -36,6 +38,7 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           imageAlt={displayTitle}
           categories={[]}
           isGenerating={isGeneratingImage}
+          imageSourceType={imageSourceType}
         />
         {/* Gradient overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />

@@ -9,17 +9,27 @@ interface PaperCardMediaProps {
   imageAlt: string;
   categories: string[];
   isGenerating?: boolean;
+  imageSourceType?: 'default' | 'database' | 'runware';
 }
 
 const PaperCardMedia: React.FC<PaperCardMediaProps> = ({ 
   imageSrc, 
   imageAlt, 
   categories,
-  isGenerating = false
+  isGenerating = false,
+  imageSourceType = 'database'
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const isMobile = useIsMobile();
+
+  // Log image source when component mounts or image source changes
+  useEffect(() => {
+    console.log(`Image source for "${imageAlt}": ${imageSourceType}`, { 
+      url: imageSrc,
+      isGenerating
+    });
+  }, [imageSrc, imageSourceType, imageAlt, isGenerating]);
 
   // Reset states when image source changes
   useEffect(() => {

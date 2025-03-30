@@ -55,7 +55,9 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     imageSrc, 
     displayTitle,
     firstTakeaway,
-    formattedTakeaways
+    formattedTakeaways,
+    isGeneratingImage: isGenerating,
+    imageSourceType
   } = usePaperData(paper);
 
   return (
@@ -76,7 +78,8 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
             formattedDate={formattedDate}
             categories={categories}
             firstTakeaway={firstTakeaway}
-            isGeneratingImage={isGeneratingImage}
+            isGeneratingImage={isGenerating}
+            imageSourceType={imageSourceType}
           />
         ) : (
           <PaperCardDetail

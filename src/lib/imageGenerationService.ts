@@ -15,7 +15,7 @@ export async function generateImageForPaper(paper: Paper): Promise<string | null
   }
   
   try {
-    console.log(`Generating image for paper ${paper.doi} with prompt: ${paper.ai_image_prompt}`);
+    console.log(`Generating image with Runware for paper ${paper.doi} with prompt: ${paper.ai_image_prompt}`);
     
     const { data, error } = await supabase.functions.invoke('generate-image', {
       body: {
@@ -30,15 +30,17 @@ export async function generateImageForPaper(paper: Paper): Promise<string | null
       return null;
     }
     
-    console.log('Image generation response:', data);
+    console.log('Runware image generation response:', data);
     
     if (data && data.imageUrl) {
+      console.log(`Successfully generated image with Runware for paper: ${paper.doi}`);
       return data.imageUrl;
     }
     
+    console.warn(`No image URL returned from Runware for paper: ${paper.doi}`);
     return null;
   } catch (error) {
-    console.error('Error generating image:', error);
+    console.error('Error generating image with Runware:', error);
     toast.error('Failed to generate image');
     return null;
   }
@@ -52,13 +54,18 @@ export async function generateImageForPaper(paper: Paper): Promise<string | null
 export async function checkAndGenerateImageIfNeeded(paper: Paper): Promise<string | null> {
   // If the paper already has an image, just return that URL
   if (paper.image_url) {
+    console.log(`Paper ${paper.doi} already has an image: ${paper.image_url}`);
     return paper.image_url;
   }
   
+  console.log(`Paper ${paper.doi} has no image. Checking if generation is possible...`);
+  
   // Only generate if we have a prompt AND no existing image
   if (paper.ai_image_prompt) {
+    console.log(`Found prompt for paper ${paper.doi}, generating image with Runware...`);
     return await generateImageForPaper(paper);
   }
   
+  console.log(`No prompt available for paper ${paper.doi}, cannot generate image`);
   return null;
 }
