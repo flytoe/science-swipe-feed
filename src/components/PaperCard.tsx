@@ -76,8 +76,8 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     }
   };
 
-  const handleOpenPromptModal = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Fix: Changed the function signature to match what PaperCardPreview expects
+  const handleOpenPromptModal = () => {
     setIsPromptModalOpen(true);
   };
 
