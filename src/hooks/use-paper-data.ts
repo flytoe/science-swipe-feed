@@ -14,6 +14,7 @@ interface UsePaperDataReturnType {
   formattedTakeaways: FormattedTakeaway[];
   isGeneratingImage: boolean;
   imageSourceType: 'database' | 'default' | 'generated';
+  refreshImageData: (newImageUrl?: string) => void;
 }
 
 export function usePaperData(paper: Paper): UsePaperDataReturnType {
@@ -43,51 +44,62 @@ export function usePaperData(paper: Paper): UsePaperDataReturnType {
     ? formattedTakeaways[0]?.text || null 
     : null;
 
-  // Check for image and generate if needed
-  useEffect(() => {
-    const getOrGenerateImage = async () => {
-      if (!paper) return;
+  const refreshImageData = (newImageUrl?: string) => {
+    if (newImageUrl) {
+      setImageSrc(newImageUrl);
+      setImageSourceType('generated');
+      return;
+    }
 
-      // If there's a direct image URL, use that
-      if (paper.image_url) {
-        console.log(`Using database image for paper: ${paper.doi}`);
-        setImageSrc(paper.image_url);
-        setImageSourceType('database');
-        return;
-      }
+    // If no new URL provided, check and generate if needed
+    loadImage();
+  };
 
-      // Use a default image when there's no image or no prompt
-      if (!paper.ai_image_prompt) {
-        setImageSrc('https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000');
-        setImageSourceType('default');
-        return;
-      }
+  const loadImage = async () => {
+    if (!paper) return;
 
-      // Generate image if we have a prompt but no image
-      try {
-        setIsGeneratingImage(true);
-        const imageUrl = await checkAndGenerateImageIfNeeded(paper);
-        
-        if (imageUrl) {
-          setImageSrc(imageUrl);
-          setImageSourceType('generated');
-        } else {
-          // Fallback to default
-          setImageSrc('https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000');
-          setImageSourceType('default');
-        }
-      } catch (error) {
-        console.error('Error generating image:', error);
+    // If there's a direct image URL, use that
+    if (paper.image_url) {
+      console.log(`Using database image for paper: ${paper.doi}`);
+      setImageSrc(paper.image_url);
+      setImageSourceType('database');
+      return;
+    }
+
+    // Use a default image when there's no image or no prompt
+    if (!paper.ai_image_prompt) {
+      setImageSrc('https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000');
+      setImageSourceType('default');
+      return;
+    }
+
+    // Generate image if we have a prompt but no image
+    try {
+      setIsGeneratingImage(true);
+      const imageUrl = await checkAndGenerateImageIfNeeded(paper);
+      
+      if (imageUrl) {
+        setImageSrc(imageUrl);
+        setImageSourceType('generated');
+      } else {
         // Fallback to default
         setImageSrc('https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000');
         setImageSourceType('default');
-      } finally {
-        setIsGeneratingImage(false);
       }
-    };
+    } catch (error) {
+      console.error('Error generating image:', error);
+      // Fallback to default
+      setImageSrc('https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000');
+      setImageSourceType('default');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
-    getOrGenerateImage();
-  }, [paper]);
+  // Check for image and generate if needed
+  useEffect(() => {
+    loadImage();
+  }, [paper?.doi, paper?.image_url]);
 
   return {
     categories,
@@ -97,6 +109,7 @@ export function usePaperData(paper: Paper): UsePaperDataReturnType {
     firstTakeaway,
     formattedTakeaways,
     isGeneratingImage,
-    imageSourceType
+    imageSourceType,
+    refreshImageData
   };
 }

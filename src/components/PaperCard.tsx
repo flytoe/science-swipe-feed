@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
@@ -6,6 +7,7 @@ import PaperCardPreview from './PaperCardPreview';
 import PaperCardDetail from './PaperCardDetail';
 import PaperCardPlaceholder from './PaperCardPlaceholder';
 import { usePaperData } from '../hooks/use-paper-data';
+import ImagePromptModal from './ImagePromptModal';
 
 interface PaperCardProps {
   paper: Paper;
@@ -16,6 +18,8 @@ interface PaperCardProps {
 
 const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false, onDetailToggle }) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [localIsGeneratingImage, setLocalIsGeneratingImage] = useState(false);
   const navigate = useNavigate();
   
   const cardVariants = {
@@ -55,9 +59,29 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     displayTitle,
     firstTakeaway,
     formattedTakeaways,
-    isGeneratingImage: isGenerating,
-    imageSourceType
+    isGeneratingImage: isGeneratingFromHook,
+    imageSourceType,
+    refreshImageData
   } = usePaperData(paper);
+
+  const handleRegenerationStart = () => {
+    setLocalIsGeneratingImage(true);
+  };
+
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setLocalIsGeneratingImage(false);
+    if (imageUrl) {
+      // Refresh the data to show the new image
+      refreshImageData(imageUrl);
+    }
+  };
+
+  const handleOpenPromptModal = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsPromptModalOpen(true);
+  };
+
+  const isGenerating = isGeneratingImage || localIsGeneratingImage || isGeneratingFromHook;
 
   return (
     <motion.div 
@@ -79,6 +103,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
             firstTakeaway={firstTakeaway}
             isGeneratingImage={isGenerating}
             imageSourceType={imageSourceType}
+            onRegenerateClick={handleOpenPromptModal}
           />
         ) : (
           <PaperCardDetail
@@ -94,6 +119,13 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
           />
         )}
       </AnimatePresence>
+
+      <ImagePromptModal
+        isOpen={isPromptModalOpen}
+        onClose={() => setIsPromptModalOpen(false)}
+        paper={paper}
+        onRegenerationComplete={handleRegenerationComplete}
+      />
     </motion.div>
   );
 };

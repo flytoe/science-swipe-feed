@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { generateImageForPaper } from '../lib/imageGenerationService';
 import { Paper } from '../lib/supabase';
+import ImagePromptModal from './ImagePromptModal';
 
 interface RegenerateImageButtonProps {
   paper: Paper | null;
@@ -17,9 +17,10 @@ const RegenerateImageButton: React.FC<RegenerateImageButtonProps> = ({
   onRegenerationStart,
   onRegenerationComplete
 }) => {
-  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleRegenerate = async () => {
+  const handleClick = () => {
     if (!paper) {
       toast.error('No paper available to regenerate image');
       return;
@@ -30,40 +31,40 @@ const RegenerateImageButton: React.FC<RegenerateImageButtonProps> = ({
       return;
     }
 
-    try {
-      setIsGenerating(true);
-      onRegenerationStart();
-      toast.info('Regenerating image...', { duration: 10000 });
-      
-      const imageUrl = await generateImageForPaper(paper);
-      
-      if (imageUrl) {
-        toast.success('Image regenerated successfully');
-        onRegenerationComplete(imageUrl);
-      } else {
-        toast.error('Failed to regenerate image');
-        onRegenerationComplete(null);
-      }
-    } catch (error) {
-      console.error('Error regenerating image:', error);
-      toast.error('Error regenerating image');
-      onRegenerationComplete(null);
-    } finally {
-      setIsGenerating(false);
-    }
+    // Open the modal instead of directly generating
+    setIsModalOpen(true);
+  };
+
+  const handleRegenerationStart = () => {
+    setIsGenerating(true);
+    onRegenerationStart();
+  };
+
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setIsGenerating(false);
+    onRegenerationComplete(imageUrl);
   };
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="rounded-full border-none bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60"
-      onClick={handleRegenerate}
-      disabled={isGenerating || !paper?.ai_image_prompt}
-      title="Regenerate image"
-    >
-      <RefreshCw className={`h-4 w-4 text-white ${isGenerating ? 'animate-spin' : ''}`} />
-    </Button>
+    <>
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full border-none bg-gray-800/50 backdrop-blur-sm hover:bg-gray-700/60"
+        onClick={handleClick}
+        disabled={isGenerating || !paper?.ai_image_prompt}
+        title="Edit prompt and regenerate image"
+      >
+        <RefreshCw className={`h-4 w-4 text-white ${isGenerating ? 'animate-spin' : ''}`} />
+      </Button>
+      
+      <ImagePromptModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        paper={paper}
+        onRegenerationComplete={handleRegenerationComplete}
+      />
+    </>
   );
 };
 

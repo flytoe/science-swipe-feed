@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, ImageIcon } from 'lucide-react';
-import { useIsMobile } from '../hooks/use-mobile';
-import { AspectRatio } from './ui/aspect-ratio';
+
+import React from 'react';
+import { RefreshCw } from 'lucide-react';
 
 interface PaperCardMediaProps {
   imageSrc: string;
@@ -10,67 +8,55 @@ interface PaperCardMediaProps {
   categories: string[];
   isGenerating?: boolean;
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
+  onRegenerateClick?: () => void;
 }
 
-const PaperCardMedia: React.FC<PaperCardMediaProps> = ({ 
-  imageSrc, 
-  imageAlt, 
+const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
+  imageSrc,
+  imageAlt,
   categories,
   isGenerating = false,
-  imageSourceType = 'database'
+  imageSourceType = 'database',
+  onRegenerateClick
 }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    console.log(`Image source for "${imageAlt}": ${imageSourceType}`, { 
-      url: imageSrc,
-      isGenerating
-    });
-  }, [imageSrc, imageSourceType, imageAlt, isGenerating]);
-
-  useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
-  }, [imageSrc]);
-
-  const handleImageError = () => {
-    console.error(`Failed to load image: ${imageSrc}`);
-    setImageError(true);
-    setImageLoaded(true); // To remove loading state
-  };
-
   return (
     <div className="relative h-full w-full">
-      <div className="absolute inset-0">
-        {(isGenerating || (!imageLoaded && !imageError)) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
-        )}
-        
-        {imageSrc && !imageError && (
-          <motion.img
-            src={imageSrc}
-            alt={imageAlt}
-            className="w-full h-full object-cover"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: imageLoaded ? 1 : 0 }}
-            transition={{ duration: 0.5 }}
-            onLoad={() => setImageLoaded(true)}
-            onError={handleImageError}
-            loading="lazy"
-          />
-        )}
-        
-        {imageError && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900">
-            <ImageIcon className="h-10 w-10 text-gray-600 mb-2" />
-            <p className="text-gray-400">Image not available</p>
-          </div>
-        )}
+      {/* Image */}
+      <div className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${isGenerating ? 'opacity-30' : 'opacity-100'}`}
+        style={{ backgroundImage: `url(${imageSrc})` }}
+        aria-label={imageAlt}>
+        {/* Dark overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
       </div>
+      
+      {/* Loading indicator */}
+      {isGenerating && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <RefreshCw className="h-8 w-8 text-white animate-spin" />
+        </div>
+      )}
+      
+      {/* Image source indicator */}
+      {imageSourceType === 'generated' && (
+        <div className="absolute bottom-2 right-2 bg-black/50 text-xs text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          AI Generated
+        </div>
+      )}
+      
+      {/* Regenerate button */}
+      {onRegenerateClick && (
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onRegenerateClick();
+          }}
+          className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+          disabled={isGenerating}
+          aria-label="Regenerate image"
+        >
+          <RefreshCw className={`h-4 w-4 text-white ${isGenerating ? 'animate-spin' : ''}`} />
+        </button>
+      )}
     </div>
   );
 };

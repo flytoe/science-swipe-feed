@@ -8,12 +8,14 @@ import { Card } from '@/components/ui/card';
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { getPaperById, type Paper } from '../lib/supabase';
 import { toast } from 'sonner';
+import RegenerateImageButton from '../components/RegenerateImageButton';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
 
   useEffect(() => {
     const loadPaper = async () => {
@@ -41,6 +43,21 @@ const PaperDetail: React.FC = () => {
   }, [id, navigate]);
 
   const goBack = () => navigate('/');
+
+  const handleRegenerationStart = () => {
+    setIsRegeneratingImage(true);
+  };
+
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setIsRegeneratingImage(false);
+    if (imageUrl && paper) {
+      // Update the paper object with the new image URL
+      setPaper({
+        ...paper,
+        image_url: imageUrl
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -102,12 +119,28 @@ const PaperDetail: React.FC = () => {
       <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
         {/* Hero section with image */}
         {paper.image_url && (
-          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg mb-6">
+          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg mb-6 relative">
             <img 
               src={paper.image_url} 
               alt={paper.title_org || 'Research paper'} 
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${isRegeneratingImage ? 'opacity-50' : ''}`}
             />
+            
+            {/* Regenerate button */}
+            <div className="absolute top-4 right-4">
+              <RegenerateImageButton 
+                paper={paper}
+                onRegenerationStart={handleRegenerationStart}
+                onRegenerationComplete={handleRegenerationComplete}
+              />
+            </div>
+            
+            {/* Loading overlay */}
+            {isRegeneratingImage && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <div className="loading-spinner" />
+              </div>
+            )}
           </div>
         )}
         

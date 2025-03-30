@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui/badge';
@@ -11,6 +12,7 @@ interface PaperCardPreviewProps {
   firstTakeaway: string;
   isGeneratingImage?: boolean;
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
+  onRegenerateClick?: () => void;
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
@@ -20,7 +22,8 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   categories,
   firstTakeaway,
   isGeneratingImage = false,
-  imageSourceType = 'database'
+  imageSourceType = 'database',
+  onRegenerateClick
 }) => {
   return (
     <motion.div
@@ -38,6 +41,7 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           categories={[]}
           isGenerating={isGeneratingImage}
           imageSourceType={imageSourceType}
+          onRegenerateClick={onRegenerateClick}
         />
       </div>
       
