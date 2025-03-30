@@ -62,6 +62,7 @@ const RegenerateImageButton: React.FC<RegenerateImageButtonProps> = ({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         paper={paper}
+        onRegenerationStart={handleRegenerationStart}
         onRegenerationComplete={handleRegenerationComplete}
       />
     </>

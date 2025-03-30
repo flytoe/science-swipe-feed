@@ -19,6 +19,13 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
   imageSourceType = 'database',
   onRegenerateClick
 }) => {
+  const handleRegenerateClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onRegenerateClick) {
+      onRegenerateClick();
+    }
+  };
+
   return (
     <div className="relative h-full w-full">
       {/* Image */}
@@ -46,10 +53,7 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
       {/* Regenerate button */}
       {onRegenerateClick && (
         <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            onRegenerateClick();
-          }}
+          onClick={handleRegenerateClick}
           className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
           disabled={isGenerating}
           aria-label="Regenerate image"

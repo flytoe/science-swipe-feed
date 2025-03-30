@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
 import { Info, SearchIcon } from 'lucide-react';
@@ -9,10 +8,9 @@ import { getPapers, Paper } from '../lib/supabase';
 import CategoryFilter from '../components/CategoryFilter';
 import RegenerateImageButton from '../components/RegenerateImageButton';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Dialog,
+  DialogContent,
+} from '@/components/ui/dialog';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -30,7 +28,6 @@ const Index: React.FC = () => {
       try {
         setIsLoading(true);
         
-        // Fetch papers data
         const papersData = await getPapers();
         setPapers(papersData);
         setFilteredPapers(papersData);
@@ -72,7 +69,6 @@ const Index: React.FC = () => {
       const filtered = papers.filter(paper => {
         if (!paper.category) return false;
         
-        // Handle both string and array categories
         const paperCategories = Array.isArray(paper.category) 
           ? paper.category 
           : [paper.category];
@@ -83,7 +79,7 @@ const Index: React.FC = () => {
       });
       
       setFilteredPapers(filtered);
-      setCurrentPaperIndex(0); // Reset to first paper when filter changes
+      setCurrentPaperIndex(0);
     }
   }, [selectedCategories, papers]);
 
@@ -134,7 +130,6 @@ const Index: React.FC = () => {
     setIsRegeneratingImage(false);
     
     if (imageUrl && filteredPapers[currentPaperIndex]) {
-      // Update the paper with the new image URL
       const updatedPapers = [...papers];
       const paperIndex = updatedPapers.findIndex(p => 
         p.doi === filteredPapers[currentPaperIndex].doi
@@ -147,7 +142,6 @@ const Index: React.FC = () => {
         };
         
         setPapers(updatedPapers);
-        // The filtered papers will be updated via the useEffect
       }
     }
   };
@@ -162,16 +156,14 @@ const Index: React.FC = () => {
         <div className="container max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-semibold">Research Feed</h1>
           <div className="flex items-center space-x-2">
-            <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-white">
-                  <SearchIcon className="h-5 w-5" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-2 bg-gray-900 border border-gray-800">
-                <CategoryFilter onFilterChange={handleFilterChange} />
-              </PopoverContent>
-            </Popover>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white"
+              onClick={() => setIsFilterOpen(true)}
+            >
+              <SearchIcon className="h-5 w-5" />
+            </Button>
             
             <RegenerateImageButton 
               paper={getCurrentPaper()}
@@ -181,6 +173,15 @@ const Index: React.FC = () => {
           </div>
         </div>
       </header>
+
+      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md">
+          <div className="p-2">
+            <h2 className="text-xl font-semibold mb-4 text-white">Filter By Category</h2>
+            <CategoryFilter onFilterChange={handleFilterChange} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isLoading ? (
         <div className="max-w-md mx-auto mt-6 px-4 flex justify-center">

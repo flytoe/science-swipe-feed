@@ -7,11 +7,19 @@ import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from '../lib/supabase';
 import { generateImageForPaper } from '../lib/imageGenerationService';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
   onClose: () => void;
   paper: Paper | null;
+  onRegenerationStart?: () => void;
   onRegenerationComplete: (imageUrl: string | null) => void;
 }
 
@@ -19,6 +27,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
   isOpen, 
   onClose, 
   paper,
+  onRegenerationStart,
   onRegenerationComplete
 }) => {
   const [prompt, setPrompt] = useState('');
@@ -47,6 +56,8 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
 
     try {
       setIsGenerating(true);
+      if (onRegenerationStart) onRegenerationStart();
+      
       toast.info('Updating prompt and regenerating image...', { duration: 10000 });
       
       // First update the prompt in the database
@@ -82,25 +93,16 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-      <div className="bg-black border border-gray-800 rounded-lg w-full max-w-lg p-6 relative">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="absolute right-4 top-4" 
-          onClick={onClose}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-lg bg-gray-900 border-gray-700 text-white">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">Edit Image Prompt</DialogTitle>
+        </DialogHeader>
         
-        <h2 className="text-xl font-semibold mb-4">Edit Image Prompt</h2>
-        
-        <div className="space-y-4">
+        <div className="space-y-4 py-4">
           <div>
-            <label htmlFor="prompt" className="block text-sm font-medium mb-1">
+            <label htmlFor="prompt" className="block text-sm font-medium mb-1 text-gray-200">
               Prompt for Image Generation
             </label>
             <Textarea
@@ -109,21 +111,30 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
               onChange={handlePromptChange}
               rows={6}
               placeholder="Enter a detailed prompt to generate an image..."
-              className="w-full bg-gray-900 border-gray-700"
+              className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400"
             />
           </div>
-          
-          <div className="flex justify-end space-x-3 pt-2">
-            <Button variant="outline" onClick={onClose} disabled={isGenerating}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={isGenerating}>
-              {isGenerating ? 'Generating...' : 'Regenerate Image'}
-            </Button>
-          </div>
         </div>
-      </div>
-    </div>
+        
+        <DialogFooter className="sm:justify-end">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isGenerating}
+            className="border-gray-600 text-gray-200 hover:bg-gray-800 hover:text-white"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isGenerating}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isGenerating ? 'Generating...' : 'Regenerate Image'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
