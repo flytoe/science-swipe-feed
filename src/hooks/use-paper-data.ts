@@ -44,7 +44,7 @@ export const usePaperData = (paper: Paper | undefined) => {
       }
       
       // Since we've already checked for null above, we can now safely use firstItem
-      if (typeof firstItem === 'object' && 'text' in firstItem) {
+      if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
         return String(firstItem.text || '');
       }
       
