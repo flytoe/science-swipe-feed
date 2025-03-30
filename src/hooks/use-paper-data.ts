@@ -43,9 +43,8 @@ export const usePaperData = (paper: Paper | undefined) => {
         return '';
       }
       
-      // Since we've already checked for null above, we can now safely assert that firstItem is not null
-      // Use type narrowing for the object check
-      if (typeof firstItem === 'object' && firstItem !== null && 'text' in firstItem) {
+      // Since we've already checked for null above, we can now safely use firstItem
+      if (typeof firstItem === 'object' && 'text' in firstItem) {
         return String(firstItem.text || '');
       }
       
