@@ -193,27 +193,32 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
           <div className="space-y-6">
             {Object.entries(filteredGroupedCategories).map(([parentName, categories]) => (
               <div key={parentName} className="space-y-2">
-                <h4 className="text-sm font-medium text-white/70 capitalize">
+                <h4 className="text-sm font-medium text-white/70">
                   {parentName}
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {categories.map((category, index) => (
-                    <Badge
-                      key={index}
-                      variant={selectedCategories.includes(category.code) ? "default" : "outline"}
-                      className={`cursor-pointer capitalize ${
-                        selectedCategories.includes(category.code) 
-                          ? "bg-white text-black" 
-                          : "bg-white/10 text-white border-white/20 hover:bg-white/20"
-                      }`}
-                      onClick={() => handleToggleCategory(category.code)}
-                    >
-                      {selectedCategories.includes(category.code) && (
-                        <Check className="mr-1 h-3 w-3" />
-                      )}
-                      {category.name}
-                    </Badge>
-                  ))}
+                  {categories.map((category, index) => {
+                    // Always use the full name for display, never the code
+                    const displayName = category.name;
+                    
+                    return (
+                      <Badge
+                        key={index}
+                        variant={selectedCategories.includes(category.code) ? "default" : "outline"}
+                        className={`cursor-pointer ${
+                          selectedCategories.includes(category.code) 
+                            ? "bg-white text-black" 
+                            : "bg-white/10 text-white border-white/20 hover:bg-white/20"
+                        }`}
+                        onClick={() => handleToggleCategory(category.code)}
+                      >
+                        {selectedCategories.includes(category.code) && (
+                          <Check className="mr-1 h-3 w-3" />
+                        )}
+                        {displayName}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             ))}
