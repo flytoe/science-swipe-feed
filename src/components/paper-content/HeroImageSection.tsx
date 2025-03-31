@@ -18,7 +18,7 @@ const HeroImageSection: React.FC<HeroImageSectionProps> = ({ imageSrc, title, cr
   };
 
   return (
-    <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+    <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden mx-[-24px]">
       <img 
         src={imageSrc || 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=1000&auto=format&fit=crop'}
         alt={title} 

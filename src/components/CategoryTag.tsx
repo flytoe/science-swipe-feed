@@ -20,7 +20,10 @@ const colors = {
 };
 
 const CategoryTag: React.FC<CategoryTagProps> = ({ category }) => {
-  const categoryKey = category.toLowerCase();
+  // Get a color based on the first word of the category
+  // This works well for both category codes and full names
+  const firstWord = category.split(' ')[0].toLowerCase();
+  const categoryKey = firstWord.toLowerCase();
   const colorClass = colors[categoryKey as keyof typeof colors] || colors.default;
   
   return (

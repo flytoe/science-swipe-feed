@@ -51,6 +51,8 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
           
         // Get category map for displaying full names
         const categoryMap = await fetchCategoryMap();
+        
+        // Map category codes to full names using the taxonomy data
         const formattedCategoryNames = paperCategories.map(cat => 
           formatCategoryName(cat, categoryMap)
         );
@@ -73,7 +75,7 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
           imageSourceType = 'generated';
         }
         
-        // Format takeaways - use the full takeaways structure
+        // Format takeaways
         const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
         
         setFormattedData({

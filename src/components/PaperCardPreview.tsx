@@ -53,11 +53,12 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
             {formattedDate}
           </Badge>
           
+          {/* Display formatted category names */}
           {categories.slice(0, 2).map((category, idx) => (
             <Badge 
               key={idx}
               variant="outline" 
-              className="bg-white/10 text-white border-none capitalize"
+              className="bg-white/10 text-white border-none"
             >
               {category}
             </Badge>

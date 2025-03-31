@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, MoveLeft, BookOpen, LightbulbIcon, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Calendar, BookOpen, LightbulbIcon, BarChart3, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { getPaperById, type Paper } from '../lib/supabase';
 import { toast } from 'sonner';
 import RegenerateImageButton from '../components/RegenerateImageButton';
+import { usePaperData } from '../hooks/use-paper-data';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -59,6 +60,9 @@ const PaperDetail: React.FC = () => {
     }
   };
 
+  // Get formatted paper data using our custom hook
+  const paperData = paper ? usePaperData(paper) : null;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white p-4 flex items-center justify-center">
@@ -67,7 +71,7 @@ const PaperDetail: React.FC = () => {
     );
   }
 
-  if (!paper) {
+  if (!paper || !paperData) {
     return (
       <div className="min-h-screen bg-black text-white p-4">
         <div className="max-w-3xl mx-auto py-12 text-center">
@@ -79,20 +83,8 @@ const PaperDetail: React.FC = () => {
       </div>
     );
   }
-
-  // Format date in European format (DD.MM.YYYY)
-  const formattedDate = new Date(paper.created_at).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).replace(/\//g, '.');
   
-  const categories = Array.isArray(paper.category) ? paper.category : 
-    (typeof paper.category === 'string' ? [paper.category] : []);
-  
-  const takeaways = parseKeyTakeaways(paper.ai_key_takeaways);
-  
-  // Process abstract to clean it up
+  const { formattedCategoryNames, formattedDate, imageSrc, formattedTakeaways } = paperData;
   const cleanAbstract = paper.abstract_org 
     ? paper.abstract_org.includes("Abstract:") 
       ? paper.abstract_org.split("Abstract:")[1].trim()
@@ -101,27 +93,26 @@ const PaperDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header with back button */}
-      <div className="sticky top-0 z-30 w-full bg-black/90 backdrop-blur-sm border-b border-white/10">
-        <div className="container max-w-3xl mx-auto px-4 py-4 flex items-center">
+      {/* Close button at the top instead of header */}
+      <div className="sticky top-0 z-30 w-full bg-black/50 backdrop-blur-sm">
+        <div className="container max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <Button 
             onClick={goBack} 
             variant="ghost" 
-            className="mr-4 text-white hover:bg-white/10"
+            className="text-white hover:bg-white/10"
             size="icon"
           >
-            <MoveLeft />
+            <X size={24} />
           </Button>
-          <h1 className="text-xl font-medium">Research Article</h1>
         </div>
       </div>
       
       <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
-        {/* Hero section with image */}
+        {/* Hero section with image - now full width with negative margin */}
         {paper.image_url && (
-          <div className="aspect-[16/9] w-full overflow-hidden rounded-lg mb-6 relative">
+          <div className="mx-[-16px] aspect-[16/9] w-screen overflow-hidden relative mb-6">
             <img 
-              src={paper.image_url} 
+              src={imageSrc} 
               alt={paper.title_org || 'Research paper'} 
               className={`w-full h-full object-cover ${isRegeneratingImage ? 'opacity-50' : ''}`}
             />
@@ -150,11 +141,12 @@ const PaperDetail: React.FC = () => {
             {formattedDate}
           </Badge>
           
-          {categories.map((category, idx) => (
+          {/* Display the formatted category names */}
+          {formattedCategoryNames.map((category, idx) => (
             <Badge 
               key={idx}
               variant="outline" 
-              className="bg-white/10 text-white border-none capitalize"
+              className="bg-white/10 text-white border-none"
             >
               {category}
             </Badge>
@@ -174,22 +166,21 @@ const PaperDetail: React.FC = () => {
           </div>
         )}
         
-        {/* Key takeaways section */}
-        {takeaways && takeaways.length > 0 && (
+        {/* Key takeaways section - made more prominent */}
+        {formattedTakeaways && formattedTakeaways.length > 0 && (
           <div className="mb-8">
             <h2 className="flex items-center text-xl font-semibold mb-4">
               <LightbulbIcon className="mr-2 h-5 w-5 text-yellow-400" />
               Key Insights
             </h2>
             <div className="space-y-4">
-              {takeaways.map((takeaway, idx) => (
+              {formattedTakeaways.map((takeaway, idx) => (
                 <Card key={idx} className="bg-white/5 border-none p-4">
                   <div className="flex">
                     <div className="mr-3 flex-shrink-0">
                       <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
                     </div>
                     <div>
-                      {/* Use text property for the main content */}
                       <h3 className="font-medium mb-1">{takeaway.text}</h3>
                       {takeaway.citation && (
                         <p className="text-white/70 text-sm">{takeaway.citation}</p>
