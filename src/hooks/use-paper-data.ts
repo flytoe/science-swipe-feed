@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
 import { formatCategoryName, fetchCategoryMap } from '../utils/categoryUtils';
+import { parseKeyTakeaways } from '../utils/takeawayParser';
 
 interface UsePaperDataResult {
   categories: string[];
@@ -73,7 +74,6 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
         }
         
         // Format takeaways - use the full takeaways structure
-        import { parseKeyTakeaways } from '../utils/takeawayParser';
         const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
         
         setFormattedData({
