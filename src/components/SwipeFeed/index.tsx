@@ -20,6 +20,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   isGeneratingImage = false
 }) => {
   const [internalIndex, setInternalIndex] = React.useState(0);
+  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
   
   // Use external or internal state depending on what's provided
   const currentIndex = externalIndex !== undefined ? externalIndex : internalIndex;
@@ -42,7 +43,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   } = useSwipeNavigation({ 
     currentIndex, 
     setCurrentIndex, 
-    papersLength: papers?.length || 0 
+    papersLength: papers?.length || 0,
+    isScrolling: isDetailOpen // Pass isDetailOpen to disable swipe when detail is open
   });
   
   // Check for empty papers after hooks are called
@@ -56,13 +58,17 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
 
   const currentPaper = papers[currentIndex];
   
+  const handleDetailToggle = (isOpen: boolean) => {
+    setIsDetailOpen(isOpen);
+  };
+  
   return (
     <div 
       className="relative h-full w-full max-w-md mx-auto overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onWheel={handleWheel}
+      onTouchStart={!isDetailOpen ? handleTouchStart : undefined}
+      onTouchMove={!isDetailOpen ? handleTouchMove : undefined}
+      onTouchEnd={!isDetailOpen ? handleTouchEnd : undefined}
+      onWheel={!isDetailOpen ? handleWheel : undefined}
     >
       <div className="absolute inset-0">
         <AnimatePresence>
@@ -71,11 +77,12 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
             paper={currentPaper}
             isActive={true}
             isGeneratingImage={isGeneratingImage}
+            onDetailToggle={handleDetailToggle}
           />
         </AnimatePresence>
       </div>
       
-      {papers.length > 1 && (
+      {papers.length > 1 && !isDetailOpen && (
         <SwipeControls 
           currentIndex={currentIndex} 
           total={papers.length}

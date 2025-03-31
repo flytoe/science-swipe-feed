@@ -54,6 +54,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
   // Extract and format paper data using custom hook
   const {
     categories,
+    formattedCategoryNames,
     formattedDate,
     imageSrc, 
     displayTitle,
@@ -99,7 +100,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
             imageSrc={imageSrc}
             displayTitle={displayTitle}
             formattedDate={formattedDate}
-            categories={categories}
+            categories={formattedCategoryNames}
             firstTakeaway={firstTakeaway}
             isGeneratingImage={isGenerating}
             imageSourceType={imageSourceType}

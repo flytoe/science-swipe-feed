@@ -32,7 +32,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
         
         const { data, error } = await supabase
           .from('n8n_table')
-          .select('category');
+          .select('category')
+          .eq('ai_summary_done', true); // Only fetch categories from papers with ai_summary_done = true
         
         if (error) {
           console.error('Error fetching categories:', error);

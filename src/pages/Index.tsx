@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
-import { Info, SearchIcon } from 'lucide-react';
+import { FilterX, SearchIcon } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -31,12 +31,18 @@ const Index: React.FC = () => {
         setIsLoading(true);
         
         const papersData = await getPapers();
-        setPapers(papersData);
-        setFilteredPapers(papersData);
+        // Sort papers by created_at, newest first
+        const sortedPapers = [...papersData].sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        
+        setPapers(sortedPapers);
+        setFilteredPapers(sortedPapers);
         
         const { data, error, count } = await supabase
           .from('n8n_table')
           .select('doi', { count: 'exact' })
+          .eq('ai_summary_done', true) // Only count papers with ai_summary_done = true
           .limit(1);
         
         if (error) {
@@ -166,6 +172,30 @@ const Index: React.FC = () => {
         <DialogPortal>
           <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
           <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md w-[95vw] h-[90vh] p-0 overflow-hidden">
+            <div className="p-4 flex items-center justify-between border-b border-white/10">
+              <h2 className="text-lg font-semibold">Filter Categories</h2>
+              <div className="flex gap-2">
+                {selectedCategories.length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSelectedCategories([])}
+                    className="h-8 text-xs bg-white/10 text-white border-white/20"
+                  >
+                    <FilterX size={14} className="mr-1" />
+                    Reset
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsFilterOpen(false)}
+                  className="h-8 text-xs text-white hover:bg-white/10"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
             <div className="p-4 h-full overflow-hidden">
               <CategoryFilter onFilterChange={handleFilterChange} />
             </div>
@@ -180,7 +210,6 @@ const Index: React.FC = () => {
       ) : hasPapers === false && !isSample ? (
         <div className="max-w-md mx-auto mt-2 px-4">
           <div className="flex flex-col items-center gap-2 bg-amber-950/50 p-4 rounded-md border border-amber-800/30 text-sm text-amber-200">
-            <Info size={16} />
             <span>
               No papers found in your database. Would you like to add a sample paper?
             </span>
