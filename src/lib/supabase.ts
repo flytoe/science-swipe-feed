@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -89,7 +88,7 @@ export const getPapers = async (): Promise<Paper[]> => {
       .from('n8n_table')
       .select('*')
       .eq('ai_summary_done', true) // Only fetch papers with ai_summary_done = true
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }); // Order by newest first
     
     if (error) {
       console.error('Error fetching papers:', error);
@@ -100,8 +99,10 @@ export const getPapers = async (): Promise<Paper[]> => {
     
     if (!data || data.length === 0) {
       console.info('No data returned from Supabase, using demo data instead');
-      // Filter demo data to match the same condition
-      return demoData.filter(paper => paper.ai_summary_done === true);
+      // Filter and sort demo data to match the same condition
+      return demoData
+        .filter(paper => paper.ai_summary_done === true)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); // Sort by newest first
     }
     
     // Transform the data to match the Paper type
@@ -194,8 +195,10 @@ export const getPapers = async (): Promise<Paper[]> => {
   } catch (error) {
     console.error('Error fetching papers:', error);
     console.info('Using demo data due to connection issue');
-    // Filter demo data to match the same condition
-    return demoData.filter(paper => paper.ai_summary_done === true);
+    // Filter and sort demo data
+    return demoData
+      .filter(paper => paper.ai_summary_done === true)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); // Sort by newest first
   }
 };
 

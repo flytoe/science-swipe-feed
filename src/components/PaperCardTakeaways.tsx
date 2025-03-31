@@ -16,17 +16,17 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
   const otherTakeaways = takeaways.filter(t => t.type !== 'why_it_matters');
 
   return (
-    <div className="mt-4 mb-6">
-      <h3 className="text-sm font-semibold uppercase text-gray-500 mb-2">Key Takeaways</h3>
+    <div className="mt-6 mb-8">
+      <h3 className="text-base font-semibold uppercase text-indigo-400 mb-3">Key Insights</h3>
       
-      {/* Display "why it matters" takeaways first */}
+      {/* Display "why it matters" takeaways first with special styling */}
       {whyItMattersTakeaways.length > 0 && (
         <div className="mb-4">
           {whyItMattersTakeaways.map((takeaway, index) => (
-            <div key={`why-${index}`} className="flex flex-col gap-1 mb-3">
+            <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">
               {takeaway.tag && (
-                <Badge variant="outline" className="self-start text-xs">
-                  {takeaway.tag}
+                <Badge variant="outline" className="self-start text-xs bg-indigo-900/40 text-indigo-300 border-indigo-700/50">
+                  {takeaway.tag || 'Why It Matters'}
                 </Badge>
               )}
               <KeyTakeaway 
@@ -42,7 +42,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
       {/* Display other takeaways */}
       <div className="space-y-4">
         {otherTakeaways.map((takeaway, index) => (
-          <div key={`other-${index}`} className="flex flex-col gap-1">
+          <div key={`other-${index}`} className="flex flex-col gap-2 mb-3">
             {takeaway.tag && (
               <Badge variant="outline" className="self-start text-xs">
                 {takeaway.tag}

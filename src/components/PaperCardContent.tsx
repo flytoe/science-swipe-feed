@@ -36,7 +36,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     <div className="paper-card-content h-full flex flex-col">
       {/* Full height scroll container */}
       <ScrollArea className="flex-1 h-full overflow-auto">
-        {/* Hero Image Section */}
+        {/* Hero Image Section - now full width */}
         <HeroImageSection 
           imageSrc={imageSrc}
           title={title}
@@ -45,6 +45,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         
         {/* Content section */}
         <div className="p-6">
+          {/* Make takeaways prominently displayed */}
           {takeaways && takeaways.length > 0 ? (
             <PaperCardTakeaways takeaways={takeaways} />
           ) : abstract ? (

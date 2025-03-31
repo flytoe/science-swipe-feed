@@ -37,14 +37,14 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Close button - positioned with higher z-index */}
+      {/* Prominent close button at the top */}
       <Button 
         variant="ghost" 
         size="icon" 
-        className="absolute top-4 right-4 z-50 bg-black/50 text-white hover:bg-black/70"
+        className="absolute top-2 left-2 z-50 bg-black/50 text-white hover:bg-black/70"
         onClick={(e) => onClose(e)}
       >
-        <X size={18} />
+        <X size={24} />
       </Button>
       
       <div className="flex-1 overflow-hidden h-full">

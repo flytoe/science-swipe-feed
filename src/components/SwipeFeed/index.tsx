@@ -58,6 +58,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
 
   const currentPaper = papers[currentIndex];
   
+  // This handles detail toggle state
   const handleDetailToggle = (isOpen: boolean) => {
     setIsDetailOpen(isOpen);
   };
@@ -82,6 +83,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
         </AnimatePresence>
       </div>
       
+      {/* Only show controls when detail is not open */}
       {papers.length > 1 && !isDetailOpen && (
         <SwipeControls 
           currentIndex={currentIndex} 

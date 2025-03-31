@@ -54,6 +54,11 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
           formatCategoryName(cat, categoryMap)
         );
         
+        // Parse takeaways
+        const takeaways = Array.isArray(paper.ai_key_takeaways) ? 
+          paper.ai_key_takeaways : 
+          (paper.ai_key_takeaways ? [paper.ai_key_takeaways] : []);
+          
         // Image source handling
         const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973';
         
@@ -67,15 +72,9 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
           imageSourceType = 'generated';
         }
         
-        // Format takeaways
-        const takeaways = Array.isArray(paper.ai_key_takeaways) ? 
-          paper.ai_key_takeaways : 
-          (paper.ai_key_takeaways ? [paper.ai_key_takeaways] : []);
-        
-        const formattedTakeaways = takeaways.map(takeaway => ({
-          content: takeaway,
-          type: 'takeaway'
-        }));
+        // Format takeaways - use the full takeaways structure
+        import { parseKeyTakeaways } from '../utils/takeawayParser';
+        const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
         
         setFormattedData({
           categories: paperCategories,
