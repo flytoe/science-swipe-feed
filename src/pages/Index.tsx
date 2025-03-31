@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
 import { Info, SearchIcon } from 'lucide-react';
@@ -6,10 +7,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getPapers, Paper } from '../lib/supabase';
 import CategoryFilter from '../components/CategoryFilter';
-import RegenerateImageButton from '../components/RegenerateImageButton';
 import {
   Dialog,
   DialogContent,
+  DialogOverlay,
+  DialogPortal,
 } from '@/components/ui/dialog';
 
 const Index: React.FC = () => {
@@ -95,7 +97,7 @@ const Index: React.FC = () => {
         ai_headline: 'AI Revolutionizes Medical Diagnostics and Treatment Plans',
         ai_key_takeaways: ['Reduced diagnostic time by 60%', 'Increased treatment efficacy by 45%', 'Improved patient outcomes in 78% of cases'],
         created_at: new Date().toISOString(),
-        category: ['healthcare', 'ai', 'medicine'],
+        category: ['cs.LG', 'cs.AI', 'q-bio'],
         image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070'
       };
       
@@ -122,10 +124,6 @@ const Index: React.FC = () => {
     setSelectedCategories(categories);
   };
 
-  const handleRegenerationStart = () => {
-    setIsRegeneratingImage(true);
-  };
-
   const handleRegenerationComplete = (imageUrl: string | null) => {
     setIsRegeneratingImage(false);
     
@@ -146,10 +144,6 @@ const Index: React.FC = () => {
     }
   };
 
-  const getCurrentPaper = (): Paper | null => {
-    return filteredPapers.length > currentPaperIndex ? filteredPapers[currentPaperIndex] : null;
-  };
-
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
@@ -164,23 +158,19 @@ const Index: React.FC = () => {
             >
               <SearchIcon className="h-5 w-5" />
             </Button>
-            
-            <RegenerateImageButton 
-              paper={getCurrentPaper()}
-              onRegenerationStart={handleRegenerationStart}
-              onRegenerationComplete={handleRegenerationComplete}
-            />
           </div>
         </div>
       </header>
 
       <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-        <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md">
-          <div className="p-2">
-            <h2 className="text-xl font-semibold mb-4 text-white">Filter By Category</h2>
-            <CategoryFilter onFilterChange={handleFilterChange} />
-          </div>
-        </DialogContent>
+        <DialogPortal>
+          <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
+          <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md w-[95vw] h-[90vh] p-0 overflow-hidden">
+            <div className="p-4 h-full overflow-hidden">
+              <CategoryFilter onFilterChange={handleFilterChange} />
+            </div>
+          </DialogContent>
+        </DialogPortal>
       </Dialog>
 
       {isLoading ? (

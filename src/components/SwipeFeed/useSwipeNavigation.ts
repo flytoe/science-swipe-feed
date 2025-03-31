@@ -56,8 +56,10 @@ export const useSwipeNavigation = ({
     // Use increased threshold for more deliberate swipes
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
       if (dragDistance > 0) {
+        // Swipe down -> show previous paper (older)
         prevPaper();
       } else {
+        // Swipe up -> show next paper (newer)
         nextPaper();
       }
       
@@ -76,8 +78,10 @@ export const useSwipeNavigation = ({
     // Make wheel navigation less sensitive - require more scrolling
     if (Math.abs(e.deltaY) > 50) {
       if (e.deltaY > 0) {
+        // Scroll down -> show next paper (newer)
         nextPaper();
       } else {
+        // Scroll up -> show previous paper (older)
         prevPaper();
       }
     }

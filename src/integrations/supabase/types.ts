@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      arxiv_taxonomy: {
+        Row: {
+          category_code: string
+          category_name: string
+          created_at: string | null
+          id: number
+          parent_category: string | null
+        }
+        Insert: {
+          category_code: string
+          category_name: string
+          created_at?: string | null
+          id?: number
+          parent_category?: string | null
+        }
+        Update: {
+          category_code?: string
+          category_name?: string
+          created_at?: string | null
+          id?: number
+          parent_category?: string | null
+        }
+        Relationships: []
+      }
       n8n_table: {
         Row: {
           abstract_org: string | null

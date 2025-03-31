@@ -54,7 +54,7 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
       {onRegenerateClick && (
         <button 
           onClick={handleRegenerateClick}
-          className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+          className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
           disabled={isGenerating}
           aria-label="Regenerate image"
         >
