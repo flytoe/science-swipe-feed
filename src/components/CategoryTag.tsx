@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { fetchCategoryMap, formatCategoryName } from '../utils/categoryUtils';
 
 type CategoryTagProps = {
   category: string;
@@ -20,15 +21,28 @@ const colors = {
 };
 
 const CategoryTag: React.FC<CategoryTagProps> = ({ category }) => {
-  // Get a color based on the first word of the category
-  // This works well for both category codes and full names
-  const firstWord = category.split(' ')[0].toLowerCase();
-  const categoryKey = firstWord.toLowerCase();
-  const colorClass = colors[categoryKey as keyof typeof colors] || colors.default;
+  const [displayName, setDisplayName] = useState(category);
+  
+  useEffect(() => {
+    // Fetch category map and format the category name
+    async function formatCategory() {
+      const categoryMap = await fetchCategoryMap();
+      const formattedName = formatCategoryName(category, categoryMap);
+      setDisplayName(formattedName);
+    }
+    
+    formatCategory();
+  }, [category]);
+  
+  // Get color based on the first word of the formatted category
+  // This works with both codes and names
+  const firstWord = displayName.split(' ')[0].toLowerCase();
+  const firstWordSimple = firstWord.replace(/[^a-z]/g, ''); // Remove non-alphabetic chars
+  const colorClass = colors[firstWordSimple as keyof typeof colors] || colors.default;
   
   return (
-    <span className={`category-tag ${colorClass} animate-fade-in`}>
-      {category}
+    <span className={`category-tag ${colorClass} px-2 py-1 rounded-full text-xs font-medium`}>
+      {displayName}
     </span>
   );
 };

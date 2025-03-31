@@ -1,13 +1,35 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Badge } from '../ui/badge';
+import { fetchCategoryMap, formatCategoryName } from '../../utils/categoryUtils';
 
 interface HeroImageSectionProps {
   imageSrc?: string;
   title: string;
   creator?: string[] | string | null;
+  categories?: string[];
 }
 
-const HeroImageSection: React.FC<HeroImageSectionProps> = ({ imageSrc, title, creator }) => {
+const HeroImageSection: React.FC<HeroImageSectionProps> = ({ 
+  imageSrc, 
+  title, 
+  creator,
+  categories = [] 
+}) => {
+  const [formattedCategories, setFormattedCategories] = useState<string[]>([]);
+  
+  useEffect(() => {
+    async function formatCategories() {
+      if (!categories || categories.length === 0) return;
+      
+      const categoryMap = await fetchCategoryMap();
+      const formatted = categories.map(cat => formatCategoryName(cat, categoryMap));
+      setFormattedCategories(formatted);
+    }
+    
+    formatCategories();
+  }, [categories]);
+  
   // Format creator display
   const formatCreator = (creator: string[] | string | null) => {
     if (!creator) return null;
@@ -30,6 +52,21 @@ const HeroImageSection: React.FC<HeroImageSectionProps> = ({ imageSrc, title, cr
       
       {/* Title and author positioned at the bottom of the image */}
       <div className="absolute bottom-0 left-0 right-0 p-6">
+        {/* Display categories */}
+        {formattedCategories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {formattedCategories.map((category, idx) => (
+              <Badge 
+                key={idx}
+                variant="outline" 
+                className="bg-white/10 text-white border-none"
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
+        )}
+      
         <h2 className="text-3xl font-bold text-white drop-shadow-md leading-tight">
           {title}
         </h2>

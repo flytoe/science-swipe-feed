@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
-import { formatCategoryName, fetchCategoryMap } from '../utils/categoryUtils';
+import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../utils/categoryUtils';
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 
 interface UsePaperDataResult {
@@ -52,7 +52,7 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
         // Get category map for displaying full names
         const categoryMap = await fetchCategoryMap();
         
-        // Map category codes to full names using the taxonomy data
+        // Format all category names using the utility function
         const formattedCategoryNames = paperCategories.map(cat => 
           formatCategoryName(cat, categoryMap)
         );

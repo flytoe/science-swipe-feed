@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { ScrollArea } from './ui/scroll-area';
-import { groupCategoriesByParent, fetchCategoryMap, formatCategoryName } from '../utils/categoryUtils';
+import { fetchCategoryMap, formatCategoryName } from '../utils/categoryUtils';
 
 interface CategoryFilterProps {
   onFilterChange: (categories: string[]) => void;
@@ -19,6 +19,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [categoryMap, setCategoryMap] = useState<{[key: string]: string}>({});
+  const [groupedCategoriesWithNames, setGroupedCategoriesWithNames] = useState<{[key: string]: {code: string, name: string}[]}>({});
 
   // Fetch all unique categories from the database
   useEffect(() => {
@@ -60,6 +61,9 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
         const uniqueCategories = Array.from(categories);
         setAllCategories(uniqueCategories);
         
+        // Process categories into groups with names
+        await processCategoriesWithNames(uniqueCategories, map);
+        
         console.log('Fetched categories:', uniqueCategories);
       } catch (error) {
         console.error('Error in fetchCategories:', error);
@@ -72,28 +76,80 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
     fetchCategories();
   }, []);
 
+  // Group categories by parent and provide names
+  const processCategoriesWithNames = async (categories: string[], map: {[key: string]: string}) => {
+    const grouped: {[key: string]: {code: string, name: string}[]} = {};
+
+    categories.forEach(category => {
+      const parts = category.split('.');
+      const parentCode = parts[0];
+      const fullCode = category;
+      
+      // Get the parent category name
+      const parentName = map[parentCode.toLowerCase()] || parentCode;
+      
+      // Format the full category name
+      const fullName = formatCategoryName(fullCode, map);
+      
+      if (!grouped[parentName]) {
+        grouped[parentName] = [];
+      }
+
+      // Add the category with both code and formatted name
+      grouped[parentName].push({
+        code: fullCode,
+        name: fullName
+      });
+    });
+
+    // Sort the groups alphabetically
+    const sortedGroups: {[key: string]: {code: string, name: string}[]} = {};
+    Object.keys(grouped).sort().forEach(key => {
+      // Sort categories within each group
+      sortedGroups[key] = grouped[key].sort((a, b) => a.name.localeCompare(b.name));
+    });
+
+    setGroupedCategoriesWithNames(sortedGroups);
+  };
+
   useEffect(() => {
     onFilterChange(selectedCategories);
   }, [selectedCategories, onFilterChange]);
 
-  const handleToggleCategory = (category: string) => {
+  const handleToggleCategory = (categoryCode: string) => {
     setSelectedCategories(prev => {
-      if (prev.includes(category)) {
-        return prev.filter(c => c !== category);
+      if (prev.includes(categoryCode)) {
+        return prev.filter(c => c !== categoryCode);
       } else {
-        return [...prev, category];
+        return [...prev, categoryCode];
       }
     });
   };
 
-  const filteredCategories = allCategories.filter(category => 
-    category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (categoryMap[category.toLowerCase()] && 
-     categoryMap[category.toLowerCase()].toLowerCase().includes(searchTerm.toLowerCase()))
+  // Filter categories by search term using both code and name
+  const filteredGroupedCategories = Object.fromEntries(
+    Object.entries(groupedCategoriesWithNames).filter(([parentName, categories]) => {
+      // Check if parent name matches
+      if (parentName.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return true;
+      }
+      
+      // Check if any category in this group matches
+      return categories.some(cat => 
+        cat.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        cat.code.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }).map(([parentName, categories]) => {
+      // Also filter the categories within each group
+      const filteredCategories = categories.filter(cat => 
+        cat.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        cat.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        parentName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      
+      return [parentName, filteredCategories];
+    })
   );
-
-  // Group categories by parent
-  const groupedCategories = groupCategoriesByParent(filteredCategories);
 
   const clearFilters = () => {
     setSelectedCategories([]);
@@ -130,32 +186,32 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({ onFilterChange }) => {
         <div className="flex items-center justify-center h-40">
           <RefreshCw className="h-6 w-6 text-white/50 animate-spin" />
         </div>
-      ) : filteredCategories.length === 0 ? (
+      ) : Object.keys(filteredGroupedCategories).length === 0 ? (
         <p className="text-sm text-white/60 text-center py-8">No categories found</p>
       ) : (
         <ScrollArea className="flex-1 pr-4">
           <div className="space-y-6">
-            {Object.keys(groupedCategories).sort().map((parentCategory) => (
-              <div key={parentCategory} className="space-y-2">
+            {Object.entries(filteredGroupedCategories).map(([parentName, categories]) => (
+              <div key={parentName} className="space-y-2">
                 <h4 className="text-sm font-medium text-white/70 capitalize">
-                  {categoryMap[parentCategory.toLowerCase()] || parentCategory}
+                  {parentName}
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {groupedCategories[parentCategory].sort().map((category, index) => (
+                  {categories.map((category, index) => (
                     <Badge
                       key={index}
-                      variant={selectedCategories.includes(category) ? "default" : "outline"}
+                      variant={selectedCategories.includes(category.code) ? "default" : "outline"}
                       className={`cursor-pointer capitalize ${
-                        selectedCategories.includes(category) 
+                        selectedCategories.includes(category.code) 
                           ? "bg-white text-black" 
                           : "bg-white/10 text-white border-white/20 hover:bg-white/20"
                       }`}
-                      onClick={() => handleToggleCategory(category)}
+                      onClick={() => handleToggleCategory(category.code)}
                     >
-                      {selectedCategories.includes(category) && (
+                      {selectedCategories.includes(category.code) && (
                         <Check className="mr-1 h-3 w-3" />
                       )}
-                      {formatCategoryName(category, categoryMap)}
+                      {category.name}
                     </Badge>
                   ))}
                 </div>

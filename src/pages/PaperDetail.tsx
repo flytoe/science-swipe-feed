@@ -5,11 +5,11 @@ import { ArrowLeft, Calendar, BookOpen, LightbulbIcon, BarChart3, X } from 'luci
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { getPaperById, type Paper } from '../lib/supabase';
 import { toast } from 'sonner';
 import RegenerateImageButton from '../components/RegenerateImageButton';
 import { usePaperData } from '../hooks/use-paper-data';
+import HeroImageSection from '../components/paper-content/HeroImageSection';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -108,35 +108,26 @@ const PaperDetail: React.FC = () => {
       </div>
       
       <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
-        {/* Hero section with image - now full width with negative margin */}
-        {paper.image_url && (
-          <div className="mx-[-16px] aspect-[16/9] w-screen overflow-hidden relative mb-6">
-            <img 
-              src={imageSrc} 
-              alt={paper.title_org || 'Research paper'} 
-              className={`w-full h-full object-cover ${isRegeneratingImage ? 'opacity-50' : ''}`}
-            />
-            
-            {/* Regenerate button */}
-            <div className="absolute top-4 right-4">
-              <RegenerateImageButton 
-                paper={paper}
-                onRegenerationStart={handleRegenerationStart}
-                onRegenerationComplete={handleRegenerationComplete}
-              />
-            </div>
-            
-            {/* Loading overlay */}
-            {isRegeneratingImage && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <div className="loading-spinner" />
-              </div>
-            )}
-          </div>
-        )}
+        {/* Hero section with image - using the updated HeroImageSection component */}
+        <HeroImageSection 
+          imageSrc={imageSrc}
+          title={paper.ai_headline || paper.title_org}
+          creator={paper.creator}
+          categories={paper.category ? 
+            (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
+        />
         
-        {/* Date and categories */}
-        <div className="mb-4 flex flex-wrap gap-2">
+        {/* Regenerate button */}
+        <div className="mt-4">
+          <RegenerateImageButton 
+            paper={paper}
+            onRegenerationStart={handleRegenerationStart}
+            onRegenerationComplete={handleRegenerationComplete}
+          />
+        </div>
+        
+        {/* Date and categories - Already using formatted category names */}
+        <div className="mb-4 flex flex-wrap gap-2 mt-6">
           <Badge variant="outline" className="bg-white/10 text-white border-none">
             {formattedDate}
           </Badge>
@@ -166,7 +157,7 @@ const PaperDetail: React.FC = () => {
           </div>
         )}
         
-        {/* Key takeaways section - made more prominent */}
+        {/* Key takeaways section */}
         {formattedTakeaways && formattedTakeaways.length > 0 && (
           <div className="mb-8">
             <h2 className="flex items-center text-xl font-semibold mb-4">
