@@ -49,17 +49,20 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           />
         )}
         
-        {/* Content section */}
+        {/* Content section with improved spacing */}
         <div className="p-6">
-          {/* Make takeaways prominently displayed */}
-          {takeaways && takeaways.length > 0 ? (
-            <PaperCardTakeaways takeaways={takeaways} />
-          ) : abstract ? (
-            // Fallback to abstract if no takeaways are available
-            <p className="text-sm md:text-base text-white/80 mb-4">
-              {abstract}
-            </p>
-          ) : null}
+          {/* Main takeaways section */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-white mb-4">Key Takeaways</h3>
+            {takeaways && takeaways.length > 0 ? (
+              <PaperCardTakeaways takeaways={takeaways} />
+            ) : abstract ? (
+              // Fallback to abstract if no takeaways are available
+              <p className="text-sm md:text-base text-white/80 mb-4">
+                {abstract}
+              </p>
+            ) : null}
+          </div>
           
           {/* Original Title Section */}
           <OriginalTitleSection title={title} title_org={title_org} />
@@ -69,6 +72,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           
           {/* AI Disclaimer */}
           <DisclaimerSection />
+          
+          {/* Extra padding at the bottom to prevent action bar overlap */}
+          <div className="h-16"></div>
         </div>
       </div>
       

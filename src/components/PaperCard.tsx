@@ -83,8 +83,8 @@ const PaperCard: React.FC<PaperCardProps> = ({
       exit="inactive"
       layout
     >
-      {/* Preview section at the top (full height viewport) */}
-      <div className="h-screen sticky top-0 z-10">
+      {/* Preview section at the top (larger height) */}
+      <div className="h-[70vh] sticky top-0 z-10">
         <PaperCardPreview 
           imageSrc={imageSrc}
           displayTitle={displayTitle}
@@ -98,8 +98,8 @@ const PaperCard: React.FC<PaperCardProps> = ({
         />
       </div>
       
-      {/* Detailed content section (scrolls underneath the preview) */}
-      <div className="bg-black pt-8 min-h-screen">
+      {/* Detailed content section with padding to prevent action bar overlap */}
+      <div className="bg-black pt-8 min-h-screen pb-24">
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
