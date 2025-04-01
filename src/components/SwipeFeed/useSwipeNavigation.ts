@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -17,6 +16,7 @@ export const useSwipeNavigation = ({
 }: UseSwipeNavigationProps) => {
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<'up' | 'down' | null>(null);
   
   // Increase threshold for more deliberate swipes
   const SWIPE_THRESHOLD = 150; // Increased from 100
@@ -56,10 +56,10 @@ export const useSwipeNavigation = ({
     // Use increased threshold for more deliberate swipes
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
       if (dragDistance > 0) {
-        // Swipe down -> show previous paper (older)
+        setSwipeDirection('down');
         prevPaper();
       } else {
-        // Swipe up -> show next paper (newer)
+        setSwipeDirection('up');
         nextPaper();
       }
       
@@ -78,10 +78,10 @@ export const useSwipeNavigation = ({
     // Make wheel navigation less sensitive - require more scrolling
     if (Math.abs(e.deltaY) > 50) {
       if (e.deltaY > 0) {
-        // Scroll down -> show next paper (newer)
+        setSwipeDirection('up');
         nextPaper();
       } else {
-        // Scroll up -> show previous paper (older)
+        setSwipeDirection('down');
         prevPaper();
       }
     }
@@ -94,6 +94,7 @@ export const useSwipeNavigation = ({
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
-    isDragging
+    isDragging,
+    swipeDirection
   };
 };

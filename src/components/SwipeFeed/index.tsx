@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { type Paper } from '../../lib/supabase';
 import PaperCard from '../PaperCard';
 import SwipeControls from './SwipeControls';
@@ -40,6 +39,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     handleTouchMove,
     handleTouchEnd,
     handleWheel,
+    swipeDirection
   } = useSwipeNavigation({ 
     currentIndex, 
     setCurrentIndex, 
@@ -77,14 +77,21 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       onWheel={!isDetailOpen ? handleWheel : undefined}
     >
       <div className="absolute inset-0">
-        <AnimatePresence>
-          <PaperCard 
+        <AnimatePresence mode="wait">
+          <motion.div
             key={currentPaper?.doi || currentIndex}
-            paper={currentPaper}
-            isActive={true}
-            isGeneratingImage={isGeneratingImage}
-            onDetailToggle={handleDetailToggle}
-          />
+            initial={{ y: swipeDirection === 'up' ? 100 : -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: swipeDirection === 'up' ? -100 : 100, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+          >
+            <PaperCard 
+              paper={currentPaper}
+              isActive={true}
+              isGeneratingImage={isGeneratingImage}
+              onDetailToggle={handleDetailToggle}
+            />
+          </motion.div>
         </AnimatePresence>
       </div>
       
