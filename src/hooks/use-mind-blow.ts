@@ -57,22 +57,31 @@ export function useMindBlow(paperDoi: string) {
     
     setIsLoading(true);
     try {
-      let success;
-      
-      if (hasMindBlown) {
-        success = await removeMindBlow(paperDoi, userId);
-        if (success) {
-          setCount(prev => Math.max(prev - 1, 0));
-          setHasMindBlown(false);
-        }
-      } else {
-        success = await addMindBlow(paperDoi, userId, reason);
+      if (!hasMindBlown) {
+        // Add a new mind blow
+        const success = await addMindBlow(paperDoi, userId, reason);
         if (success) {
           setCount(prev => prev + 1);
           setHasMindBlown(true);
           // Check if this addition makes it a top paper
           const newIsTop = await isTopMindBlownPaper(paperDoi);
           setIsTopPaper(newIsTop);
+        }
+      } else if (hasMindBlown && reason) {
+        // User is just adding a reason to an existing mind-blow
+        // Remove the existing mind-blow and add a new one with the reason
+        await removeMindBlow(paperDoi, userId);
+        const success = await addMindBlow(paperDoi, userId, reason);
+        if (success) {
+          // Count stays the same since we're just updating the reason
+          setHasMindBlown(true);
+        }
+      } else {
+        // Remove mind blow (only if no reason is provided)
+        const success = await removeMindBlow(paperDoi, userId);
+        if (success) {
+          setCount(prev => Math.max(prev - 1, 0));
+          setHasMindBlown(false);
         }
       }
     } catch (error) {

@@ -38,7 +38,7 @@ const DetailNavButtons: React.FC<DetailNavButtonsProps> = ({ paperDoi, onClose }
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
+          className="rounded-full bg-white shadow-md text-gray-700 hover:bg-white/90 transition-colors"
           onClick={handleShare}
         >
           <Share className="h-5 w-5" />
@@ -53,7 +53,7 @@ const DetailNavButtons: React.FC<DetailNavButtonsProps> = ({ paperDoi, onClose }
         onClick={toggleMindBlow}
         size="icon"
         variant="outline"
-        className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
+        className="rounded-full bg-white shadow-md text-gray-700 hover:bg-white/90 transition-colors"
         showCount={false}
       />
 
@@ -61,7 +61,7 @@ const DetailNavButtons: React.FC<DetailNavButtonsProps> = ({ paperDoi, onClose }
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
+          className="rounded-full bg-white shadow-md text-gray-700 hover:bg-white/90 transition-colors"
           onClick={onClose}
         >
           <X className="h-5 w-5" />

@@ -32,6 +32,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const [reason, setReason] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   // Handle click outside overlay to close it
   useEffect(() => {
@@ -49,20 +50,26 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   }, []);
 
   const handleClick = () => {
-    if (hasMindBlown) {
-      // If already mind-blown, just toggle it off
+    if (!hasMindBlown) {
+      // If not mind-blown yet, trigger mind-blown immediately
       onClick();
+      // Then show overlay for notes
+      setShowOverlay(true);
     } else {
-      // If not mind-blown yet, trigger mind-blown immediately and show overlay for notes
-      onClick();
-      setTimeout(() => setShowOverlay(true), 500); // Show overlay after animation completes
+      // If already mind-blown, just show the overlay for potential note addition
+      setShowOverlay(true);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     if (reason.trim()) {
+      // Only send the reason as a parameter, don't toggle the mind-blown state again
+      // This way we're just adding a note to an existing mind-blow
       onClick(reason);
     }
+    
     setReason('');
     setShowOverlay(false);
   };
@@ -140,24 +147,26 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
                 <X size={16} />
               </Button>
             </div>
-            <Textarea
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="This research amazed me because..."
-              className="min-h-[80px] bg-white/10 border-white/20 text-white mb-2 text-sm"
-              maxLength={256}
-              autoFocus
-            />
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleSubmit} 
-                disabled={isLoading} 
-                size="sm"
-                className="bg-yellow-500 text-black hover:bg-yellow-400 text-xs"
-              >
-                Submit
-              </Button>
-            </div>
+            <form onSubmit={handleSubmit} ref={formRef}>
+              <Textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="This research amazed me because..."
+                className="min-h-[80px] bg-white/10 border-white/20 text-white mb-2 text-sm"
+                maxLength={256}
+                autoFocus
+              />
+              <div className="flex justify-end">
+                <Button 
+                  type="submit"
+                  disabled={isLoading} 
+                  size="sm"
+                  className="bg-yellow-500 text-black hover:bg-yellow-400 text-xs"
+                >
+                  Submit
+                </Button>
+              </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
