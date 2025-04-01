@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { type Paper } from '../../lib/supabase';
 import PaperCard from '../PaperCard';
@@ -18,8 +19,9 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   setCurrentIndex: setExternalIndex,
   isGeneratingImage = false
 }) => {
-  const [internalIndex, setInternalIndex] = React.useState(0);
-  const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const [internalIndex, setInternalIndex] = useState(0);
+  const [isDetailView, setIsDetailView] = useState(false);
+  const feedRef = useRef<HTMLDivElement>(null);
   
   // Use external or internal state depending on what's provided
   const currentIndex = externalIndex !== undefined ? externalIndex : internalIndex;
@@ -30,6 +32,28 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       setInternalIndex(index);
     }
   };
+  
+  // Handle scroll detection for detail view
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!feedRef.current) return;
+      
+      const scrollTop = feedRef.current.scrollTop;
+      // If scrolled more than 100px, consider it detail view
+      setIsDetailView(scrollTop > 100);
+    };
+    
+    const currentRef = feedRef.current;
+    if (currentRef) {
+      currentRef.addEventListener('scroll', handleScroll);
+    }
+    
+    return () => {
+      if (currentRef) {
+        currentRef.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, []);
   
   // Always call hooks at the top level, regardless of conditions
   const {
@@ -44,7 +68,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     currentIndex, 
     setCurrentIndex, 
     papersLength: papers?.length || 0,
-    isScrolling: isDetailOpen // Pass isDetailOpen to disable swipe when detail is open
+    isScrolling: isDetailView
   });
   
   // Check for empty papers after hooks are called
@@ -58,53 +82,72 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
 
   const currentPaper = papers[currentIndex];
   
-  // This handles detail toggle state
-  const handleDetailToggle = (isOpen: boolean) => {
-    setIsDetailOpen(isOpen);
+  // Helper function to turn off detail view
+  const scrollToTop = () => {
+    if (feedRef.current) {
+      feedRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   };
-
-  // Close detail handler for the button
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
+  
+  // Handle navigation with automatic scroll to top
+  const handleNavigate = (direction: 'next' | 'prev') => {
+    scrollToTop();
+    if (direction === 'next') {
+      nextPaper();
+    } else {
+      prevPaper();
+    }
   };
   
   return (
     <div 
       className="relative h-full w-full max-w-md mx-auto overflow-hidden"
-      onTouchStart={!isDetailOpen ? handleTouchStart : undefined}
-      onTouchMove={!isDetailOpen ? handleTouchMove : undefined}
-      onTouchEnd={!isDetailOpen ? handleTouchEnd : undefined}
-      onWheel={!isDetailOpen ? handleWheel : undefined}
+      onTouchStart={!isDetailView ? handleTouchStart : undefined}
+      onTouchMove={!isDetailView ? handleTouchMove : undefined}
+      onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
+      onWheel={handleWheel}
+      ref={feedRef}
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentPaper?.doi || currentIndex}
-            initial={{ y: swipeDirection === 'up' ? 100 : -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: swipeDirection === 'up' ? -100 : 100, opacity: 0 }}
+            initial={{ 
+              x: swipeDirection === 'left' ? 300 : -300, 
+              opacity: 0 
+            }}
+            animate={{ 
+              x: 0, 
+              opacity: 1 
+            }}
+            exit={{ 
+              x: swipeDirection === 'left' ? -300 : 300, 
+              opacity: 0 
+            }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="h-full w-full"
           >
             <PaperCard 
               paper={currentPaper}
               isActive={true}
               isGeneratingImage={isGeneratingImage}
-              onDetailToggle={handleDetailToggle}
+              onDetailToggle={() => {}} // We no longer need this since scrolling handles detail view
             />
           </motion.div>
         </AnimatePresence>
       </div>
       
-      {/* Show different controls based on detail state */}
       {papers.length > 1 && (
         <SwipeControls 
           currentIndex={currentIndex} 
           total={papers.length}
-          onNext={nextPaper}
-          onPrev={prevPaper}
-          isDetailOpen={isDetailOpen}
+          onNext={() => handleNavigate('next')}
+          onPrev={() => handleNavigate('prev')}
+          isDetailOpen={isDetailView}
           paperDoi={currentPaper?.doi}
-          onClose={isDetailOpen ? handleCloseDetail : undefined}
         />
       )}
     </div>

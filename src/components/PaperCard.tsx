@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import PaperCardPreview from './PaperCardPreview';
-import PaperCardDetail from './PaperCardDetail';
+import PaperCardContent from './PaperCardContent';
 import PaperCardPlaceholder from './PaperCardPlaceholder';
 import { usePaperData } from '../hooks/use-paper-data';
 import ImagePromptModal from './ImagePromptModal';
@@ -16,8 +16,12 @@ interface PaperCardProps {
   onDetailToggle?: (isOpen: boolean) => void;
 }
 
-const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImage = false, onDetailToggle }) => {
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+const PaperCard: React.FC<PaperCardProps> = ({ 
+  paper, 
+  isActive, 
+  isGeneratingImage = false,
+  onDetailToggle 
+}) => {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [localIsGeneratingImage, setLocalIsGeneratingImage] = useState(false);
   const navigate = useNavigate();
@@ -33,17 +37,6 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
       opacity: 0,
       transition: { duration: 0.3, ease: 'easeIn' }
     }
-  };
-
-  const toggleDetail = (e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const newState = !isDetailOpen;
-    setIsDetailOpen(newState);
-    if (onDetailToggle) onDetailToggle(newState);
-  };
-
-  const handleCardClick = () => {
-    toggleDetail();
   };
   
   // If paper is undefined or null, return a placeholder card
@@ -77,7 +70,6 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
     }
   };
 
-  // Fix: Changed the function signature to match what PaperCardPreview expects
   const handleOpenPromptModal = () => {
     setIsPromptModalOpen(true);
   };
@@ -86,41 +78,41 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
 
   return (
     <motion.div 
-      className="paper-card bg-black text-white rounded-lg overflow-hidden cursor-pointer h-full w-full"
+      className="paper-card bg-black text-white min-h-[100vh] w-full"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
       exit="inactive"
-      onClick={handleCardClick}
       layout
     >
-      <AnimatePresence mode="wait">
-        {!isDetailOpen ? (
-          <PaperCardPreview 
-            imageSrc={imageSrc}
-            displayTitle={displayTitle}
-            formattedDate={formattedDate}
-            categories={formattedCategoryNames}
-            firstTakeaway={firstTakeaway}
-            isGeneratingImage={isGenerating}
-            imageSourceType={imageSourceType}
-            onRegenerateClick={handleOpenPromptModal}
-            paperDoi={paper.doi} // Pass the paper DOI for mind-blow functionality
-          />
-        ) : (
-          <PaperCardDetail
-            displayTitle={displayTitle}
-            title_org={paper.title_org}
-            abstract_org={paper.abstract_org}
-            formattedDate={formattedDate}
-            doi={paper.doi}
-            takeaways={formattedTakeaways}
-            creator={paper.creator}
-            imageSrc={imageSrc}
-            onClose={toggleDetail}
-          />
-        )}
-      </AnimatePresence>
+      {/* Preview section stays at the top */}
+      <div className="h-screen sticky top-0 z-10">
+        <PaperCardPreview 
+          imageSrc={imageSrc}
+          displayTitle={displayTitle}
+          formattedDate={formattedDate}
+          categories={formattedCategoryNames}
+          firstTakeaway={firstTakeaway}
+          isGeneratingImage={isGenerating}
+          imageSourceType={imageSourceType}
+          onRegenerateClick={handleOpenPromptModal}
+          paperDoi={paper.doi}
+        />
+      </div>
+      
+      {/* Detailed content - scrolls under preview */}
+      <div className="bg-black pt-8">
+        <PaperCardContent
+          title={displayTitle}
+          title_org={paper.title_org}
+          abstract_org={paper.abstract_org}
+          formattedDate={formattedDate}
+          doi={paper.doi}
+          takeaways={formattedTakeaways}
+          creator={paper.creator}
+          imageSrc={imageSrc}
+        />
+      </div>
 
       <ImagePromptModal
         isOpen={isPromptModalOpen}

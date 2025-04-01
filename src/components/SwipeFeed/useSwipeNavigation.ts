@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -16,17 +17,19 @@ export const useSwipeNavigation = ({
 }: UseSwipeNavigationProps) => {
   const [dragStart, setDragStart] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  const [swipeDirection, setSwipeDirection] = useState<'up' | 'down' | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   // Increase threshold for more deliberate swipes
-  const SWIPE_THRESHOLD = 150; // Increased from 100
+  const SWIPE_THRESHOLD = 100;
   
   const nextPaper = () => {
     if (currentIndex < papersLength - 1) {
       setCurrentIndex(currentIndex + 1);
+      setSwipeDirection('left');
     } else {
       // Loop back to the beginning when reaching the end
       setCurrentIndex(0);
+      setSwipeDirection('left');
       toast.info('You have seen all papers. Starting from the beginning!');
     }
   };
@@ -34,9 +37,11 @@ export const useSwipeNavigation = ({
   const prevPaper = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
+      setSwipeDirection('right');
     } else {
       // Loop to the end when at the beginning
       setCurrentIndex(papersLength - 1);
+      setSwipeDirection('right');
       toast.info('Showing the last paper');
     }
   };
@@ -44,22 +49,22 @@ export const useSwipeNavigation = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScrolling) return;
     
-    setDragStart(e.touches[0].clientY);
+    setDragStart(e.touches[0].clientX); // Changed from clientY to clientX
     setIsDragging(true);
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isScrolling) return;
     
-    const dragDistance = e.touches[0].clientY - dragStart;
+    const dragDistance = e.touches[0].clientX - dragStart; // Changed from clientY to clientX
     
-    // Use increased threshold for more deliberate swipes
+    // Use threshold for more deliberate swipes
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
       if (dragDistance > 0) {
-        setSwipeDirection('down');
+        setSwipeDirection('right');
         prevPaper();
       } else {
-        setSwipeDirection('up');
+        setSwipeDirection('left');
         nextPaper();
       }
       
@@ -73,15 +78,18 @@ export const useSwipeNavigation = ({
   };
   
   const handleWheel = (e: React.WheelEvent) => {
-    if (isScrolling) return;
+    // If the user is scrolling vertically, don't interfere with paper navigation
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX) || isScrolling) {
+      return;
+    }
     
     // Make wheel navigation less sensitive - require more scrolling
-    if (Math.abs(e.deltaY) > 50) {
-      if (e.deltaY > 0) {
-        setSwipeDirection('up');
+    if (Math.abs(e.deltaX) > 50) {
+      if (e.deltaX > 0) {
+        setSwipeDirection('left');
         nextPaper();
       } else {
-        setSwipeDirection('down');
+        setSwipeDirection('right');
         prevPaper();
       }
     }
