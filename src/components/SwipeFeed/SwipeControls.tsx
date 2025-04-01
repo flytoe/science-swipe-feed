@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ChevronUp, ChevronDown, X, ExternalLink } from 'lucide-react';
 import { useMindBlow } from '../../hooks/use-mind-blow';
@@ -45,7 +44,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
             isLoading={isLoading}
             onClick={toggleMindBlow}
             size="icon"
-            className="w-10 h-10 rounded-full shadow-md"
+            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
             showCount={false}
             variant="outline"
           />
@@ -70,7 +69,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View original paper"
-              className="w-10 h-10 rounded-full bg-blue-950/80 hover:bg-blue-900/90 text-blue-400 border border-blue-900/40 shadow-md flex items-center justify-center"
+              className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md flex items-center justify-center transition-colors"
             >
               <ExternalLink size={18} />
             </a>
@@ -81,7 +80,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
         {onClose && (
           <motion.button 
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-black/80 backdrop-blur-sm hover:bg-black/60 border border-white/10 text-white shadow-md flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white text-gray-700 shadow-md flex items-center justify-center transition-colors"
             aria-label="Close detail view"
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}

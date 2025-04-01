@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Textarea } from './ui/textarea';
+import { X } from 'lucide-react';
 
 interface MindBlowButtonProps {
   hasMindBlown: boolean;
@@ -27,9 +28,8 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   className = '',
   variant = 'default'
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [reason, setReason] = useState('');
   const [showOverlay, setShowOverlay] = useState(false);
+  const [reason, setReason] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -53,19 +53,21 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
       // If already mind-blown, just toggle it off
       onClick();
     } else {
-      // If not mind-blown yet, show the overlay
-      setShowOverlay(true);
+      // If not mind-blown yet, trigger mind-blown immediately and show overlay for notes
+      onClick();
+      setTimeout(() => setShowOverlay(true), 500); // Show overlay after animation completes
     }
   };
 
   const handleSubmit = () => {
-    onClick(reason);
+    if (reason.trim()) {
+      onClick(reason);
+    }
     setReason('');
     setShowOverlay(false);
   };
 
-  const handleSkip = () => {
-    onClick();
+  const handleClose = () => {
     setReason('');
     setShowOverlay(false);
   };
@@ -86,10 +88,11 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           <motion.span
             initial={{ scale: 1 }}
             animate={{ 
-              scale: hasMindBlown ? [1, 1.2, 1] : 1 
+              scale: hasMindBlown ? [1, 1.4, 1] : 1,
+              rotate: hasMindBlown ? [0, -10, 10, -10, 0] : 0
             }}
             transition={{ 
-              duration: 0.5,
+              duration: hasMindBlown ? 0.5 : 0,
               repeat: hasMindBlown ? Infinity : 0,
               repeatType: "reverse",
               repeatDelay: 2
@@ -126,7 +129,17 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
             transition={{ duration: 0.2 }}
             ref={overlayRef}
           >
-            <p className="text-white text-sm mb-2">What blew your mind? (optional)</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-white text-sm">What blew your mind? (optional)</p>
+              <Button 
+                onClick={handleClose}
+                variant="ghost" 
+                size="sm"
+                className="p-1 h-auto w-auto text-white/60 hover:text-white hover:bg-white/10"
+              >
+                <X size={16} />
+              </Button>
+            </div>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -135,22 +148,14 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
               maxLength={256}
               autoFocus
             />
-            <div className="flex justify-between items-center">
-              <Button 
-                onClick={handleSkip} 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs hover:bg-white/10"
-              >
-                Skip
-              </Button>
+            <div className="flex justify-end">
               <Button 
                 onClick={handleSubmit} 
                 disabled={isLoading} 
                 size="sm"
                 className="bg-yellow-500 text-black hover:bg-yellow-400 text-xs"
               >
-                Mind-Blown 🤯
+                Submit
               </Button>
             </div>
           </motion.div>

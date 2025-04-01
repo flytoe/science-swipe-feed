@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { X, Share } from 'lucide-react';
 import MindBlowButton from '../MindBlowButton';
 import { useMindBlow } from '../../hooks/use-mind-blow';
+import { motion } from 'framer-motion';
 
 interface DetailNavButtonsProps {
   paperDoi: string;
@@ -33,14 +34,16 @@ const DetailNavButtons: React.FC<DetailNavButtonsProps> = ({ paperDoi, onClose }
 
   return (
     <div className="fixed bottom-8 right-8 flex space-x-3">
-      <Button
-        variant="outline"
-        size="icon"
-        className="rounded-full bg-black/50 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
-        onClick={handleShare}
-      >
-        <Share className="h-5 w-5" />
-      </Button>
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
+          onClick={handleShare}
+        >
+          <Share className="h-5 w-5" />
+        </Button>
+      </motion.div>
 
       <MindBlowButton
         hasMindBlown={hasMindBlown}
@@ -50,18 +53,20 @@ const DetailNavButtons: React.FC<DetailNavButtonsProps> = ({ paperDoi, onClose }
         onClick={toggleMindBlow}
         size="icon"
         variant="outline"
-        className="rounded-full bg-black/50 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+        className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
         showCount={false}
       />
 
-      <Button
-        variant="outline"
-        size="icon"
-        className="rounded-full bg-black/50 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
-        onClick={onClose}
-      >
-        <X className="h-5 w-5" />
-      </Button>
+      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+        <Button
+          variant="outline"
+          size="icon"
+          className="rounded-full bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-white shadow-md transition-colors"
+          onClick={onClose}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      </motion.div>
     </div>
   );
 };
