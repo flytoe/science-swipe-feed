@@ -20,7 +20,7 @@ export const useSwipeNavigation = ({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
   // Increase threshold for more deliberate swipes
-  const SWIPE_THRESHOLD = 100;
+  const SWIPE_THRESHOLD = 80;
   
   const nextPaper = () => {
     if (currentIndex < papersLength - 1) {
@@ -49,14 +49,14 @@ export const useSwipeNavigation = ({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isScrolling) return;
     
-    setDragStart(e.touches[0].clientX); // Changed from clientY to clientX
+    setDragStart(e.touches[0].clientX);
     setIsDragging(true);
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isScrolling) return;
     
-    const dragDistance = e.touches[0].clientX - dragStart; // Changed from clientY to clientX
+    const dragDistance = e.touches[0].clientX - dragStart;
     
     // Use threshold for more deliberate swipes
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
@@ -84,7 +84,7 @@ export const useSwipeNavigation = ({
     }
     
     // Make wheel navigation less sensitive - require more scrolling
-    if (Math.abs(e.deltaX) > 50) {
+    if (Math.abs(e.deltaX) > 40) {
       if (e.deltaX > 0) {
         setSwipeDirection('left');
         nextPaper();

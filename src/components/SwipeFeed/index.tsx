@@ -101,34 +101,57 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       prevPaper();
     }
   };
+
+  // Drag constraints for horizontal swiping
+  const dragConstraints = { left: 0, right: 0 };
+  const dragElastic = 0.7; // Elastic feel when dragging beyond edges
+  
+  // Calculate drag direction and handle completion
+  const handleDragEnd = (event: any, info: any) => {
+    if (isDetailView) return;
+    
+    const threshold = 100; // Threshold to determine if swipe should change slide
+    const dragX = info.offset.x;
+    
+    if (dragX > threshold) {
+      handleNavigate('prev');
+    } else if (dragX < -threshold) {
+      handleNavigate('next');
+    }
+  };
   
   return (
     <div 
       className="relative h-full w-full max-w-md mx-auto overflow-hidden"
-      onTouchStart={!isDetailView ? handleTouchStart : undefined}
-      onTouchMove={!isDetailView ? handleTouchMove : undefined}
-      onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
-      onWheel={handleWheel}
       ref={feedRef}
+      onWheel={handleWheel}
     >
       <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentPaper?.doi || currentIndex}
             initial={{ 
-              x: swipeDirection === 'left' ? 300 : -300, 
-              opacity: 0 
+              x: swipeDirection === 'left' ? '100%' : '-100%', 
+              opacity: 0.5
             }}
             animate={{ 
               x: 0, 
               opacity: 1 
             }}
             exit={{ 
-              x: swipeDirection === 'left' ? -300 : 300, 
-              opacity: 0 
+              x: swipeDirection === 'left' ? '-100%' : '100%', 
+              opacity: 0.5
             }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{ 
+              type: "spring",
+              stiffness: 300,
+              damping: 30
+            }}
             className="h-full w-full"
+            drag="x"
+            dragConstraints={dragConstraints}
+            dragElastic={dragElastic}
+            onDragEnd={handleDragEnd}
           >
             <PaperCard 
               paper={currentPaper}

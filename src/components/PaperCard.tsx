@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { type Paper } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import PaperCardPreview from './PaperCardPreview';
@@ -24,7 +23,6 @@ const PaperCard: React.FC<PaperCardProps> = ({
 }) => {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [localIsGeneratingImage, setLocalIsGeneratingImage] = useState(false);
-  const navigate = useNavigate();
   
   const cardVariants = {
     active: {
@@ -85,7 +83,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
       exit="inactive"
       layout
     >
-      {/* Preview section stays at the top */}
+      {/* Preview section at the top (full height viewport) */}
       <div className="h-screen sticky top-0 z-10">
         <PaperCardPreview 
           imageSrc={imageSrc}
@@ -100,8 +98,8 @@ const PaperCard: React.FC<PaperCardProps> = ({
         />
       </div>
       
-      {/* Detailed content - scrolls under preview */}
-      <div className="bg-black pt-8">
+      {/* Detailed content section (scrolls underneath the preview) */}
+      <div className="bg-black pt-8 min-h-screen">
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
@@ -111,6 +109,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
           takeaways={formattedTakeaways}
           creator={paper.creator}
           imageSrc={imageSrc}
+          hideHeroImage={true} // Hide duplicate hero image in content section
         />
       </div>
 

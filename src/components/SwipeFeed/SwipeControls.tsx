@@ -12,7 +12,6 @@ interface SwipeControlsProps {
   onPrev: () => void;
   isDetailOpen?: boolean;
   paperDoi?: string;
-  onClose?: () => void;
 }
 
 const SwipeControls: React.FC<SwipeControlsProps> = ({ 
@@ -21,15 +20,14 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
   onNext, 
   onPrev,
   isDetailOpen = false,
-  paperDoi = '',
-  onClose
+  paperDoi = ''
 }) => {
   // Get mind-blow data for the paper
   const { count, hasMindBlown, isTopPaper, isLoading, toggleMindBlow } = 
     useMindBlow(paperDoi || '');
 
   return (
-    <div className="fixed bottom-4 right-4 flex items-center gap-3 z-20">
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-3 z-20">
       {/* Navigation Controls */}
       <div className="flex items-center gap-3">
         <motion.button 

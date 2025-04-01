@@ -20,6 +20,7 @@ interface PaperCardContentProps {
   creator?: string[] | string | null;
   imageSrc?: string;
   hideFooter?: boolean;
+  hideHeroImage?: boolean;
 }
 
 const PaperCardContent: React.FC<PaperCardContentProps> = ({
@@ -32,18 +33,21 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   takeaways,
   creator,
   imageSrc,
-  hideFooter = false
+  hideFooter = false,
+  hideHeroImage = false
 }) => {
   return (
     <div className="paper-card-content h-full flex flex-col">
       {/* Full height scroll container */}
-      <ScrollArea className="flex-1 h-full overflow-auto">
-        {/* Hero Image Section - now full width */}
-        <HeroImageSection 
-          imageSrc={imageSrc}
-          title={title}
-          creator={creator}
-        />
+      <div className="flex-1 h-full">
+        {/* Hero Image Section - conditionally render */}
+        {!hideHeroImage && (
+          <HeroImageSection 
+            imageSrc={imageSrc}
+            title={title}
+            creator={creator}
+          />
+        )}
         
         {/* Content section */}
         <div className="p-6">
@@ -66,8 +70,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           {/* AI Disclaimer */}
           <DisclaimerSection />
         </div>
-      </ScrollArea>
+      </div>
       
+      {/* Footer is conditionally rendered */}
       {!hideFooter && <ContentFooter formattedDate={formattedDate} doi={doi} />}
     </div>
   );
