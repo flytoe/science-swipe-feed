@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import PaperCardContent from './PaperCardContent';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import { Badge } from './ui/badge';
+import MindBlowBadge from './MindBlowBadge';
+import { useMindBlow } from '../hooks/use-mind-blow';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -28,6 +30,9 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   imageSrc,
   onClose
 }) => {
+  // Get mind-blow data for the paper
+  const { count: mindBlowCount, isTopPaper } = useMindBlow(doi || '');
+
   return (
     <motion.div
       className="h-full flex flex-col relative"
@@ -42,6 +47,13 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           {formattedDate}
         </Badge>
       </div>
+      
+      {/* Mind-blow badge - positioned at the top right */}
+      {mindBlowCount > 0 && (
+        <div className="absolute top-4 right-4 z-10">
+          <MindBlowBadge count={mindBlowCount} />
+        </div>
+      )}
       
       <div className="flex-1 overflow-hidden h-full">
         <PaperCardContent

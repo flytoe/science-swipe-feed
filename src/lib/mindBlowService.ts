@@ -42,7 +42,7 @@ export async function getAllMindBlowCounts(): Promise<MindBlowCount[]> {
   try {
     // Use the raw query to avoid TypeScript error with table types
     const { data, error } = await supabase
-      .rpc('get_all_mind_blows')
+      .from('mind_blows')
       .select('paper_doi, count');
     
     if (error) {
@@ -84,12 +84,14 @@ export async function hasUserMindBlown(paperDoi: string, userId: string): Promis
 // Add a mind-blow reaction
 export async function addMindBlow(paperDoi: string, userId: string, reason?: string): Promise<boolean> {
   try {
-    // Use the raw query to avoid TypeScript error with table types
-    const { error } = await supabase.rpc('add_mind_blow', { 
-      p_paper_doi: paperDoi, 
-      p_user_id: userId, 
-      p_reason: reason || null 
-    });
+    // Insert directly to the user_mind_blows table instead of using RPC
+    const { error } = await supabase
+      .from('user_mind_blows')
+      .insert({ 
+        paper_doi: paperDoi, 
+        user_id: userId, 
+        reason: reason || null 
+      });
     
     if (error) {
       console.error('Error adding mind blow:', error);
@@ -113,11 +115,12 @@ export async function addMindBlow(paperDoi: string, userId: string, reason?: str
 // Remove a mind-blow reaction
 export async function removeMindBlow(paperDoi: string, userId: string): Promise<boolean> {
   try {
-    // Use the raw query to avoid TypeScript error with table types
-    const { error } = await supabase.rpc('remove_mind_blow', { 
-      p_paper_doi: paperDoi, 
-      p_user_id: userId
-    });
+    // Delete directly from the user_mind_blows table instead of using RPC
+    const { error } = await supabase
+      .from('user_mind_blows')
+      .delete()
+      .eq('paper_doi', paperDoi)
+      .eq('user_id', userId);
     
     if (error) {
       console.error('Error removing mind blow:', error);
@@ -137,9 +140,12 @@ export async function removeMindBlow(paperDoi: string, userId: string): Promise<
 // Get top mind-blown papers
 export async function getTopMindBlownPapers(limit: number = 10): Promise<MindBlowCount[]> {
   try {
-    // Use the raw query to avoid TypeScript error with table types
+    // Query the mind_blows table directly instead of using RPC
     const { data, error } = await supabase
-      .rpc('get_top_mind_blown_papers', { p_limit: limit });
+      .from('mind_blows')
+      .select('paper_doi, count')
+      .order('count', { ascending: false })
+      .limit(limit);
     
     if (error) {
       console.error('Error fetching top mind blown papers:', error);

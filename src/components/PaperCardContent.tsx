@@ -19,6 +19,7 @@ interface PaperCardContentProps {
   takeaways: FormattedTakeaway[];
   creator?: string[] | string | null;
   imageSrc?: string;
+  hideFooter?: boolean;
 }
 
 const PaperCardContent: React.FC<PaperCardContentProps> = ({
@@ -30,7 +31,8 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   doi,
   takeaways,
   creator,
-  imageSrc
+  imageSrc,
+  hideFooter = false
 }) => {
   return (
     <div className="paper-card-content h-full flex flex-col">
@@ -66,7 +68,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         </div>
       </ScrollArea>
       
-      <ContentFooter formattedDate={formattedDate} doi={doi} />
+      {!hideFooter && <ContentFooter formattedDate={formattedDate} doi={doi} />}
     </div>
   );
 };

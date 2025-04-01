@@ -156,6 +156,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_mind_blow: {
+        Args: {
+          p_paper_doi: string
+          p_user_id: string
+          p_reason?: string
+        }
+        Returns: boolean
+      }
+      get_all_mind_blows: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          paper_doi: string
+          count: number
+        }[]
+      }
+      get_top_mind_blown_papers: {
+        Args: {
+          p_limit?: number
+        }
+        Returns: {
+          paper_doi: string
+          count: number
+        }[]
+      }
       gtrgm_compress: {
         Args: {
           "": unknown
@@ -185,6 +209,13 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      remove_mind_blow: {
+        Args: {
+          p_paper_doi: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       set_limit: {
         Args: {

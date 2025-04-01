@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 
 interface MindBlowButtonProps {
@@ -30,31 +29,49 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [reason, setReason] = useState('');
+  const [showOverlay, setShowOverlay] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Handle click outside overlay to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (overlayRef.current && !overlayRef.current.contains(event.target as Node) && 
+          buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        setShowOverlay(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleClick = () => {
     if (hasMindBlown) {
       // If already mind-blown, just toggle it off
       onClick();
     } else {
-      // If not mind-blown yet, open the dialog
-      setIsOpen(true);
+      // If not mind-blown yet, show the overlay
+      setShowOverlay(true);
     }
   };
 
   const handleSubmit = () => {
     onClick(reason);
     setReason('');
-    setIsOpen(false);
+    setShowOverlay(false);
   };
 
   const handleSkip = () => {
     onClick();
     setReason('');
-    setIsOpen(false);
+    setShowOverlay(false);
   };
   
   return (
-    <>
+    <div className="relative">
       <motion.div
         whileTap={{ scale: 0.95 }}
       >
@@ -64,6 +81,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           onClick={handleClick}
           disabled={isLoading}
           className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : ''}`}
+          ref={buttonRef}
         >
           <motion.span
             initial={{ scale: 1 }}
@@ -72,8 +90,9 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
             }}
             transition={{ 
               duration: 0.5,
-              repeat: hasMindBlown ? 0 : 0,
-              repeatType: "reverse"
+              repeat: hasMindBlown ? Infinity : 0,
+              repeatType: "reverse",
+              repeatDelay: 2
             }}
             className="inline-flex items-center"
           >
@@ -97,39 +116,47 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         </Button>
       </motion.div>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-black/90 border-white/20 text-white">
-          <DialogHeader>
-            <DialogTitle>Why was this mind-blowing?</DialogTitle>
-            <DialogDescription className="text-white/70">
-              Share what amazed you about this research (optional)
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="This research amazed me because..."
-            className="min-h-[100px] bg-white/10 border-white/20 text-white"
-            maxLength={256}
-            autoFocus
-          />
-          
-          <DialogFooter className="flex justify-between sm:justify-between gap-2">
-            <Button onClick={handleSkip} variant="outline" className="border-white/20 hover:bg-white/10">
-              Skip
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isLoading} 
-              className="bg-yellow-500 text-black hover:bg-yellow-400"
-            >
-              Submit Mind-Blow 🤯
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+      <AnimatePresence>
+        {showOverlay && (
+          <motion.div 
+            className="absolute bottom-full right-0 mb-2 w-64 bg-black/90 border border-white/20 p-3 rounded-lg shadow-xl z-50"
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            ref={overlayRef}
+          >
+            <p className="text-white text-sm mb-2">What blew your mind? (optional)</p>
+            <Textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="This research amazed me because..."
+              className="min-h-[80px] bg-white/10 border-white/20 text-white mb-2 text-sm"
+              maxLength={256}
+              autoFocus
+            />
+            <div className="flex justify-between items-center">
+              <Button 
+                onClick={handleSkip} 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs hover:bg-white/10"
+              >
+                Skip
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={isLoading} 
+                size="sm"
+                className="bg-yellow-500 text-black hover:bg-yellow-400 text-xs"
+              >
+                Mind-Blown 🤯
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 
