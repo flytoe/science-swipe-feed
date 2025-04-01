@@ -20,6 +20,8 @@ const MindBlowBadge: React.FC<MindBlowBadgeProps> = ({
     <motion.div
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.2 }}
       className={`inline-flex ${className}`}
     >
       <Badge
@@ -27,11 +29,17 @@ const MindBlowBadge: React.FC<MindBlowBadgeProps> = ({
         className={`
           flex items-center gap-1 
           ${isTopPaper 
-            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold border-none' 
+            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-bold border-none shadow-md' 
             : 'bg-white/10 text-white border-white/20'}
         `}
       >
-        <span className="mr-0.5">🤯</span>
+        <motion.span 
+          className="mr-0.5"
+          animate={isTopPaper ? { scale: [1, 1.15, 1] } : {}}
+          transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
+        >
+          🤯
+        </motion.span>
         <span>{count}</span>
         {isTopPaper && (
           <motion.span 

@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Calendar, BookOpen, LightbulbIcon, BarChart3, X } from 'lucide-react';
+import { Calendar, BookOpen, LightbulbIcon, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -83,7 +83,7 @@ const PaperDetail: React.FC = () => {
         <div className="max-w-3xl mx-auto py-12 text-center">
           <h2 className="text-2xl font-bold">Paper not found</h2>
           <Button onClick={goBack} variant="outline" className="mt-4">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Feed
+            Back to Feed
           </Button>
         </div>
       </div>
@@ -99,36 +99,35 @@ const PaperDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Close button at the top instead of header */}
-      <div className="sticky top-0 z-30 w-full bg-black/50 backdrop-blur-sm">
-        <div className="container max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button 
-            onClick={goBack} 
-            variant="ghost" 
-            className="text-white hover:bg-white/10"
-            size="icon"
-          >
-            <X size={24} />
-          </Button>
-          
-          {/* Show mind-blow badge in header */}
-          {mindBlowCount > 0 && (
-            <MindBlowBadge count={mindBlowCount} />
-          )}
-        </div>
-      </div>
+      {/* No top bar - removed as requested */}
       
       <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
-        {/* Hero section with image - using the updated HeroImageSection component */}
-        <HeroImageSection 
-          imageSrc={imageSrc}
-          title={paper.ai_headline || paper.title_org}
-          creator={paper.creator}
-          categories={paper.category ? 
-            (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
-          mindBlowCount={mindBlowCount}
-          isTopPaper={isTopPaper}
-        />
+        {/* Hero section with image and date at the top */}
+        <div className="relative">
+          {/* Date positioned at the top */}
+          <div className="absolute top-4 left-4 z-10">
+            <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none">
+              {formattedDate}
+            </Badge>
+          </div>
+          
+          {/* Mind-blow badge */}
+          {mindBlowCount > 0 && (
+            <div className="absolute top-4 right-4 z-10">
+              <MindBlowBadge count={mindBlowCount} />
+            </div>
+          )}
+          
+          <HeroImageSection 
+            imageSrc={imageSrc}
+            title={paper.ai_headline || paper.title_org}
+            creator={paper.creator}
+            categories={paper.category ? 
+              (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
+            mindBlowCount={mindBlowCount}
+            isTopPaper={isTopPaper}
+          />
+        </div>
         
         {/* Regenerate button */}
         <div className="mt-4">
@@ -139,12 +138,8 @@ const PaperDetail: React.FC = () => {
           />
         </div>
         
-        {/* Date and categories - Already using formatted category names */}
+        {/* Categories - Already using formatted category names */}
         <div className="mb-4 flex flex-wrap gap-2 mt-6">
-          <Badge variant="outline" className="bg-white/10 text-white border-none">
-            {formattedDate}
-          </Badge>
-          
           {/* Display the formatted category names */}
           {formattedCategoryNames.map((category, idx) => (
             <Badge 

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from './ui/dialog';
 import { Textarea } from './ui/textarea';
 
@@ -55,45 +55,53 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   
   return (
     <>
-      <Button 
-        variant={variant}
-        size={size}
-        onClick={handleClick}
-        disabled={isLoading}
-        className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : ''}`}
+      <motion.div
+        whileTap={{ scale: 0.95 }}
       >
-        <motion.span
-          initial={{ scale: 1 }}
-          animate={{ 
-            scale: hasMindBlown ? [1, 1.2, 1] : 1 
-          }}
-          transition={{ 
-            duration: 0.5,
-            repeat: hasMindBlown ? 0 : 0,
-            repeatType: "reverse"
-          }}
-          className="inline-flex items-center"
+        <Button 
+          variant={variant}
+          size={size}
+          onClick={handleClick}
+          disabled={isLoading}
+          className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : ''}`}
         >
-          🤯
-          {showCount && count > 0 && (
-            <span className="ml-1 text-sm font-bold">
-              {count}
-            </span>
+          <motion.span
+            initial={{ scale: 1 }}
+            animate={{ 
+              scale: hasMindBlown ? [1, 1.2, 1] : 1 
+            }}
+            transition={{ 
+              duration: 0.5,
+              repeat: hasMindBlown ? 0 : 0,
+              repeatType: "reverse"
+            }}
+            className="inline-flex items-center"
+          >
+            🤯
+            {showCount && count > 0 && (
+              <span className="ml-1 text-sm font-bold">
+                {count}
+              </span>
+            )}
+          </motion.span>
+          
+          {isTopPaper && (
+            <motion.div 
+              className="absolute -top-1 -right-1"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity, repeatType: "reverse" }}
+            >
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+            </motion.div>
           )}
-        </motion.span>
-        
-        {isTopPaper && (
-          <div className="absolute -top-1 -right-1">
-            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-          </div>
-        )}
-      </Button>
+        </Button>
+      </motion.div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
+        <DialogContent className="bg-black/90 border-white/20 text-white">
           <DialogHeader>
             <DialogTitle>Why was this mind-blowing?</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-white/70">
               Share what amazed you about this research (optional)
             </DialogDescription>
           </DialogHeader>
@@ -102,14 +110,20 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="This research amazed me because..."
-            className="min-h-[100px]"
+            className="min-h-[100px] bg-white/10 border-white/20 text-white"
+            maxLength={256}
+            autoFocus
           />
           
           <DialogFooter className="flex justify-between sm:justify-between gap-2">
-            <Button onClick={handleSkip} variant="outline">
+            <Button onClick={handleSkip} variant="outline" className="border-white/20 hover:bg-white/10">
               Skip
             </Button>
-            <Button onClick={handleSubmit} disabled={isLoading}>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isLoading} 
+              className="bg-yellow-500 text-black hover:bg-yellow-400"
+            >
               Submit Mind-Blow 🤯
             </Button>
           </DialogFooter>

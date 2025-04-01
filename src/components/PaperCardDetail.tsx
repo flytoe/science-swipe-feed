@@ -1,10 +1,9 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button } from './ui/button';
 import PaperCardContent from './PaperCardContent';
 import { FormattedTakeaway } from '../utils/takeawayParser';
+import { Badge } from './ui/badge';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -37,15 +36,12 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
     >
-      {/* Prominent close button at the top */}
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="absolute top-2 left-2 z-50 bg-black/50 text-white hover:bg-black/70"
-        onClick={(e) => onClose(e)}
-      >
-        <X size={24} />
-      </Button>
+      {/* Show date at the top */}
+      <div className="absolute top-4 left-4 z-10">
+        <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none">
+          {formattedDate}
+        </Badge>
+      </div>
       
       <div className="flex-1 overflow-hidden h-full">
         <PaperCardContent
@@ -58,6 +54,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           takeaways={takeaways}
           creator={creator}
           imageSrc={imageSrc}
+          hideFooter={true} // Hide the footer with date and link
         />
       </div>
     </motion.div>
