@@ -10,6 +10,9 @@ import { toast } from 'sonner';
 import RegenerateImageButton from '../components/RegenerateImageButton';
 import { usePaperData } from '../hooks/use-paper-data';
 import HeroImageSection from '../components/paper-content/HeroImageSection';
+import DetailNavButtons from '../components/paper-content/DetailNavButtons';
+import MindBlowBadge from '../components/MindBlowBadge';
+import { useMindBlow } from '../hooks/use-mind-blow';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +20,9 @@ const PaperDetail: React.FC = () => {
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
+
+  // Get mind-blow data for the paper
+  const { count: mindBlowCount, isTopPaper } = useMindBlow(id || '');
 
   useEffect(() => {
     const loadPaper = async () => {
@@ -104,6 +110,11 @@ const PaperDetail: React.FC = () => {
           >
             <X size={24} />
           </Button>
+          
+          {/* Show mind-blow badge in header */}
+          {mindBlowCount > 0 && (
+            <MindBlowBadge count={mindBlowCount} />
+          )}
         </div>
       </div>
       
@@ -115,6 +126,8 @@ const PaperDetail: React.FC = () => {
           creator={paper.creator}
           categories={paper.category ? 
             (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
+          mindBlowCount={mindBlowCount}
+          isTopPaper={isTopPaper}
         />
         
         {/* Regenerate button */}
@@ -206,26 +219,15 @@ const PaperDetail: React.FC = () => {
                 <span className="text-sm">{paper.score} Impact Score</span>
               </div>
             )}
-            
-            {paper.doi && (
-              <Button 
-                variant="outline"
-                size="sm"
-                className="bg-blue-900/30 hover:bg-blue-900/50 text-blue-400 border-blue-900"
-                asChild
-              >
-                <a 
-                  href={paper.doi.startsWith('http') ? paper.doi : `https://doi.org/${paper.doi}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  View Original Paper
-                </a>
-              </Button>
-            )}
           </div>
         </div>
       </div>
+
+      {/* Detail navigation buttons */}
+      <DetailNavButtons 
+        paperDoi={paper.doi}
+        onClose={goBack}
+      />
     </div>
   );
 };

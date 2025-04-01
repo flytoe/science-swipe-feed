@@ -105,6 +105,7 @@ const PaperCard: React.FC<PaperCardProps> = ({ paper, isActive, isGeneratingImag
             isGeneratingImage={isGenerating}
             imageSourceType={imageSourceType}
             onRegenerateClick={handleOpenPromptModal}
+            paperDoi={paper.doi} // Pass the paper DOI for mind-blow functionality
           />
         ) : (
           <PaperCardDetail

@@ -3,6 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui/badge';
 import PaperCardMedia from './PaperCardMedia';
+import MindBlowBadge from './MindBlowBadge';
+import { useMindBlow } from '../hooks/use-mind-blow';
 
 interface PaperCardPreviewProps {
   imageSrc: string;
@@ -13,6 +15,7 @@ interface PaperCardPreviewProps {
   isGeneratingImage?: boolean;
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
   onRegenerateClick?: () => void;
+  paperDoi: string;
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
@@ -23,8 +26,12 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   firstTakeaway,
   isGeneratingImage = false,
   imageSourceType = 'database',
-  onRegenerateClick
+  onRegenerateClick,
+  paperDoi
 }) => {
+  // Get mind-blow data for the paper
+  const { count: mindBlowCount } = useMindBlow(paperDoi);
+
   return (
     <motion.div
       className="h-full flex flex-col relative"
@@ -44,6 +51,13 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           onRegenerateClick={onRegenerateClick}
         />
       </div>
+      
+      {/* Mind-blow badge - positioned at the top right */}
+      {mindBlowCount > 0 && (
+        <div className="absolute top-4 right-4 z-20">
+          <MindBlowBadge count={mindBlowCount} />
+        </div>
+      )}
       
       {/* Content overlaid on the image - positioned at the bottom */}
       <div className="relative z-10 mt-auto p-6 pt-36 pb-8 bg-gradient-to-t from-black/95 via-black/80 to-transparent">

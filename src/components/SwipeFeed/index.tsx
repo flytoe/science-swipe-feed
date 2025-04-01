@@ -62,6 +62,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const handleDetailToggle = (isOpen: boolean) => {
     setIsDetailOpen(isOpen);
   };
+
+  // Close detail handler for the button
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+  };
   
   return (
     <div 
@@ -83,13 +88,16 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
         </AnimatePresence>
       </div>
       
-      {/* Only show controls when detail is not open */}
-      {papers.length > 1 && !isDetailOpen && (
+      {/* Show different controls based on detail state */}
+      {papers.length > 1 && (
         <SwipeControls 
           currentIndex={currentIndex} 
           total={papers.length}
           onNext={nextPaper}
           onPrev={prevPaper}
+          isDetailOpen={isDetailOpen}
+          paperDoi={currentPaper?.doi}
+          onClose={isDetailOpen ? handleCloseDetail : undefined}
         />
       )}
     </div>

@@ -33,6 +33,38 @@ export type Database = {
         }
         Relationships: []
       }
+      mind_blows: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          paper_doi: string
+          updated_at: string
+        }
+        Insert: {
+          count?: number
+          created_at?: string
+          id?: string
+          paper_doi: string
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          paper_doi?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mind_blows_paper_doi_fkey"
+            columns: ["paper_doi"]
+            isOneToOne: true
+            referencedRelation: "n8n_table"
+            referencedColumns: ["doi"]
+          },
+        ]
+      }
       n8n_table: {
         Row: {
           abstract_org: string | null
@@ -86,6 +118,38 @@ export type Database = {
           title_org?: string
         }
         Relationships: []
+      }
+      user_mind_blows: {
+        Row: {
+          created_at: string
+          id: string
+          paper_doi: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          paper_doi: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          paper_doi?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_mind_blows_paper_doi_fkey"
+            columns: ["paper_doi"]
+            isOneToOne: false
+            referencedRelation: "n8n_table"
+            referencedColumns: ["doi"]
+          },
+        ]
       }
     }
     Views: {
