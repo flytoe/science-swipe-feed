@@ -83,6 +83,10 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   }
 
   const currentPaper = papers[currentIndex];
+  const nextIndex = currentIndex < papers.length - 1 ? currentIndex + 1 : 0;
+  const prevIndex = currentIndex > 0 ? currentIndex - 1 : papers.length - 1;
+  const nextPaper = papers[nextIndex];
+  const prevPaper = papers[prevIndex];
   
   // Helper function to turn off detail view
   const scrollToTop = () => {
@@ -128,102 +132,96 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       ref={feedRef}
       style={{ overflowY: 'auto', overflowX: 'hidden' }}
     >
-      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
+      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden pb-24">
         <div className="h-full w-full relative">
-          {papers.map((paper, index) => {
-            // Only render the current card fully
-            const isCurrentCard = index === currentIndex;
-            
-            return (
-              <AnimatePresence key={`card-${paper?.doi || index}`} initial={false} mode="wait">
-                {isCurrentCard && (
-                  <motion.div
-                    key={`card-${paper?.doi || index}`}
-                    initial={{ 
-                      opacity: 0, 
-                      x: swipeDirection === 'left' ? '100%' : '-100%',
-                      scale: 0.95
-                    }}
-                    animate={{ 
-                      opacity: 1, 
-                      x: 0, 
-                      scale: 1,
-                      zIndex: 10
-                    }}
-                    exit={{ 
-                      opacity: 0, 
-                      x: swipeDirection === 'left' ? '-100%' : '100%',
-                      scale: 0.95,
-                      zIndex: 0
-                    }}
-                    transition={{ 
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 30
-                    }}
-                    className="absolute inset-0 w-full"
-                    drag={isMobile ? "x" : false}
-                    dragConstraints={dragConstraints}
-                    dragElastic={0.1}
-                    onDragEnd={handleDragEnd}
-                    dragDirectionLock
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onWheel={handleWheel}
-                    style={{ touchAction: 'pan-y' }}
-                  >
-                    <PaperCard 
-                      paper={paper}
-                      isActive={true}
-                      isGeneratingImage={isGeneratingImage}
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            );
-          })}
+          {/* Current card */}
+          <AnimatePresence key={`animation-${currentIndex}`} initial={false} mode="wait">
+            <motion.div
+              key={`card-${currentPaper?.doi || currentIndex}`}
+              initial={{ 
+                opacity: 0, 
+                x: swipeDirection === 'left' ? '100%' : '-100%',
+                scale: 0.95
+              }}
+              animate={{ 
+                opacity: 1, 
+                x: 0, 
+                scale: 1,
+                zIndex: 10
+              }}
+              exit={{ 
+                opacity: 0, 
+                x: swipeDirection === 'left' ? '-100%' : '100%',
+                scale: 0.95,
+                zIndex: 0
+              }}
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 30
+              }}
+              className="absolute inset-0 w-full"
+              drag={isMobile ? "x" : false}
+              dragConstraints={dragConstraints}
+              dragElastic={0.1}
+              onDragEnd={handleDragEnd}
+              dragDirectionLock
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onWheel={handleWheel}
+              style={{ touchAction: 'pan-y' }}
+            >
+              <PaperCard 
+                paper={currentPaper}
+                isActive={true}
+                isGeneratingImage={isGeneratingImage}
+              />
+            </motion.div>
+          </AnimatePresence>
           
           {/* Staggered cards (visible only when not in detail view) */}
           {!isDetailView && papers.length > 1 && (
             <>
               {/* Previous card (peeking from left) */}
-              <AnimatePresence initial={false}>
-                <motion.div
-                  key={`prev-peek-${currentIndex}`}
-                  className="absolute inset-0 w-full pointer-events-none"
-                  initial={{ x: "-80%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                  animate={{ x: "-15%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                  exit={{ x: "-80%", scale: 0.9, opacity: 0, zIndex: 1 }}
-                >
-                  <div className="w-full h-full bg-black/60 rounded-lg overflow-hidden">
-                    <div className="w-full h-[80vh] bg-gray-800 animate-pulse" />
-                    <div className="h-40 bg-black/80 p-6">
-                      <div className="h-4 w-3/4 bg-gray-700 rounded-full mb-4"></div>
-                      <div className="h-6 w-1/2 bg-gray-700 rounded-full"></div>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+              <motion.div
+                key={`prev-peek-${prevIndex}`}
+                className="absolute inset-0 w-full pointer-events-none"
+                initial={{ x: "-110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                animate={{ x: "-85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+              >
+                <div className="w-full h-full rounded-lg overflow-hidden">
+                  <PaperCard 
+                    paper={prevPaper}
+                    isActive={false}
+                  />
+                </div>
+              </motion.div>
               
               {/* Next card (peeking from right) */}
-              <AnimatePresence initial={false}>
-                <motion.div
-                  key={`next-peek-${currentIndex}`}
-                  className="absolute inset-0 w-full pointer-events-none"
-                  initial={{ x: "80%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                  animate={{ x: "15%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                  exit={{ x: "80%", scale: 0.9, opacity: 0, zIndex: 1 }}
-                >
-                  <div className="w-full h-full bg-black/60 rounded-lg overflow-hidden">
-                    <div className="w-full h-[80vh] bg-gray-800 animate-pulse" />
-                    <div className="h-40 bg-black/80 p-6">
-                      <div className="h-4 w-3/4 bg-gray-700 rounded-full mb-4"></div>
-                      <div className="h-6 w-1/2 bg-gray-700 rounded-full"></div>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
+              <motion.div
+                key={`next-peek-${nextIndex}`}
+                className="absolute inset-0 w-full pointer-events-none"
+                initial={{ x: "110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                animate={{ x: "85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+              >
+                <div className="w-full h-full rounded-lg overflow-hidden">
+                  <PaperCard 
+                    paper={nextPaper}
+                    isActive={false}
+                  />
+                </div>
+              </motion.div>
             </>
           )}
         </div>

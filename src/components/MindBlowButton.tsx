@@ -131,7 +131,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           size={size}
           onClick={handleClick}
           disabled={isLoading}
-          className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black' : ''}`}
+          className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black border-none' : ''}`}
           ref={buttonRef}
         >
           <motion.span

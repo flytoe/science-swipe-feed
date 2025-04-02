@@ -37,9 +37,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   hideHeroImage = false
 }) => {
   return (
-    <div className="paper-card-content h-full flex flex-col">
-      {/* Content section with improved spacing - added more bottom padding for action bar */}
-      <div className="p-6 pt-0 pb-24">
+    <div className="paper-card-content h-full flex flex-col overflow-y-auto">
+      {/* Content section with improved spacing - added significantly more bottom padding for action bar */}
+      <div className="p-6 pt-0 pb-32">
         {/* Main takeaways section */}
         <div className="mb-6">
           <h3 className="text-xl font-bold text-white mb-4">Key Takeaways</h3>

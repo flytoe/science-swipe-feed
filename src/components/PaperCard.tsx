@@ -84,7 +84,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
       layout
     >
       {/* Hero image section - larger height with content overlay */}
-      <div className="h-[80vh] relative">
+      <div className="h-[85vh] relative">
         <PaperCardPreview 
           imageSrc={imageSrc}
           displayTitle={displayTitle}
@@ -98,8 +98,8 @@ const PaperCard: React.FC<PaperCardProps> = ({
         />
       </div>
       
-      {/* Content section can now overlay onto the image when scrolled */}
-      <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[50vh] -mt-20 relative z-10">
+      {/* Content section overlays onto the image when scrolled */}
+      <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[50vh] -mt-28 relative z-10">
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
