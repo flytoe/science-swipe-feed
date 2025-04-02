@@ -19,8 +19,8 @@ export const useSwipeNavigation = ({
   const [isDragging, setIsDragging] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
-  // Increase threshold for more deliberate swipes
-  const SWIPE_THRESHOLD = 80;
+  // Use a lower threshold for more responsive swiping
+  const SWIPE_THRESHOLD = 60;
   
   const nextPaper = () => {
     if (currentIndex < papersLength - 1) {
@@ -57,6 +57,15 @@ export const useSwipeNavigation = ({
     if (!isDragging || isScrolling) return;
     
     const dragDistance = e.touches[0].clientX - dragStart;
+    const touchY = e.touches[0].clientY;
+    const initialY = e.touches[0].clientY;
+    
+    // Check if vertical scroll is larger than horizontal to avoid accidental swipes
+    const isVerticalScroll = Math.abs(touchY - initialY) > Math.abs(dragDistance);
+    
+    if (isVerticalScroll) {
+      return;
+    }
     
     // Use threshold for more deliberate swipes
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {

@@ -17,6 +17,15 @@ interface MindBlowButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
 }
 
+// Predefined quick tag options for mind-blow reasons
+const QUICK_TAGS = [
+  "Novel approach",
+  "Groundbreaking results",
+  "Surprising findings", 
+  "Counter-intuitive",
+  "Elegant solution"
+];
+
 const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   hasMindBlown,
   count,
@@ -30,9 +39,11 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
 }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [reason, setReason] = useState('');
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Handle click outside overlay to close it
   useEffect(() => {
@@ -49,6 +60,21 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     };
   }, []);
 
+  // Handle key press events for the textarea
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey && textareaRef.current?.contains(event.target as Node)) {
+        event.preventDefault(); // Prevent line breaks
+        handleSubmit(); // Submit the form
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [reason, selectedTags]);
+
   const handleClick = () => {
     if (!hasMindBlown) {
       // If not mind-blown yet, trigger mind-blown immediately
@@ -64,19 +90,35 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    if (reason.trim()) {
-      // Only send the reason as a parameter, don't toggle the mind-blown state again
-      // This way we're just adding a note to an existing mind-blow
-      onClick(reason);
+    let finalReason = reason.trim();
+    
+    // Add selected tags to the reason
+    if (selectedTags.length > 0) {
+      const tagsText = selectedTags.join(", ");
+      finalReason = finalReason ? `${finalReason} (${tagsText})` : tagsText;
+    }
+    
+    if (finalReason) {
+      onClick(finalReason);
     }
     
     setReason('');
+    setSelectedTags([]);
     setShowOverlay(false);
   };
 
   const handleClose = () => {
     setReason('');
+    setSelectedTags([]);
     setShowOverlay(false);
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
   
   return (
@@ -129,15 +171,15 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
       <AnimatePresence>
         {showOverlay && (
           <motion.div 
-            className="absolute bottom-full right-0 mb-2 w-64 bg-black/90 border border-white/20 p-3 rounded-lg shadow-xl z-50"
+            className="absolute bottom-full right-0 mb-2 w-80 bg-black/95 border border-white/20 p-4 rounded-lg shadow-xl z-50"
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             ref={overlayRef}
           >
-            <div className="flex justify-between items-center mb-2">
-              <p className="text-white text-sm">What blew your mind? (optional)</p>
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-white text-sm font-medium">What blew your mind?</p>
               <Button 
                 onClick={handleClose}
                 variant="ghost" 
@@ -147,14 +189,39 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
                 <X size={16} />
               </Button>
             </div>
+            
+            {/* Quick tags selection */}
+            <div className="mb-3 flex flex-wrap gap-2">
+              {QUICK_TAGS.map((tag, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => toggleTag(tag)}
+                  className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                    selectedTags.includes(tag) 
+                      ? 'bg-yellow-500 text-black' 
+                      : 'bg-white/10 text-white hover:bg-white/20'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            
             <form onSubmit={handleSubmit} ref={formRef}>
               <Textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="This research amazed me because..."
-                className="min-h-[80px] bg-white/10 border-white/20 text-white mb-2 text-sm"
+                placeholder="Or write your own reason..."
+                className="min-h-[80px] bg-white/10 border-white/20 text-white mb-3 text-sm"
                 maxLength={256}
-                autoFocus
+                ref={textareaRef}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
               />
               <div className="flex justify-end">
                 <Button 

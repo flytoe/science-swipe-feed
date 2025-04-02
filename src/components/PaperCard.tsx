@@ -76,15 +76,15 @@ const PaperCard: React.FC<PaperCardProps> = ({
 
   return (
     <motion.div 
-      className="paper-card bg-black text-white min-h-[100vh] w-full"
+      className="paper-card bg-black text-white min-h-[100vh] w-full overflow-y-auto"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
       exit="inactive"
       layout
     >
-      {/* Preview section at the top (larger height) */}
-      <div className="h-[70vh] sticky top-0 z-10">
+      {/* Hero image section - larger height with content overlay */}
+      <div className="h-[80vh] relative">
         <PaperCardPreview 
           imageSrc={imageSrc}
           displayTitle={displayTitle}
@@ -98,11 +98,12 @@ const PaperCard: React.FC<PaperCardProps> = ({
         />
       </div>
       
-      {/* Detailed content section with padding to prevent action bar overlap */}
-      <div className="bg-black pt-8 min-h-screen pb-24">
+      {/* Content section can now overlay onto the image when scrolled */}
+      <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[50vh] -mt-20 relative z-10">
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
+          abstract={paper.abstract}
           abstract_org={paper.abstract_org}
           formattedDate={formattedDate}
           doi={paper.doi}

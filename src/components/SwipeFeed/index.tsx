@@ -6,6 +6,7 @@ import PaperCard from '../PaperCard';
 import SwipeControls from './SwipeControls';
 import { useSwipeNavigation } from './useSwipeNavigation';
 import { ScrollArea } from '../ui/scroll-area';
+import { useIsMobile } from '../../hooks/use-mobile';
 
 interface SwipeFeedProps {
   papers: Paper[];
@@ -23,6 +24,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const [internalIndex, setInternalIndex] = useState(0);
   const [isDetailView, setIsDetailView] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   // Use external or internal state depending on what's provided
   const currentIndex = externalIndex !== undefined ? externalIndex : internalIndex;
@@ -119,59 +121,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
 
-  // Function to get the variants for staggered cards
-  const getCardVariants = (index: number) => {
-    const isCurrent = index === currentIndex;
-    const isPrev = index === currentIndex - 1 || (currentIndex === 0 && index === papers.length - 1);
-    const isNext = index === currentIndex + 1 || (currentIndex === papers.length - 1 && index === 0);
-    
-    if (isCurrent) {
-      return {
-        initial: { 
-          scale: 0.95, 
-          opacity: 0.5,
-          x: swipeDirection === 'left' ? '100%' : '-100%'
-        },
-        animate: { 
-          scale: 1, 
-          opacity: 1, 
-          x: 0,
-          zIndex: 10
-        },
-        exit: { 
-          scale: 0.95, 
-          opacity: 0.5, 
-          x: swipeDirection === 'left' ? '-100%' : '100%',
-          zIndex: 0
-        },
-        transition: {
-          type: "spring",
-          stiffness: 300,
-          damping: 30
-        }
-      };
-    } else if (isPrev) {
-      return {
-        initial: { scale: 0.9, x: '-80%', opacity: 0.7, zIndex: 5 },
-        animate: { scale: 0.9, x: '-15%', opacity: 0.7, zIndex: 5 },
-        exit: { scale: 0.9, x: '-80%', opacity: 0, zIndex: 5 }
-      };
-    } else if (isNext) {
-      return {
-        initial: { scale: 0.9, x: '80%', opacity: 0.7, zIndex: 5 },
-        animate: { scale: 0.9, x: '15%', opacity: 0.7, zIndex: 5 },
-        exit: { scale: 0.9, x: '80%', opacity: 0, zIndex: 5 }
-      };
-    }
-    
-    // For other cards
-    return {
-      initial: { opacity: 0, scale: 0.8, zIndex: 0 },
-      animate: { opacity: 0, scale: 0.8, zIndex: 0 },
-      exit: { opacity: 0, scale: 0.8, zIndex: 0 }
-    };
-  };
-  
+  // Create a more natural card swipe effect with previews of adjacent cards
   return (
     <div 
       className="relative h-full w-full mx-auto overflow-hidden"
@@ -180,33 +130,59 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     >
       <div className="absolute inset-0 overflow-y-auto overflow-x-hidden">
         <div className="h-full w-full relative">
-          {papers.map((paper, index) => (
-            <AnimatePresence key={paper?.doi || index} initial={false} mode="wait">
-              {index === currentIndex && (
-                <motion.div
-                  key={`card-${paper?.doi || index}`}
-                  custom={index}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  variants={getCardVariants(index)}
-                  className="absolute inset-0 w-full"
-                  drag="x"
-                  dragConstraints={dragConstraints}
-                  dragElastic={0.1}
-                  onDragEnd={handleDragEnd}
-                  dragDirectionLock
-                  style={{ touchAction: 'pan-y' }}
-                >
-                  <PaperCard 
-                    paper={paper}
-                    isActive={true}
-                    isGeneratingImage={isGeneratingImage}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          ))}
+          {papers.map((paper, index) => {
+            // Only render the current card fully
+            const isCurrentCard = index === currentIndex;
+            
+            return (
+              <AnimatePresence key={`card-${paper?.doi || index}`} initial={false} mode="wait">
+                {isCurrentCard && (
+                  <motion.div
+                    key={`card-${paper?.doi || index}`}
+                    initial={{ 
+                      opacity: 0, 
+                      x: swipeDirection === 'left' ? '100%' : '-100%',
+                      scale: 0.95
+                    }}
+                    animate={{ 
+                      opacity: 1, 
+                      x: 0, 
+                      scale: 1,
+                      zIndex: 10
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      x: swipeDirection === 'left' ? '-100%' : '100%',
+                      scale: 0.95,
+                      zIndex: 0
+                    }}
+                    transition={{ 
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30
+                    }}
+                    className="absolute inset-0 w-full"
+                    drag={isMobile ? "x" : false}
+                    dragConstraints={dragConstraints}
+                    dragElastic={0.1}
+                    onDragEnd={handleDragEnd}
+                    dragDirectionLock
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onWheel={handleWheel}
+                    style={{ touchAction: 'pan-y' }}
+                  >
+                    <PaperCard 
+                      paper={paper}
+                      isActive={true}
+                      isGeneratingImage={isGeneratingImage}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            );
+          })}
           
           {/* Staggered cards (visible only when not in detail view) */}
           {!isDetailView && papers.length > 1 && (
@@ -221,7 +197,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                   exit={{ x: "-80%", scale: 0.9, opacity: 0, zIndex: 1 }}
                 >
                   <div className="w-full h-full bg-black/60 rounded-lg overflow-hidden">
-                    <div className="w-full h-40 bg-gray-800 animate-pulse" />
+                    <div className="w-full h-[80vh] bg-gray-800 animate-pulse" />
+                    <div className="h-40 bg-black/80 p-6">
+                      <div className="h-4 w-3/4 bg-gray-700 rounded-full mb-4"></div>
+                      <div className="h-6 w-1/2 bg-gray-700 rounded-full"></div>
+                    </div>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -236,7 +216,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                   exit={{ x: "80%", scale: 0.9, opacity: 0, zIndex: 1 }}
                 >
                   <div className="w-full h-full bg-black/60 rounded-lg overflow-hidden">
-                    <div className="w-full h-40 bg-gray-800 animate-pulse" />
+                    <div className="w-full h-[80vh] bg-gray-800 animate-pulse" />
+                    <div className="h-40 bg-black/80 p-6">
+                      <div className="h-4 w-3/4 bg-gray-700 rounded-full mb-4"></div>
+                      <div className="h-6 w-1/2 bg-gray-700 rounded-full"></div>
+                    </div>
                   </div>
                 </motion.div>
               </AnimatePresence>

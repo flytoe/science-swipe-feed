@@ -33,7 +33,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
   ) : undefined;
 
   return (
-    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-5 z-20 px-6 py-3 bg-black/80 backdrop-blur-sm rounded-full shadow-lg">
+    <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-5 z-50 px-6 py-3 bg-black/90 backdrop-blur-sm rounded-full shadow-lg">
       {/* Navigation Controls */}
       <div className="flex items-center gap-4">
         <motion.button 
@@ -61,40 +61,37 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
         </motion.button>
       </div>
       
-      {/* View Paper Link */}
+      {/* View Paper Link - consistent styling with other buttons */}
       {doiUrl && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-blue-950/40 hover:bg-blue-900/60 text-blue-400 border-blue-900/40"
-          asChild
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
         >
           <a 
             href={doiUrl}
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
+            className="flex items-center justify-center gap-1 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors text-sm"
           >
-            <ExternalLink size={16} className="mr-1" />
+            <ExternalLink size={16} />
             <span>View Paper</span>
           </a>
-        </Button>
+        </motion.div>
       )}
       
-      {/* Mind Blow Button */}
-      <div>
-        <MindBlowButton
-          hasMindBlown={hasMindBlown}
-          count={count}
-          isTopPaper={isTopPaper}
-          isLoading={isLoading}
-          onClick={toggleMindBlow}
-          size="icon"
-          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
-          showCount={false}
-          variant="outline"
-        />
-      </div>
+      {/* Mind Blow Button - consistent styling */}
+      <MindBlowButton
+        hasMindBlown={hasMindBlown}
+        count={count}
+        isTopPaper={isTopPaper}
+        isLoading={isLoading}
+        onClick={toggleMindBlow}
+        size="icon"
+        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors"
+        showCount={false}
+        variant="outline"
+      />
     </div>
   );
 };
