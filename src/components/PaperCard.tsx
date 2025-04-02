@@ -76,7 +76,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
 
   return (
     <motion.div 
-      className="paper-card bg-black text-white min-h-[100vh] w-full overflow-y-auto"
+      className="paper-card bg-black text-white min-h-[100vh] w-full"
       variants={cardVariants}
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
@@ -103,7 +103,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
-          abstract={paper.abstract}
+          abstract={paper.abstract_org} // Use abstract_org instead of abstract
           abstract_org={paper.abstract_org}
           formattedDate={formattedDate}
           doi={paper.doi}

@@ -1,11 +1,10 @@
 
 import React from 'react';
-import { ScrollArea } from './ui/scroll-area';
 import PaperCardTakeaways from './PaperCardTakeaways';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import HeroImageSection from './paper-content/HeroImageSection';
-import AbstractSection from './paper-content/AbstractSection';
 import OriginalTitleSection from './paper-content/OriginalTitleSection';
+import AbstractSection from './paper-content/AbstractSection';
 import DisclaimerSection from './paper-content/DisclaimerSection';
 import ContentFooter from './paper-content/ContentFooter';
 
@@ -37,7 +36,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   hideHeroImage = false
 }) => {
   return (
-    <div className="paper-card-content h-full flex flex-col overflow-y-auto">
+    <div className="paper-card-content">
       {/* Content section with improved spacing - added significantly more bottom padding for action bar */}
       <div className="p-6 pt-0 pb-32">
         {/* Main takeaways section */}
