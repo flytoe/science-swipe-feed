@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react';
 import { useMindBlow } from '../../hooks/use-mind-blow';
 import MindBlowButton from '../MindBlowButton';
 import { motion } from 'framer-motion';
-import { Button } from '../ui/button';
 
 interface SwipeControlsProps {
   currentIndex: number;
@@ -80,7 +79,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
         </motion.div>
       )}
       
-      {/* Mind Blow Button - with updated styling */}
+      {/* Mind Blow Button - with updated styling (removed outline) */}
       <MindBlowButton
         hasMindBlown={hasMindBlown}
         count={count}
@@ -88,7 +87,7 @@ const SwipeControls: React.FC<SwipeControlsProps> = ({
         isLoading={isLoading}
         onClick={toggleMindBlow}
         size="icon"
-        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors border-none"
+        className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-colors border-none shadow-none"
         showCount={false}
         variant="ghost"
       />

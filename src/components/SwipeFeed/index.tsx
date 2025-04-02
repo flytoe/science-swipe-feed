@@ -59,8 +59,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   }, []);
   
   const {
-    nextPaper,
-    prevPaper,
+    nextPaper: goToNextPaper,
+    prevPaper: goToPrevPaper,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -85,8 +85,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const currentPaper = papers[currentIndex];
   const nextIndex = currentIndex < papers.length - 1 ? currentIndex + 1 : 0;
   const prevIndex = currentIndex > 0 ? currentIndex - 1 : papers.length - 1;
-  const nextPaper = papers[nextIndex];
-  const prevPaper = papers[prevIndex];
+  const nextPaperData = papers[nextIndex];
+  const prevPaperData = papers[prevIndex];
   
   // Helper function to turn off detail view
   const scrollToTop = () => {
@@ -102,9 +102,9 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const handleNavigate = (direction: 'next' | 'prev') => {
     scrollToTop();
     if (direction === 'next') {
-      nextPaper();
+      goToNextPaper();
     } else {
-      prevPaper();
+      goToPrevPaper();
     }
   };
 
@@ -197,7 +197,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">
                   <PaperCard 
-                    paper={prevPaper}
+                    paper={prevPaperData}
                     isActive={false}
                   />
                 </div>
@@ -217,7 +217,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">
                   <PaperCard 
-                    paper={nextPaper}
+                    paper={nextPaperData}
                     isActive={false}
                   />
                 </div>

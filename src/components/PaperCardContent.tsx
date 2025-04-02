@@ -12,7 +12,7 @@ import ContentFooter from './paper-content/ContentFooter';
 interface PaperCardContentProps {
   title: string;
   title_org?: string;
-  abstract?: string;
+  abstract?: string | null;  // Making abstract nullable to match Paper type
   abstract_org?: string;
   formattedDate: string;
   doi?: string;
