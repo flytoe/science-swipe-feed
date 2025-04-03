@@ -26,12 +26,10 @@ const PaperCard: React.FC<PaperCardProps> = ({
   
   const cardVariants = {
     active: {
-      scale: 1,
       opacity: 1,
       transition: { duration: 0.3, ease: 'easeOut' }
     },
     inactive: {
-      scale: 0.98,
       opacity: 0,
       transition: { duration: 0.3, ease: 'easeIn' }
     }
@@ -75,16 +73,9 @@ const PaperCard: React.FC<PaperCardProps> = ({
   const isGenerating = isGeneratingImage || localIsGeneratingImage || isGeneratingFromHook;
 
   return (
-    <motion.div 
-      className="paper-card bg-black text-white min-h-[100vh] w-full"
-      variants={cardVariants}
-      initial="inactive"
-      animate={isActive ? "active" : "inactive"}
-      exit="inactive"
-      layout="position"
-    >
+    <div className="paper-card bg-black text-white min-h-[100vh] w-full">
       {/* Hero image section - larger height with content overlay */}
-      <div className="h-[85vh] relative">
+      <div className="h-[70vh] relative">
         <PaperCardPreview 
           imageSrc={imageSrc}
           displayTitle={displayTitle}
@@ -99,7 +90,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
       </div>
       
       {/* Content section overlays onto the image when scrolled */}
-      <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[50vh] -mt-28 relative z-10">
+      <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[80vh] -mt-28 relative z-10">
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
@@ -120,7 +111,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
         paper={paper}
         onRegenerationComplete={handleRegenerationComplete}
       />
-    </motion.div>
+    </div>
   );
 };
 

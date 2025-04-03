@@ -35,14 +35,20 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
   
-  // Handle scroll detection for detail view
+  // Handle scroll detection for detail view - with debounce
   useEffect(() => {
+    let timeoutId: number;
+    
     const handleScroll = () => {
       if (!feedRef.current) return;
       
       const scrollTop = feedRef.current.scrollTop;
-      // If scrolled more than 100px, consider it detail view
-      setIsDetailView(scrollTop > 100);
+      
+      // Use setTimeout to debounce the scroll detection
+      clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        setIsDetailView(scrollTop > 100);
+      }, 50);
     };
     
     const currentRef = feedRef.current;
@@ -54,6 +60,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       if (currentRef) {
         currentRef.removeEventListener('scroll', handleScroll);
       }
+      clearTimeout(timeoutId);
     };
   }, []);
   
@@ -124,17 +131,14 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
 
-  // Create a more natural card swipe effect with previews of adjacent cards
   return (
     <div 
-      className="relative h-full w-full mx-auto"
+      className="relative h-full w-full max-w-md mx-auto overflow-y-auto overflow-x-hidden"
       ref={feedRef}
-      style={{ overflowY: 'auto', overflowX: 'hidden' }}
     >
-      <div className="min-h-full w-full pb-24">
+      <div className="min-h-full w-full">
         <div className="h-full w-full relative">
-          {/* Current card */}
-          <AnimatePresence mode="popLayout" initial={false}>
+          <AnimatePresence mode="sync" initial={false}>
             <motion.div
               key={`card-${currentPaper?.doi || currentIndex}`}
               initial={{ 
@@ -155,11 +159,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                 zIndex: 0
               }}
               transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 30
+                type: "tween",
+                ease: "easeInOut",
+                duration: 0.3
               }}
-              className="w-full"
+              className="w-full h-full"
               drag={isMobile && !isDetailView ? "x" : false}
               dragConstraints={dragConstraints}
               dragElastic={0.1}
@@ -169,7 +173,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               onTouchMove={!isDetailView ? handleTouchMove : undefined}
               onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
               onWheel={!isDetailView ? handleWheel : undefined}
-              style={{ touchAction: isDetailView ? 'pan-y' : 'none' }}
+              style={{ 
+                touchAction: isDetailView ? 'pan-y' : 'none',
+                position: 'relative',
+                willChange: 'transform'
+              }}
             >
               <PaperCard 
                 paper={currentPaper}
@@ -189,9 +197,9 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                 initial={{ x: "-110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
                 animate={{ x: "-85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
                 transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30
+                  type: "tween",
+                  ease: "easeInOut",
+                  duration: 0.3
                 }}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">
@@ -209,9 +217,9 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                 initial={{ x: "110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
                 animate={{ x: "85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
                 transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30
+                  type: "tween",
+                  ease: "easeInOut",
+                  duration: 0.3
                 }}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">
