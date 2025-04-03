@@ -134,7 +134,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       <div className="min-h-full w-full pb-24">
         <div className="h-full w-full relative">
           {/* Current card */}
-          <AnimatePresence key={`animation-${currentIndex}`} initial={false} mode="wait">
+          <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={`card-${currentPaper?.doi || currentIndex}`}
               initial={{ 
@@ -169,7 +169,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               onTouchMove={!isDetailView ? handleTouchMove : undefined}
               onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
               onWheel={!isDetailView ? handleWheel : undefined}
-              style={{ touchAction: 'pan-y' }}
+              style={{ touchAction: isDetailView ? 'pan-y' : 'none' }}
             >
               <PaperCard 
                 paper={currentPaper}

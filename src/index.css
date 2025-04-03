@@ -39,7 +39,7 @@
   }
   
   .paper-card-content {
-    @apply p-5 flex flex-col flex-1 overflow-hidden;
+    @apply flex flex-col flex-1;
   }
   
   .paper-card-title {

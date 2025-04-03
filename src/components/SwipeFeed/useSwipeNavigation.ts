@@ -16,11 +16,14 @@ export const useSwipeNavigation = ({
   isScrolling = false
 }: UseSwipeNavigationProps) => {
   const [dragStart, setDragStart] = useState(0);
+  const [dragStartY, setDragStartY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
-  // Use a lower threshold for more responsive swiping
+  // Use a reasonable threshold for swipes
   const SWIPE_THRESHOLD = 60;
+  // Vertical threshold to detect when user is trying to scroll vertically
+  const VERTICAL_THRESHOLD = 30;
   
   const goToNextPaper = () => {
     if (currentIndex < papersLength - 1) {
@@ -50,26 +53,28 @@ export const useSwipeNavigation = ({
     if (isScrolling) return;
     
     setDragStart(e.touches[0].clientX);
+    setDragStartY(e.touches[0].clientY);
     setIsDragging(true);
   };
   
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || isScrolling) return;
     
-    const dragDistance = e.touches[0].clientX - dragStart;
-    const touchY = e.touches[0].clientY;
-    const initialY = e.touches[0].clientY;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
     
-    // Check if vertical scroll is larger than horizontal to avoid accidental swipes
-    const isVerticalScroll = Math.abs(touchY - initialY) > Math.abs(dragDistance);
+    const dragDistanceX = currentX - dragStart;
+    const dragDistanceY = currentY - dragStartY;
     
-    if (isVerticalScroll) {
+    // If vertical movement is significantly larger than horizontal, treat as scrolling
+    if (Math.abs(dragDistanceY) > Math.abs(dragDistanceX) + VERTICAL_THRESHOLD) {
+      setIsDragging(false);
       return;
     }
     
-    // Use threshold for more deliberate swipes
-    if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
-      if (dragDistance > 0) {
+    // If horizontal swipe is large enough, trigger page change and end dragging
+    if (Math.abs(dragDistanceX) > SWIPE_THRESHOLD) {
+      if (dragDistanceX > 0) {
         setSwipeDirection('right');
         goToPrevPaper();
       } else {

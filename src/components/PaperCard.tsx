@@ -81,7 +81,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
       initial="inactive"
       animate={isActive ? "active" : "inactive"}
       exit="inactive"
-      layout
+      layout="position"
     >
       {/* Hero image section - larger height with content overlay */}
       <div className="h-[85vh] relative">
