@@ -103,14 +103,14 @@ const PaperCard: React.FC<PaperCardProps> = ({
         <PaperCardContent
           title={displayTitle}
           title_org={paper.title_org}
-          abstract={paper.abstract_org} // Use abstract_org instead of abstract
+          abstract={paper.abstract_org}
           abstract_org={paper.abstract_org}
           formattedDate={formattedDate}
           doi={paper.doi}
           takeaways={formattedTakeaways}
           creator={paper.creator}
           imageSrc={imageSrc}
-          hideHeroImage={true} // Hide duplicate hero image in content section
+          hideHeroImage={true}
         />
       </div>
 

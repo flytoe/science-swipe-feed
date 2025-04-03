@@ -5,7 +5,6 @@ import { type Paper } from '../../lib/supabase';
 import PaperCard from '../PaperCard';
 import SwipeControls from './SwipeControls';
 import { useSwipeNavigation } from './useSwipeNavigation';
-import { ScrollArea } from '../ui/scroll-area';
 import { useIsMobile } from '../../hooks/use-mobile';
 
 interface SwipeFeedProps {
@@ -59,8 +58,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   }, []);
   
   const {
-    nextPaper: goToNextPaper,
-    prevPaper: goToPrevPaper,
+    goToNextPaper,
+    goToPrevPaper,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
@@ -128,11 +127,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   // Create a more natural card swipe effect with previews of adjacent cards
   return (
     <div 
-      className="relative h-full w-full mx-auto overflow-hidden"
+      className="relative h-full w-full mx-auto"
       ref={feedRef}
       style={{ overflowY: 'auto', overflowX: 'hidden' }}
     >
-      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden pb-24">
+      <div className="min-h-full w-full pb-24">
         <div className="h-full w-full relative">
           {/* Current card */}
           <AnimatePresence key={`animation-${currentIndex}`} initial={false} mode="wait">
@@ -160,16 +159,16 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                 stiffness: 300,
                 damping: 30
               }}
-              className="absolute inset-0 w-full"
-              drag={isMobile ? "x" : false}
+              className="w-full"
+              drag={isMobile && !isDetailView ? "x" : false}
               dragConstraints={dragConstraints}
               dragElastic={0.1}
               onDragEnd={handleDragEnd}
               dragDirectionLock
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onWheel={handleWheel}
+              onTouchStart={!isDetailView ? handleTouchStart : undefined}
+              onTouchMove={!isDetailView ? handleTouchMove : undefined}
+              onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
+              onWheel={!isDetailView ? handleWheel : undefined}
               style={{ touchAction: 'pan-y' }}
             >
               <PaperCard 

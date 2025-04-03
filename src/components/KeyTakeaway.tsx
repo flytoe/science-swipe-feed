@@ -19,7 +19,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
 
   return (
     <div 
-      className={`rounded-lg p-4 ${
+      className={`rounded-lg p-4 w-full ${
         isWhyItMatters 
           ? 'bg-indigo-950/40 border border-indigo-800/30' 
           : 'bg-white/5 border border-white/10'

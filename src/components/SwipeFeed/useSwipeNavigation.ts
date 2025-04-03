@@ -22,7 +22,7 @@ export const useSwipeNavigation = ({
   // Use a lower threshold for more responsive swiping
   const SWIPE_THRESHOLD = 60;
   
-  const nextPaper = () => {
+  const goToNextPaper = () => {
     if (currentIndex < papersLength - 1) {
       setCurrentIndex(currentIndex + 1);
       setSwipeDirection('left');
@@ -34,7 +34,7 @@ export const useSwipeNavigation = ({
     }
   };
   
-  const prevPaper = () => {
+  const goToPrevPaper = () => {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setSwipeDirection('right');
@@ -71,10 +71,10 @@ export const useSwipeNavigation = ({
     if (Math.abs(dragDistance) > SWIPE_THRESHOLD) {
       if (dragDistance > 0) {
         setSwipeDirection('right');
-        prevPaper();
+        goToPrevPaper();
       } else {
         setSwipeDirection('left');
-        nextPaper();
+        goToNextPaper();
       }
       
       setIsDragging(false);
@@ -96,17 +96,17 @@ export const useSwipeNavigation = ({
     if (Math.abs(e.deltaX) > 40) {
       if (e.deltaX > 0) {
         setSwipeDirection('left');
-        nextPaper();
+        goToNextPaper();
       } else {
         setSwipeDirection('right');
-        prevPaper();
+        goToPrevPaper();
       }
     }
   };
   
   return {
-    nextPaper,
-    prevPaper,
+    goToNextPaper,
+    goToPrevPaper,
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd,
