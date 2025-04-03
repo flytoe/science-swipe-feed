@@ -2,11 +2,9 @@
 import React from 'react';
 import PaperCardTakeaways from './PaperCardTakeaways';
 import { FormattedTakeaway } from '../utils/takeawayParser';
-import HeroImageSection from './paper-content/HeroImageSection';
 import OriginalTitleSection from './paper-content/OriginalTitleSection';
 import AbstractSection from './paper-content/AbstractSection';
 import DisclaimerSection from './paper-content/DisclaimerSection';
-import ContentFooter from './paper-content/ContentFooter';
 
 interface PaperCardContentProps {
   title: string;
@@ -37,11 +35,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
 }) => {
   return (
     <div className="paper-card-content">
-      {/* Content section with improved spacing - increased width for better readability */}
-      <div className="p-6 pt-0 pb-24">
+      <div className="p-6 pt-20 pb-24">
         {/* Main takeaways section with expanded width */}
         <div className="mb-6 max-w-4xl mx-auto">
-          <h3 className="text-xl font-bold text-white mb-4">Key Takeaways</h3>
           {takeaways && takeaways.length > 0 ? (
             <PaperCardTakeaways takeaways={takeaways} />
           ) : abstract ? (
@@ -52,18 +48,11 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
           ) : null}
         </div>
         
-        {/* Original Title Section */}
         <OriginalTitleSection title={title} title_org={title_org} />
-        
-        {/* Original Abstract Section with Collapsible */}
         <AbstractSection abstract_org={abstract_org} />
-        
-        {/* AI Disclaimer */}
         <DisclaimerSection />
       </div>
       
-      {/* Footer is conditionally rendered */}
-      {!hideFooter && <ContentFooter formattedDate={formattedDate} doi={doi} />}
     </div>
   );
 };
