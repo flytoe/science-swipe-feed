@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Separator } from '@/components/ui/separator';
 import { AlertCircle, AlertOctagon, ArrowUpRight } from 'lucide-react';
 
 interface KeyTakeawayProps {
@@ -21,8 +20,8 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
     <div 
       className={`rounded-lg p-4 w-full ${
         isWhyItMatters 
-          ? 'bg-indigo-950/40 border border-indigo-800/30' 
-          : 'bg-white/5 border border-white/10'
+          ? 'bg-indigo-950/100' 
+          : 'bg-white/0'
       }`}
     >
       <div className="flex">
