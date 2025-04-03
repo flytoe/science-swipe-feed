@@ -5,20 +5,19 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overscroll-none;
   }
 }
 
 @layer components {
   .swipe-feed-container {
-    @apply relative h-screen md:h-screen overflow-hidden bg-gradient-to-b from-white to-gray-50;
+    @apply relative h-screen overflow-hidden bg-gradient-to-b from-black to-gray-900;
   }
   
   .paper-card {
-    @apply overflow-hidden bg-white flex flex-col h-full w-full animate-fade-in;
+    @apply overflow-hidden flex flex-col h-full w-full animate-fade-in;
   }
   
-  /* Full-screen design styling */
   .paper-card.overlapping-design {
     @apply relative h-full;
   }
@@ -69,8 +68,6 @@
   .key-takeaway-text {
     @apply flex-1;
   }
-  
-  /* Removed the container styling for these classes since we're using badges instead */
   
   .loading-spinner {
     @apply w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin;

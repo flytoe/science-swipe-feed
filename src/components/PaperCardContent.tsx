@@ -38,7 +38,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   return (
     <div className="paper-card-content">
       {/* Content section with improved spacing - increased width for better readability */}
-      <div className="p-6 pt-0 pb-24">
+      <div className="p-6 pt-0 pb-28">
         {/* Main takeaways section with expanded width */}
         <div className="mb-6 max-w-4xl mx-auto">
           <h3 className="text-xl font-bold text-white mb-4">Key Takeaways</h3>
