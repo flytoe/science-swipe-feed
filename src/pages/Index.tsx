@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import SwipeFeed from '../components/SwipeFeed';
 import { FilterX, SearchIcon } from 'lucide-react';
@@ -13,6 +12,13 @@ import {
   DialogOverlay,
   DialogPortal,
 } from '@/components/ui/dialog';
+import FeedModeSelector from '@/components/FeedModeSelector';
+import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
+import OnboardingModal from '@/components/Onboarding/OnboardingModal';
+import { useOnboardingStore } from '@/hooks/use-onboarding';
+import DonationPrompt from '@/components/donations/DonationPrompt';
+import DonationModal from '@/components/donations/DonationModal';
+import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -25,24 +31,33 @@ const Index: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
   
+  const { currentMode } = useFeedModeStore();
+  
+  const { completedOnboarding, showOnboarding, setShowOnboarding } = useOnboardingStore();
+  
+  const [showDonationPrompt, setShowDonationPrompt] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  const [isSubscriptionModal, setIsSubscriptionModal] = useState(false);
+  const { shouldShowDonationPrompt, markDonationPromptSeen, resetPromptTimestamp } = useMindBlowTracker();
+  
+  useEffect(() => {
+    if (!completedOnboarding && !showOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [completedOnboarding, showOnboarding, setShowOnboarding]);
+  
   useEffect(() => {
     const checkDatabase = async () => {
       try {
         setIsLoading(true);
         
         const papersData = await getPapers();
-        // Sort papers by created_at, newest first
-        const sortedPapers = [...papersData].sort((a, b) => 
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        
-        setPapers(sortedPapers);
-        setFilteredPapers(sortedPapers);
+        setPapers(papersData);
         
         const { data, error, count } = await supabase
           .from('n8n_table')
           .select('doi', { count: 'exact' })
-          .eq('ai_summary_done', true) // Only count papers with ai_summary_done = true
+          .eq('ai_summary_done', true)
           .limit(1);
         
         if (error) {
@@ -71,25 +86,31 @@ const Index: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedCategories.length === 0) {
-      setFilteredPapers(papers);
-    } else {
-      const filtered = papers.filter(paper => {
-        if (!paper.category) return false;
-        
-        const paperCategories = Array.isArray(paper.category) 
-          ? paper.category 
-          : [paper.category];
-        
-        return selectedCategories.some(selected => 
-          paperCategories.includes(selected)
-        );
-      });
-      
-      setFilteredPapers(filtered);
-      setCurrentPaperIndex(0);
+    const categoryFiltered = selectedCategories.length === 0
+      ? papers
+      : papers.filter(paper => {
+          if (!paper.category) return false;
+          
+          const paperCategories = Array.isArray(paper.category) 
+            ? paper.category 
+            : [paper.category];
+          
+          return selectedCategories.some(selected => 
+            paperCategories.includes(selected)
+          );
+        });
+    
+    const sorted = sortPapers(categoryFiltered, currentMode);
+    setFilteredPapers(sorted);
+    setCurrentPaperIndex(0);
+  }, [selectedCategories, papers, currentMode]);
+
+  useEffect(() => {
+    if (shouldShowDonationPrompt()) {
+      setShowDonationPrompt(true);
+      resetPromptTimestamp();
     }
-  }, [selectedCategories, papers]);
+  }, [shouldShowDonationPrompt, resetPromptTimestamp]);
 
   const addSamplePaper = async () => {
     try {
@@ -150,21 +171,46 @@ const Index: React.FC = () => {
     }
   };
 
+  const handleCloseDonationPrompt = () => {
+    setShowDonationPrompt(false);
+  };
+
+  const handleDonate = () => {
+    setShowDonationPrompt(false);
+    setIsSubscriptionModal(false);
+    setShowDonationModal(true);
+  };
+
+  const handleSubscribe = () => {
+    setShowDonationPrompt(false);
+    setIsSubscriptionModal(true);
+    setShowDonationModal(true);
+  };
+
+  const handleCloseDonationModal = () => {
+    setShowDonationModal(false);
+    markDonationPromptSeen();
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
-        <div className="container max-w-md mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-semibold">Research Feed</h1>
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white"
-              onClick={() => setIsFilterOpen(true)}
-            >
-              <SearchIcon className="h-5 w-5" />
-            </Button>
+        <div className="container max-w-md mx-auto px-4 py-4 flex flex-col items-center gap-3">
+          <div className="w-full flex items-center justify-between">
+            <h1 className="text-xl font-semibold">Research Feed</h1>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white"
+                onClick={() => setIsFilterOpen(true)}
+              >
+                <SearchIcon className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
+          
+          <FeedModeSelector />
         </div>
       </header>
 
@@ -203,6 +249,11 @@ const Index: React.FC = () => {
         </DialogPortal>
       </Dialog>
 
+      <OnboardingModal 
+        isOpen={showOnboarding} 
+        onClose={() => setShowOnboarding(false)} 
+      />
+
       {isLoading ? (
         <div className="max-w-md mx-auto mt-6 px-4 flex justify-center">
           <div className="loading-spinner" />
@@ -237,6 +288,19 @@ const Index: React.FC = () => {
           />
         )}
       </div>
+      
+      <DonationPrompt 
+        isVisible={showDonationPrompt}
+        onClose={handleCloseDonationPrompt}
+        onDonate={handleDonate}
+        onSubscribe={handleSubscribe}
+      />
+      
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={handleCloseDonationModal}
+        isSubscription={isSubscriptionModal}
+      />
     </div>
   );
 };

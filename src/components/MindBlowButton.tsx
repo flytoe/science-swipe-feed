@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Textarea } from './ui/textarea';
 import { X } from 'lucide-react';
+import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 
 interface MindBlowButtonProps {
   hasMindBlown: boolean;
@@ -44,6 +45,9 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Use the mind blow tracker
+  const { increment } = useMindBlowTracker();
 
   // Handle click outside overlay to close it
   useEffect(() => {
@@ -79,6 +83,8 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     if (!hasMindBlown) {
       // If not mind-blown yet, trigger mind-blown immediately
       onClick();
+      // Track the mind-blow
+      increment();
       // Then show overlay for notes
       setShowOverlay(true);
     } else {

@@ -87,8 +87,9 @@ export const useSwipeNavigation = ({
     
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
-    const timeDelta = e.timeStamp - e.touches[0]?.timeStamp || 0;
-    const velocity = Math.abs(deltaX) / Math.max(timeDelta, 1);
+    // Fix: Remove reference to timeStamp which doesn't exist on Touch
+    const timeDelta = 150; // Use a default time delta instead
+    const velocity = Math.abs(deltaX) / timeDelta;
     
     // Process horizontal swipes with improved detection logic
     if ((Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) || 
