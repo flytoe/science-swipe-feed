@@ -35,16 +35,19 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
 }) => {
   return (
     <div className="paper-card-content">
-      <div className="p-6 pt-20 pb-24">
+      <div className="p-6 pt-20 pb-24 max-w-4xl mx-auto">
         {/* Main takeaways section with expanded width */}
-        <div className="mb-6 max-w-4xl mx-auto">
+        <div className="mb-6">
           {takeaways && takeaways.length > 0 ? (
             <PaperCardTakeaways takeaways={takeaways} />
           ) : abstract ? (
             // Fallback to abstract if no takeaways are available
-            <p className="text-sm md:text-base text-white/80 mb-4">
-              {abstract}
-            </p>
+            <div className="mt-6 mb-8">
+              <h3 className="text-base font-semibold uppercase text-indigo-400 mb-4">Summary</h3>
+              <p className="text-base text-white/80 leading-relaxed">
+                {abstract}
+              </p>
+            </div>
           ) : null}
         </div>
         
@@ -52,7 +55,6 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
         <AbstractSection abstract_org={abstract_org} />
         <DisclaimerSection />
       </div>
-      
     </div>
   );
 };

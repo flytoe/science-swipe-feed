@@ -17,11 +17,11 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
 
   return (
     <div className="mt-6 mb-8">
-      <h3 className="text-base font-semibold uppercase text-indigo-400 mb-3">Key Insights</h3>
+      <h3 className="text-base font-semibold uppercase text-indigo-400 mb-4">Key Insights</h3>
       
       {/* Display "why it matters" takeaways first with special styling */}
       {whyItMattersTakeaways.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-5">
           {whyItMattersTakeaways.map((takeaway, index) => (
             <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">
               {takeaway.tag && (
@@ -40,9 +40,9 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
       )}
       
       {/* Display other takeaways */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         {otherTakeaways.map((takeaway, index) => (
-          <div key={`other-${index}`} className="flex flex-col gap-2 mb-3">
+          <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
             {takeaway.tag && (
               <Badge variant="outline" className="self-start text-xs">
                 {takeaway.tag}

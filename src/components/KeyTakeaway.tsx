@@ -18,7 +18,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
 
   return (
     <div 
-      className={`rounded-lg p-4 w-full ${
+      className={`rounded-lg p-4 w-full shadow-sm ${
         isWhyItMatters 
           ? 'bg-indigo-950/100' 
           : 'bg-white/0'
@@ -26,7 +26,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
     >
       <div className="flex">
         <div className="mr-3 flex-shrink-0">
-          <div className={`w-1 h-full ${
+          <div className={`w-1.5 h-full ${
             isWhyItMatters 
               ? 'bg-gradient-to-b from-indigo-400 to-purple-500' 
               : 'bg-gradient-to-b from-blue-400 to-purple-500'
@@ -34,7 +34,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
         </div>
         
         <div className="flex-1">
-          <p className="text-white/90 text-base">
+          <p className="text-white/90 text-base leading-relaxed">
             {text}
           </p>
           

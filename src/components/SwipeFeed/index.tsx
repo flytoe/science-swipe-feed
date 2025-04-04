@@ -23,6 +23,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const [internalIndex, setInternalIndex] = useState(0);
   const [isDetailView, setIsDetailView] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   
   // Use external or internal state depending on what's provided
@@ -35,7 +36,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
   
-  // Handle scroll detection for detail view - with debounce
+  // Handle scroll detection for detail view - with improved debounce
   useEffect(() => {
     let timeoutId: number;
     
@@ -44,16 +45,18 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       
       const scrollTop = feedRef.current.scrollTop;
       
-      // Use setTimeout to debounce the scroll detection
+      // Clear the previous timeout
       clearTimeout(timeoutId);
+      
+      // Set a new timeout to update the state after the user has stopped scrolling
       timeoutId = window.setTimeout(() => {
         setIsDetailView(scrollTop > 100);
-      }, 50);
+      }, 100); // Slightly longer debounce for better performance
     };
     
     const currentRef = feedRef.current;
     if (currentRef) {
-      currentRef.addEventListener('scroll', handleScroll);
+      currentRef.addEventListener('scroll', handleScroll, { passive: true });
     }
     
     return () => {
@@ -114,19 +117,22 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
 
-  // Drag constraints for horizontal swiping
+  // Enhanced drag constraints with friction
   const dragConstraints = { left: 0, right: 0 };
   
-  // Calculate drag direction and handle completion
+  // Improved drag handling with velocity-based decisions
   const handleDragEnd = (event: any, info: any) => {
     if (isDetailView) return;
     
-    const threshold = 80; // Lower threshold for easier swiping
+    const threshold = 50; // Lower threshold for easier swiping
+    const velocityThreshold = 0.3; // Add velocity threshold for more natural swiping
     const dragX = info.offset.x;
+    const velocityX = info.velocity.x;
     
-    if (dragX > threshold) {
+    // Consider both distance and velocity for more natural swiping
+    if (dragX > threshold || velocityX > velocityThreshold) {
       handleNavigate('prev');
-    } else if (dragX < -threshold) {
+    } else if (dragX < -threshold || velocityX < -velocityThreshold) {
       handleNavigate('next');
     }
   };
@@ -136,15 +142,15 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       className="relative h-full w-full max-w-md mx-auto overflow-y-auto overflow-x-hidden"
       ref={feedRef}
     >
-      <div className="min-h-full w-full">
-        <div className="h-full w-full relative">
-          <AnimatePresence mode="sync" initial={false}>
+      <div className="min-h-full w-full" ref={contentRef}>
+        <div className="h-full w-full relative will-change-transform">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`card-${currentPaper?.doi || currentIndex}`}
               initial={{ 
                 opacity: 0, 
                 x: swipeDirection === 'left' ? '100%' : '-100%',
-                scale: 0.95
+                scale: 0.92
               }}
               animate={{ 
                 opacity: 1, 
@@ -155,13 +161,14 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               exit={{ 
                 opacity: 0, 
                 x: swipeDirection === 'left' ? '-100%' : '100%',
-                scale: 0.95,
+                scale: 0.92,
                 zIndex: 0
               }}
               transition={{ 
-                type: "tween",
-                ease: "easeInOut",
-                duration: 0.3
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                mass: 1
               }}
               className="w-full h-full"
               drag={isMobile && !isDetailView ? "x" : false}
@@ -176,7 +183,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               style={{ 
                 touchAction: isDetailView ? 'pan-y' : 'none',
                 position: 'relative',
-                willChange: 'transform'
+                willChange: 'transform',
+                backfaceVisibility: 'hidden'
               }}
             >
               <PaperCard 
@@ -194,12 +202,16 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               <motion.div
                 key={`prev-peek-${prevIndex}`}
                 className="absolute inset-0 w-full pointer-events-none"
-                initial={{ x: "-110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                animate={{ x: "-85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                initial={{ x: "-110%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
+                animate={{ x: "-85%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
                 transition={{
-                  type: "tween",
-                  ease: "easeInOut",
-                  duration: 0.3
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+                style={{
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">
@@ -214,12 +226,16 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
               <motion.div
                 key={`next-peek-${nextIndex}`}
                 className="absolute inset-0 w-full pointer-events-none"
-                initial={{ x: "110%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
-                animate={{ x: "85%", scale: 0.9, opacity: 0.7, zIndex: 1 }}
+                initial={{ x: "110%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
+                animate={{ x: "85%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
                 transition={{
-                  type: "tween",
-                  ease: "easeInOut",
-                  duration: 0.3
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30
+                }}
+                style={{
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <div className="w-full h-full rounded-lg overflow-hidden">

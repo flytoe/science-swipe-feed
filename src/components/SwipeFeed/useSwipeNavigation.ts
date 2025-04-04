@@ -17,13 +17,15 @@ export const useSwipeNavigation = ({
 }: UseSwipeNavigationProps) => {
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchStartY, setTouchStartY] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+  const [touchEndY, setTouchEndY] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   
-  // Thresholds for detecting swipes vs. scrolls
-  const SWIPE_THRESHOLD = 50;
-  const SCROLL_TOLERANCE = 30; 
-  const VELOCITY_THRESHOLD = 0.5;
+  // Enhanced thresholds for more reliable detection
+  const SWIPE_THRESHOLD = 40; // Lower threshold for more responsive swipes
+  const SCROLL_TOLERANCE = 25; // Refined tolerance to better distinguish swipes from scrolls
+  const VELOCITY_THRESHOLD = 0.3; // Velocity-based detection for more natural swipes
   
   const goToNextPaper = () => {
     if (isScrolling) return;
@@ -59,6 +61,8 @@ export const useSwipeNavigation = ({
     const touch = e.touches[0];
     setTouchStartX(touch.clientX);
     setTouchStartY(touch.clientY);
+    setTouchEndX(touch.clientX); // Initialize end positions to start positions
+    setTouchEndY(touch.clientY);
     setIsSwiping(true);
   };
   
@@ -66,25 +70,29 @@ export const useSwipeNavigation = ({
     if (!isSwiping || isScrolling) return;
     
     const touch = e.touches[0];
+    setTouchEndX(touch.clientX); // Update end positions during move
+    setTouchEndY(touch.clientY);
+    
     const deltaX = touch.clientX - touchStartX;
     const deltaY = touch.clientY - touchStartY;
     
     // If vertical movement is significantly larger than horizontal, treat as scrolling
     if (Math.abs(deltaY) > Math.abs(deltaX) + SCROLL_TOLERANCE) {
       setIsSwiping(false);
-      return;
     }
   };
   
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (!isSwiping || isScrolling) return;
     
-    const touch = e.changedTouches[0];
-    const deltaX = touch.clientX - touchStartX;
-    const deltaY = touch.clientY - touchStartY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const timeDelta = e.timeStamp - e.touches[0]?.timeStamp || 0;
+    const velocity = Math.abs(deltaX) / Math.max(timeDelta, 1);
     
-    // Only process horizontal swipes
-    if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) {
+    // Process horizontal swipes with improved detection logic
+    if ((Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY)) || 
+        velocity > VELOCITY_THRESHOLD) {
       if (deltaX > 0) {
         goToPrevPaper();
       } else {
@@ -96,13 +104,14 @@ export const useSwipeNavigation = ({
   };
   
   const handleWheel = (e: React.WheelEvent) => {
-    // If the user is scrolling vertically, don't interfere with paper navigation
+    // Skip if currently scrolling vertically
     if (Math.abs(e.deltaY) > Math.abs(e.deltaX) || isScrolling) {
       return;
     }
     
-    // Make wheel navigation less sensitive - require more scrolling
-    if (Math.abs(e.deltaX) > 40) {
+    // Enhanced wheel detection with more responsive handling
+    // Using a reduced threshold for easier wheel navigation
+    if (Math.abs(e.deltaX) > 30) {
       if (e.deltaX > 0) {
         setSwipeDirection('left');
         goToNextPaper();
