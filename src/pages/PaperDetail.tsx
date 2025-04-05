@@ -13,6 +13,10 @@ import HeroImageSection from '../components/paper-content/HeroImageSection';
 import DetailNavButtons from '../components/paper-content/DetailNavButtons';
 import MindBlowBadge from '../components/MindBlowBadge';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import { useMindBlowTracker } from '../hooks/use-mind-blow-tracker';
+import DonationPrompt from '../components/donations/DonationPrompt';
+import DonationModal from '../components/donations/DonationModal';
+import DisclaimerSection from '../components/paper-content/DisclaimerSection';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,9 +24,37 @@ const PaperDetail: React.FC = () => {
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
-
+  
+  // Donation modal states
+  const [showDonationPrompt, setShowDonationPrompt] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  const [isSubscription, setIsSubscription] = useState(false);
+  
   // Get mind-blow data for the paper
   const { count: mindBlowCount, isTopPaper } = useMindBlow(id || '');
+  
+  // Mind blow tracker for donation prompts
+  const { shouldShowDonationPrompt, markDonationPromptSeen, resetPromptTimestamp } = useMindBlowTracker();
+
+  // Check if we should show the donation prompt
+  useEffect(() => {
+    if (shouldShowDonationPrompt()) {
+      setShowDonationPrompt(true);
+    }
+  }, [shouldShowDonationPrompt]);
+
+  // Handle donation prompt actions
+  const handleCloseDonationPrompt = () => {
+    setShowDonationPrompt(false);
+    resetPromptTimestamp();
+  };
+
+  const handleDonate = (subscription: boolean = false) => {
+    setShowDonationPrompt(false);
+    setIsSubscription(subscription);
+    setShowDonationModal(true);
+    markDonationPromptSeen();
+  };
 
   useEffect(() => {
     const loadPaper = async () => {
@@ -216,12 +248,30 @@ const PaperDetail: React.FC = () => {
             )}
           </div>
         </div>
+        
+        {/* Disclaimer and Donation section */}
+        <DisclaimerSection />
       </div>
 
       {/* Detail navigation buttons */}
       <DetailNavButtons 
         paperDoi={paper.doi}
         onClose={goBack}
+      />
+      
+      {/* Donation prompt */}
+      <DonationPrompt
+        isVisible={showDonationPrompt}
+        onClose={handleCloseDonationPrompt}
+        onDonate={() => handleDonate(false)}
+        onSubscribe={() => handleDonate(true)}
+      />
+      
+      {/* Donation modal */}
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+        isSubscription={isSubscription}
       />
     </div>
   );

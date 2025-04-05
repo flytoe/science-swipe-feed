@@ -26,22 +26,20 @@ export const useMindBlowTracker = create<MindBlowState>()(
       shouldShowDonationPrompt: () => {
         const state = get();
         
-        // If they've already seen the prompt, don't show again
-        if (state.hasSeenDonationPrompt) return false;
+        // Don't show if user has seen it recently
+        if (state.lastPromptedAt) {
+          const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
+          if (state.lastPromptedAt > threeDaysAgo) return false;
+        }
         
         // First threshold at 5 mind blows
-        if (state.totalCount === 5) return true;
+        if (state.totalCount >= 5 && !state.hasSeenDonationPrompt) return true;
         
         // Second threshold at 10 mind blows
-        if (state.totalCount === 10) return true;
+        if (state.totalCount >= 10 && !state.hasSeenDonationPrompt) return true;
         
         // After 10, only show every 10 mind blows
         if (state.totalCount > 10 && state.totalCount % 10 === 0) {
-          // If we've shown within the last 3 days, don't show again
-          if (state.lastPromptedAt) {
-            const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
-            if (state.lastPromptedAt > threeDaysAgo) return false;
-          }
           return true;
         }
         
