@@ -17,8 +17,13 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     formattedDate, 
     imageSrc, 
     displayTitle,
-    firstTakeaway
+    formattedTakeaways
   } = usePaperData(paper);
+
+  // Extract the first takeaway's text instead of using the whole object
+  const firstTakeaway = formattedTakeaways && formattedTakeaways.length > 0 
+    ? formattedTakeaways[0].text 
+    : "Read more about this research...";
 
   return (
     <motion.div
@@ -66,7 +71,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         {/* Preview of first takeaway */}
         <div className="p-4 bg-gradient-to-b from-gray-900 to-gray-800">
           <p className="text-sm text-white/70 line-clamp-2">
-            {firstTakeaway || "Read more about this research..."}
+            {firstTakeaway}
           </p>
         </div>
       </Link>
