@@ -32,14 +32,11 @@ export const useMindBlowTracker = create<MindBlowState>()(
           if (state.lastPromptedAt > threeDaysAgo) return false;
         }
         
-        // First threshold at 5 mind blows
+        // First threshold at 5 mind blows - always show for first time
         if (state.totalCount >= 5 && !state.hasSeenDonationPrompt) return true;
         
-        // Second threshold at 10 mind blows
-        if (state.totalCount >= 10 && !state.hasSeenDonationPrompt) return true;
-        
-        // After 10, only show every 10 mind blows
-        if (state.totalCount > 10 && state.totalCount % 10 === 0) {
+        // After the first time seen (hasSeenDonationPrompt is true), only show every 10 mind blows
+        if (state.hasSeenDonationPrompt && state.totalCount % 10 === 0 && state.totalCount > 0) {
           return true;
         }
         

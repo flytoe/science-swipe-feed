@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Calendar, BookOpen, LightbulbIcon, BarChart3 } from 'lucide-react';
+import { Calendar, BookOpen, LightbulbIcon, BarChart3, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import { useMindBlowTracker } from '../hooks/use-mind-blow-tracker';
 import DonationPrompt from '../components/donations/DonationPrompt';
 import DonationModal from '../components/donations/DonationModal';
 import DisclaimerSection from '../components/paper-content/DisclaimerSection';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -130,10 +131,29 @@ const PaperDetail: React.FC = () => {
     : "";
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* No top bar - removed as requested */}
+    <motion.div 
+      className="min-h-screen bg-black text-white"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {/* App Store style header with back button */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
+        <div className="container max-w-3xl mx-auto px-4 py-4 flex items-center">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={goBack}
+            className="mr-2"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-lg font-medium truncate">Paper Details</h1>
+        </div>
+      </header>
       
-      <div className="container max-w-3xl mx-auto px-4 py-6 pb-24">
+      <div className="container max-w-3xl mx-auto px-4 py-6 pt-20 pb-24">
         {/* Hero section with image and date at the top */}
         <div className="relative">
           {/* Date positioned at the top */}
@@ -150,15 +170,21 @@ const PaperDetail: React.FC = () => {
             </div>
           )}
           
-          <HeroImageSection 
-            imageSrc={imageSrc}
-            title={paper.ai_headline || paper.title_org}
-            creator={paper.creator}
-            categories={paper.category ? 
-              (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
-            mindBlowCount={mindBlowCount}
-            isTopPaper={isTopPaper}
-          />
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.4 }}
+          >
+            <HeroImageSection 
+              imageSrc={imageSrc}
+              title={paper.ai_headline || paper.title_org}
+              creator={paper.creator}
+              categories={paper.category ? 
+                (Array.isArray(paper.category) ? paper.category : [paper.category]) : []}
+              mindBlowCount={mindBlowCount}
+              isTopPaper={isTopPaper}
+            />
+          </motion.div>
         </div>
         
         {/* Regenerate button */}
@@ -171,7 +197,12 @@ const PaperDetail: React.FC = () => {
         </div>
         
         {/* Categories - Already using formatted category names */}
-        <div className="mb-4 flex flex-wrap gap-2 mt-6">
+        <motion.div 
+          className="mb-4 flex flex-wrap gap-2 mt-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           {/* Display the formatted category names */}
           {formattedCategoryNames.map((category, idx) => (
             <Badge 
@@ -182,24 +213,39 @@ const PaperDetail: React.FC = () => {
               {category}
             </Badge>
           ))}
-        </div>
+        </motion.div>
         
         {/* Title */}
-        <h1 className="text-3xl font-bold mb-6">
+        <motion.h1 
+          className="text-3xl font-bold mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           {paper.ai_headline || paper.title_org}
-        </h1>
+        </motion.h1>
         
         {/* Original title if different */}
         {paper.ai_headline && paper.title_org && paper.ai_headline !== paper.title_org && (
-          <div className="mb-6">
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
             <h3 className="text-sm font-medium text-gray-400 mb-1">Original Title</h3>
             <p className="text-white/80">{paper.title_org}</p>
-          </div>
+          </motion.div>
         )}
         
         {/* Key takeaways section */}
         {formattedTakeaways && formattedTakeaways.length > 0 && (
-          <div className="mb-8">
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
             <h2 className="flex items-center text-xl font-semibold mb-4">
               <LightbulbIcon className="mr-2 h-5 w-5 text-yellow-400" />
               Key Insights
@@ -221,12 +267,17 @@ const PaperDetail: React.FC = () => {
                 </Card>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
         
         {/* Abstract section */}
         {cleanAbstract && (
-          <div className="mb-8">
+          <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
             <h2 className="flex items-center text-xl font-semibold mb-4">
               <BookOpen className="mr-2 h-5 w-5 text-blue-400" />
               Abstract
@@ -234,11 +285,16 @@ const PaperDetail: React.FC = () => {
             <div className="prose prose-invert max-w-none">
               <p className="text-white/80 leading-relaxed">{cleanAbstract}</p>
             </div>
-          </div>
+          </motion.div>
         )}
         
         {/* Paper stats */}
-        <div className="mt-12 border-t border-white/10 pt-4">
+        <motion.div 
+          className="mt-12 border-t border-white/10 pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
           <div className="flex justify-between items-center">
             {paper.score && (
               <div className="flex items-center">
@@ -247,7 +303,7 @@ const PaperDetail: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
         
         {/* Disclaimer and Donation section */}
         <DisclaimerSection />
@@ -273,7 +329,7 @@ const PaperDetail: React.FC = () => {
         onClose={() => setShowDonationModal(false)}
         isSubscription={isSubscription}
       />
-    </div>
+    </motion.div>
   );
 };
 

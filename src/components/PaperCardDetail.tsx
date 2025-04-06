@@ -6,6 +6,7 @@ import { FormattedTakeaway } from '../utils/takeawayParser';
 import { Badge } from './ui/badge';
 import MindBlowBadge from './MindBlowBadge';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import { Link } from 'react-router-dom';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -36,11 +37,25 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   return (
     <motion.div
       className="h-full flex flex-col relative"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
     >
+      {/* Link to full paper detail page */}
+      {doi && (
+        <div className="absolute top-4 right-4 z-20">
+          <Link to={`/paper/${doi}`} className="block">
+            <Badge 
+              variant="outline" 
+              className="bg-blue-500/80 text-white border-none hover:bg-blue-600/80 transition-colors cursor-pointer"
+            >
+              View Full Details
+            </Badge>
+          </Link>
+        </div>
+      )}
+      
       {/* Show date at the top */}
       <div className="absolute top-4 left-4 z-10">
         <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none">
@@ -50,7 +65,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       
       {/* Mind-blow badge - positioned at the top right */}
       {mindBlowCount > 0 && (
-        <div className="absolute top-4 right-4 z-10">
+        <div className="absolute top-16 right-4 z-10">
           <MindBlowBadge count={mindBlowCount} />
         </div>
       )}

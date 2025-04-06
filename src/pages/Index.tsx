@@ -1,5 +1,5 @@
+
 import React, { useEffect, useState } from 'react';
-import SwipeFeed from '../components/SwipeFeed';
 import { FilterX, SearchIcon } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,6 +19,8 @@ import { useOnboardingStore } from '@/hooks/use-onboarding';
 import DonationPrompt from '@/components/donations/DonationPrompt';
 import DonationModal from '@/components/donations/DonationModal';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
+import ScrollableFeed from '@/components/ScrollableFeed';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -27,9 +29,7 @@ const Index: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [currentPaperIndex, setCurrentPaperIndex] = useState(0);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
   
   const { currentMode } = useFeedModeStore();
   
@@ -102,7 +102,6 @@ const Index: React.FC = () => {
     
     const sorted = sortPapers(categoryFiltered, currentMode);
     setFilteredPapers(sorted);
-    setCurrentPaperIndex(0);
   }, [selectedCategories, papers, currentMode]);
 
   useEffect(() => {
@@ -151,26 +150,6 @@ const Index: React.FC = () => {
     setSelectedCategories(categories);
   };
 
-  const handleRegenerationComplete = (imageUrl: string | null) => {
-    setIsRegeneratingImage(false);
-    
-    if (imageUrl && filteredPapers[currentPaperIndex]) {
-      const updatedPapers = [...papers];
-      const paperIndex = updatedPapers.findIndex(p => 
-        p.doi === filteredPapers[currentPaperIndex].doi
-      );
-      
-      if (paperIndex !== -1) {
-        updatedPapers[paperIndex] = {
-          ...updatedPapers[paperIndex],
-          image_url: imageUrl
-        };
-        
-        setPapers(updatedPapers);
-      }
-    }
-  };
-
   const handleCloseDonationPrompt = () => {
     setShowDonationPrompt(false);
   };
@@ -193,7 +172,12 @@ const Index: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <motion.div 
+      className="min-h-screen bg-black text-white"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="container max-w-md mx-auto px-4 py-4 flex flex-col items-center gap-3">
           <div className="w-full flex items-center justify-between">
@@ -274,20 +258,20 @@ const Index: React.FC = () => {
         </div>
       ) : null}
 
-      <div className="h-[calc(100vh-4rem)]">
-        {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-white/70">No papers match the selected categories</p>
-          </div>
-        ) : (
-          <SwipeFeed 
-            papers={filteredPapers} 
-            currentIndex={currentPaperIndex}
-            setCurrentIndex={setCurrentPaperIndex}
-            isGeneratingImage={isRegeneratingImage}
-          />
-        )}
-      </div>
+      <AnimatePresence>
+        <div className="pb-8 pt-2">
+          {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
+            <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
+              <p className="text-white/70">No papers match the selected categories</p>
+            </div>
+          ) : (
+            <ScrollableFeed 
+              papers={filteredPapers} 
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+      </AnimatePresence>
       
       <DonationPrompt 
         isVisible={showDonationPrompt}
@@ -301,7 +285,7 @@ const Index: React.FC = () => {
         onClose={handleCloseDonationModal}
         isSubscription={isSubscriptionModal}
       />
-    </div>
+    </motion.div>
   );
 };
 
