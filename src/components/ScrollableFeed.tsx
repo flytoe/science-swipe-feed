@@ -2,6 +2,7 @@
 import React from 'react';
 import { type Paper } from '../lib/supabase';
 import FeedItem from './FeedItem';
+import { motion } from 'framer-motion';
 
 interface ScrollableFeedProps {
   papers: Paper[];
@@ -29,13 +30,18 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
   }
 
   return (
-    <div className="scrollable-feed px-4 pb-8">
+    <motion.div 
+      className="scrollable-feed px-4 pb-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="max-w-md mx-auto">
         {papers.map((paper, index) => (
           <FeedItem key={paper.doi} paper={paper} index={index} />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
