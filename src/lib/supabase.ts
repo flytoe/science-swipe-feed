@@ -1,3 +1,4 @@
+
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -204,6 +205,24 @@ export const getPapers = async (): Promise<Paper[]> => {
 
 export async function getPaperById(id: string): Promise<Paper | null> {
   try {
+    console.log('Fetching paper by ID:', id);
+    
+    // Check if we're using demo data due to connection issues
+    try {
+      const connectionTest = await supabaseClient.from('n8n_table').select('count').limit(1);
+      if (connectionTest.error) {
+        console.log('Using demo data due to connection issue');
+        // Find paper in demo data
+        const demoPaper = demoData.find(paper => paper.doi === id);
+        return demoPaper || null;
+      }
+    } catch (e) {
+      console.error('Connection test failed:', e);
+      // Find paper in demo data
+      const demoPaper = demoData.find(paper => paper.doi === id);
+      return demoPaper || null;
+    }
+
     // Try to find by id first (which is actually the DOI)
     let { data, error } = await supabaseClient
       .from('n8n_table')
@@ -211,9 +230,18 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       .eq('doi', id)
       .single();
     
-    if (error || !data) {
+    if (error) {
       console.error('Error fetching paper by ID:', error);
-      return null;
+      // Try to find in demo data as fallback
+      const demoPaper = demoData.find(paper => paper.doi === id);
+      return demoPaper || null;
+    }
+    
+    if (!data) {
+      console.log('No data found in database, checking demo data');
+      // Try to find in demo data as fallback
+      const demoPaper = demoData.find(paper => paper.doi === id);
+      return demoPaper || null;
     }
     
     // Transform the data to match the Paper type
@@ -237,7 +265,9 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     return paper;
   } catch (error) {
     console.error('Error in getPaperById:', error);
-    return null;
+    // Try to find in demo data as fallback
+    const demoPaper = demoData.find(paper => paper.doi === id);
+    return demoPaper || null;
   }
 }
 
