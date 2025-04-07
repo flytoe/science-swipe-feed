@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { FilterX, SearchIcon } from 'lucide-react';
+import { FilterX, SearchIcon, Settings } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -173,23 +173,30 @@ const Index: React.FC = () => {
 
   return (
     <motion.div 
-      className="min-h-screen bg-black text-white"
+      className="min-h-screen bg-white text-gray-800"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <header className="sticky top-0 z-30 w-full bg-black/80 backdrop-blur-sm border-b border-white/10">
+      <header className="sticky top-0 z-30 w-full bg-white/90 backdrop-blur-sm border-b border-gray-200">
         <div className="container max-w-md mx-auto px-4 py-4 flex flex-col items-center gap-3">
           <div className="w-full flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Research Feed</h1>
+            <h1 className="text-xl font-semibold text-gray-800">Research Feed</h1>
             <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-white"
+                className="text-gray-600"
                 onClick={() => setIsFilterOpen(true)}
               >
                 <SearchIcon className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600"
+              >
+                <Settings className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -240,11 +247,11 @@ const Index: React.FC = () => {
 
       {isLoading ? (
         <div className="max-w-md mx-auto mt-6 px-4 flex justify-center">
-          <div className="loading-spinner" />
+          <div className="loading-spinner border-gray-200 border-t-blue-500" />
         </div>
       ) : hasPapers === false && !isSample ? (
         <div className="max-w-md mx-auto mt-2 px-4">
-          <div className="flex flex-col items-center gap-2 bg-amber-950/50 p-4 rounded-md border border-amber-800/30 text-sm text-amber-200">
+          <div className="flex flex-col items-center gap-2 bg-amber-50 p-4 rounded-md border border-amber-200 text-sm text-amber-800">
             <span>
               No papers found in your database. Would you like to add a sample paper?
             </span>
@@ -261,8 +268,8 @@ const Index: React.FC = () => {
       <AnimatePresence>
         <div className="pb-8 pt-2">
           {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
-            <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
-              <p className="text-white/70">No papers match the selected categories</p>
+            <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
+              <p>No papers match the selected categories</p>
             </div>
           ) : (
             <ScrollableFeed 

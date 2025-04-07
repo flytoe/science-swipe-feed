@@ -5,13 +5,13 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground overscroll-none;
+    @apply bg-white text-gray-800 overscroll-none;
   }
 }
 
 @layer components {
   .swipe-feed-container {
-    @apply relative h-screen overflow-hidden bg-gradient-to-b from-black to-gray-900;
+    @apply relative h-screen overflow-hidden bg-white;
   }
   
   .paper-card {
@@ -54,7 +54,7 @@
   }
   
   .category-tag {
-    @apply text-xs px-2 py-1 rounded-full mr-2 mb-2 font-medium;
+    @apply text-xs px-2 py-1 rounded-full mr-2 mb-2 font-medium bg-gray-100 text-gray-600;
   }
   
   .key-takeaway {
@@ -70,11 +70,11 @@
   }
   
   .loading-spinner {
-    @apply w-10 h-10 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin;
+    @apply w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin;
   }
   
   .swipe-instruction {
-    @apply absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-full text-sm z-20 shadow-lg;
+    @apply absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm z-20 shadow-lg;
   }
   
   @keyframes fade-in {

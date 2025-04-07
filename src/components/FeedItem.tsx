@@ -27,24 +27,27 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-md mb-4 border border-gray-200"
+      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100"
     >
       <Link to={`/paper/${encodedPaperId}`} className="block">
-        <div className="relative">
-          {/* Image thumbnail with light overlay */}
-          <div className="h-48 relative">
+        <div className="flex flex-col">
+          {/* Square image container */}
+          <div className="aspect-square relative">
             <img 
               src={imageSrc} 
               alt={displayTitle}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
           </div>
           
-          {/* Content overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <div className="flex flex-wrap gap-2 mb-2">
-              <Badge variant="outline" className="bg-white/80 backdrop-blur-sm text-gray-700 border-gray-200">
+          {/* Content below image - Apple App Store style */}
+          <div className="p-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              {displayTitle}
+            </h2>
+            
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="bg-gray-100 text-gray-600 border-none text-xs">
                 {formattedDate}
               </Badge>
               
@@ -52,16 +55,12 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 <Badge 
                   key={idx}
                   variant="outline" 
-                  className="bg-white/80 backdrop-blur-sm text-gray-700 border-gray-200"
+                  className="bg-gray-100 text-gray-600 border-none text-xs"
                 >
                   {category}
                 </Badge>
               ))}
             </div>
-            
-            <h2 className="text-lg font-bold text-gray-800 drop-shadow-sm line-clamp-2">
-              {displayTitle}
-            </h2>
           </div>
         </div>
       </Link>

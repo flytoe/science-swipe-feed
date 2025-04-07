@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
 import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../utils/categoryUtils';
 import { parseKeyTakeaways } from '../utils/takeawayParser';
+import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
+import { toast } from 'sonner';
 
 interface UsePaperDataResult {
   categories: string[];
@@ -34,6 +36,55 @@ const defaultPaperData: UsePaperDataResult = {
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   // Always initialize state, even if paper is null
   const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // Effect to generate image if needed
+  useEffect(() => {
+    const generateImageIfNeeded = async () => {
+      if (!paper) return;
+      
+      // Skip if the paper already has an image or we're already generating
+      if (paper.image_url || isGenerating) return;
+      
+      // Only generate if we have a prompt
+      if (paper.ai_image_prompt) {
+        try {
+          setIsGenerating(true);
+          setFormattedData(prev => ({
+            ...prev,
+            isGeneratingImage: true
+          }));
+          
+          const imageUrl = await generateImageForPaper(paper);
+          
+          if (imageUrl) {
+            // Update the state with the new image URL
+            setFormattedData(prev => ({
+              ...prev,
+              imageSrc: imageUrl,
+              imageSourceType: 'generated',
+              isGeneratingImage: false
+            }));
+            
+            console.log(`Successfully generated image for paper: ${paper.doi}`);
+          } else {
+            console.warn(`Failed to generate image for paper: ${paper.doi}`);
+            setFormattedData(prev => ({
+              ...prev,
+              isGeneratingImage: false
+            }));
+          }
+        } catch (error) {
+          console.error(`Error generating image for paper ${paper.doi}:`, error);
+          toast.error('Failed to generate image');
+        } finally {
+          setIsGenerating(false);
+        }
+      }
+    };
+    
+    generateImageIfNeeded();
+  }, [paper]);
   
   useEffect(() => {
     const loadPaperData = async () => {
@@ -93,7 +144,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           displayTitle: paper.ai_headline || paper.title_org,
           firstTakeaway: takeaways[0] || '',
           formattedTakeaways,
-          isGeneratingImage: false,
+          isGeneratingImage: isGenerating,
           imageSourceType,
           refreshImageData: (newImageUrl?: string) => {
             if (newImageUrl) {
@@ -113,7 +164,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     loadPaperData();
-  }, [paper]);
+  }, [paper, isGenerating]);
   
   return formattedData;
 };

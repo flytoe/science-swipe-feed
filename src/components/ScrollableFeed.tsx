@@ -16,15 +16,15 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-12rem)]">
-        <div className="loading-spinner" />
+        <div className="loading-spinner border-gray-200 border-t-blue-500" />
       </div>
     );
   }
 
   if (!papers || papers.length === 0) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
-        <p className="text-white/70">No papers available</p>
+      <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
+        <p>No papers available</p>
       </div>
     );
   }
