@@ -29,7 +29,7 @@ const HeroImageSection: React.FC<HeroImageSectionProps> = ({
   }, [creator]);
 
   return (
-    <div className="relative w-full h-80 overflow-hidden rounded-lg bg-gray-900">
+    <div className="relative w-full h-80 overflow-hidden rounded-lg bg-gray-100">
       {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0 w-full h-full">
         {imageSrc && (
@@ -39,14 +39,14 @@ const HeroImageSection: React.FC<HeroImageSectionProps> = ({
             className="w-full h-full object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/60 to-transparent" />
       </div>
 
       {/* Content Overlay */}
       <div className="absolute inset-0 flex flex-col justify-end p-6">
         {/* Title */}
         <motion.h1 
-          className="text-3xl font-bold text-white mb-2 drop-shadow-md"
+          className="text-3xl font-bold text-gray-800 mb-2 drop-shadow-sm"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -57,7 +57,7 @@ const HeroImageSection: React.FC<HeroImageSectionProps> = ({
         {/* Creator */}
         {creatorDisplay && (
           <motion.p 
-            className="text-sm text-gray-300 mb-4"
+            className="text-sm text-gray-600 mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}

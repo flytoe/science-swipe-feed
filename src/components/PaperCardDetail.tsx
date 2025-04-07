@@ -33,6 +33,9 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
 }) => {
   // Get mind-blow data for the paper
   const { count: mindBlowCount, isTopPaper } = useMindBlow(doi || '');
+  
+  // Create encoded paper ID for the URL if DOI exists
+  const encodedPaperId = doi ? encodeURIComponent(doi) : '';
 
   return (
     <motion.div
@@ -45,7 +48,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       {/* Link to full paper detail page */}
       {doi && (
         <div className="absolute top-4 right-4 z-20">
-          <Link to={`/paper/${doi}`} className="block">
+          <Link to={`/paper/${encodedPaperId}`} className="block">
             <Badge 
               variant="outline" 
               className="bg-blue-500/80 text-white border-none hover:bg-blue-600/80 transition-colors cursor-pointer"
@@ -58,7 +61,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       
       {/* Show date at the top */}
       <div className="absolute top-4 left-4 z-10">
-        <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none">
+        <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
           {formattedDate}
         </Badge>
       </div>

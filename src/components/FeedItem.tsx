@@ -17,37 +17,34 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     formattedDate, 
     imageSrc, 
     displayTitle,
-    formattedTakeaways
   } = usePaperData(paper);
 
-  // Extract the first takeaway's text instead of using the whole object
-  const firstTakeaway = formattedTakeaways && formattedTakeaways.length > 0 
-    ? formattedTakeaways[0].text 
-    : "Read more about this research...";
+  // Create properly encoded paper ID for the URL
+  const encodedPaperId = encodeURIComponent(paper.doi);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="feed-item w-full bg-gray-900 rounded-xl overflow-hidden shadow-lg mb-4 border border-white/10"
+      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-md mb-4 border border-gray-200"
     >
-      <Link to={`/paper/${paper.doi}`} className="block">
+      <Link to={`/paper/${encodedPaperId}`} className="block">
         <div className="relative">
-          {/* Image thumbnail with gradient overlay */}
+          {/* Image thumbnail with light overlay */}
           <div className="h-48 relative">
             <img 
               src={imageSrc} 
               alt={displayTitle}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-white/40 to-transparent" />
           </div>
           
           {/* Content overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="flex flex-wrap gap-2 mb-2">
-              <Badge variant="outline" className="bg-black/50 backdrop-blur-sm text-white border-none">
+              <Badge variant="outline" className="bg-white/80 backdrop-blur-sm text-gray-700 border-gray-200">
                 {formattedDate}
               </Badge>
               
@@ -55,24 +52,17 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 <Badge 
                   key={idx}
                   variant="outline" 
-                  className="bg-black/50 backdrop-blur-sm text-white border-none"
+                  className="bg-white/80 backdrop-blur-sm text-gray-700 border-gray-200"
                 >
                   {category}
                 </Badge>
               ))}
             </div>
             
-            <h2 className="text-lg font-bold text-white drop-shadow-md line-clamp-2">
+            <h2 className="text-lg font-bold text-gray-800 drop-shadow-sm line-clamp-2">
               {displayTitle}
             </h2>
           </div>
-        </div>
-        
-        {/* Preview of first takeaway */}
-        <div className="p-4 bg-gradient-to-b from-gray-900 to-gray-800">
-          <p className="text-sm text-white/70 line-clamp-2">
-            {firstTakeaway}
-          </p>
         </div>
       </Link>
     </motion.div>

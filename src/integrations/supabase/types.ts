@@ -80,7 +80,7 @@ export type Database = {
           html_url: string | null
           image_url: string | null
           rerun: boolean | null
-          score: Json | null
+          score: number | null
           title_org: string
         }
         Insert: {
@@ -97,7 +97,7 @@ export type Database = {
           html_url?: string | null
           image_url?: string | null
           rerun?: boolean | null
-          score?: Json | null
+          score?: number | null
           title_org: string
         }
         Update: {
@@ -114,7 +114,7 @@ export type Database = {
           html_url?: string | null
           image_url?: string | null
           rerun?: boolean | null
-          score?: Json | null
+          score?: number | null
           title_org?: string
         }
         Relationships: []
