@@ -17,23 +17,30 @@ interface UsePaperDataResult {
   refreshImageData: (newImageUrl?: string) => void;
 }
 
-export const usePaperData = (paper: Paper): UsePaperDataResult => {
-  const [formattedData, setFormattedData] = useState<UsePaperDataResult>({
-    categories: [],
-    formattedCategoryNames: [],
-    formattedDate: '',
-    imageSrc: '',
-    displayTitle: '',
-    firstTakeaway: '',
-    formattedTakeaways: [],
-    isGeneratingImage: false,
-    imageSourceType: 'database',
-    refreshImageData: () => {},
-  });
+// Create default values for when paper is null
+const defaultPaperData: UsePaperDataResult = {
+  categories: [],
+  formattedCategoryNames: [],
+  formattedDate: '',
+  imageSrc: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973',
+  displayTitle: 'Paper not found',
+  firstTakeaway: '',
+  formattedTakeaways: [],
+  isGeneratingImage: false,
+  imageSourceType: 'default',
+  refreshImageData: () => {},
+};
+
+export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
+  // Always initialize state, even if paper is null
+  const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
   
   useEffect(() => {
     const loadPaperData = async () => {
-      if (!paper) return;
+      if (!paper) {
+        setFormattedData(defaultPaperData);
+        return;
+      }
       
       try {
         // Format the date
@@ -101,6 +108,7 @@ export const usePaperData = (paper: Paper): UsePaperDataResult => {
         });
       } catch (error) {
         console.error('Error in usePaperData:', error);
+        setFormattedData(defaultPaperData);
       }
     };
     

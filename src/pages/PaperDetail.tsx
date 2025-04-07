@@ -40,6 +40,10 @@ const PaperDetail: React.FC = () => {
   // Mind blow tracker for donation prompts
   const { shouldShowDonationPrompt, markDonationPromptSeen, resetPromptTimestamp } = useMindBlowTracker();
 
+  // Get formatted paper data using our custom hook
+  // IMPORTANT: Always call usePaperData even when paper is null
+  const paperData = usePaperData(paper);
+
   // Check if we should show the donation prompt
   useEffect(() => {
     if (shouldShowDonationPrompt()) {
@@ -103,9 +107,6 @@ const PaperDetail: React.FC = () => {
     }
   };
 
-  // Get formatted paper data using our custom hook
-  const paperData = paper ? usePaperData(paper) : null;
-
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-gray-800 p-4 flex items-center justify-center">
@@ -114,7 +115,7 @@ const PaperDetail: React.FC = () => {
     );
   }
 
-  if (!paper || !paperData) {
+  if (!paper) {
     return (
       <div className="min-h-screen bg-white text-gray-800 p-4">
         <div className="max-w-3xl mx-auto py-12 text-center">
