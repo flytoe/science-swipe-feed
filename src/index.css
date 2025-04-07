@@ -90,13 +90,8 @@
     animation: fade-in 0.5s ease-in-out;
   }
   
-  /* Smooth expansion animations */
+  /* Feed item styles */
   .feed-item {
-    @apply will-change-transform;
-    transform-origin: center top;
-  }
-  
-  .feed-item-expanded {
-    @apply z-10 relative;
+    @apply transition-transform duration-200 hover:scale-[1.02] cursor-pointer;
   }
 }

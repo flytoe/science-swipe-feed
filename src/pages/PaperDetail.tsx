@@ -17,7 +17,7 @@ import { useMindBlowTracker } from '../hooks/use-mind-blow-tracker';
 import DonationPrompt from '../components/donations/DonationPrompt';
 import DonationModal from '../components/donations/DonationModal';
 import DisclaimerSection from '../components/paper-content/DisclaimerSection';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -141,7 +141,7 @@ const PaperDetail: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
     >
       {/* App Store style header with back button */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200">
