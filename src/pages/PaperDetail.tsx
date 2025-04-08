@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar, BookOpen, LightbulbIcon, BarChart3, ArrowLeft } from 'lucide-react';
@@ -18,6 +17,7 @@ import DonationPrompt from '../components/donations/DonationPrompt';
 import DonationModal from '../components/donations/DonationModal';
 import DisclaimerSection from '../components/paper-content/DisclaimerSection';
 import { motion } from 'framer-motion';
+import DetailTakeaways from '../components/paper-content/DetailTakeaways';
 
 const PaperDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,32 +26,24 @@ const PaperDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isRegeneratingImage, setIsRegeneratingImage] = useState(false);
   
-  // Donation modal states
   const [showDonationPrompt, setShowDonationPrompt] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
   const [isSubscription, setIsSubscription] = useState(false);
   
-  // Decode the paper ID from the URL
   const decodedId = id ? decodeURIComponent(id) : '';
   
-  // Get mind-blow data for the paper
   const { count: mindBlowCount, isTopPaper } = useMindBlow(decodedId || '');
   
-  // Mind blow tracker for donation prompts
   const { shouldShowDonationPrompt, markDonationPromptSeen, resetPromptTimestamp } = useMindBlowTracker();
 
-  // Get formatted paper data using our custom hook
-  // IMPORTANT: Always call usePaperData even when paper is null
   const paperData = usePaperData(paper);
 
-  // Check if we should show the donation prompt
   useEffect(() => {
     if (shouldShowDonationPrompt()) {
       setShowDonationPrompt(true);
     }
   }, [shouldShowDonationPrompt]);
 
-  // Handle donation prompt actions
   const handleCloseDonationPrompt = () => {
     setShowDonationPrompt(false);
     resetPromptTimestamp();
@@ -99,7 +91,6 @@ const PaperDetail: React.FC = () => {
   const handleRegenerationComplete = (imageUrl: string | null) => {
     setIsRegeneratingImage(false);
     if (imageUrl && paper) {
-      // Update the paper object with the new image URL
       setPaper({
         ...paper,
         image_url: imageUrl
@@ -143,7 +134,6 @@ const PaperDetail: React.FC = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
     >
-      {/* App Store style header with back button */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-b border-gray-200">
         <div className="container max-w-3xl mx-auto px-4 py-4 flex items-center">
           <Button 
@@ -159,16 +149,13 @@ const PaperDetail: React.FC = () => {
       </header>
       
       <div className="container max-w-3xl mx-auto px-4 py-6 pt-20 pb-24">
-        {/* Hero section with image and date at the top */}
         <div className="relative">
-          {/* Date positioned at the top */}
           <div className="absolute top-4 left-4 z-10">
             <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
               {formattedDate}
             </Badge>
           </div>
           
-          {/* Mind-blow badge */}
           {mindBlowCount > 0 && (
             <div className="absolute top-4 right-4 z-10">
               <MindBlowBadge count={mindBlowCount} />
@@ -192,7 +179,6 @@ const PaperDetail: React.FC = () => {
           </motion.div>
         </div>
         
-        {/* Regenerate button */}
         <div className="mt-4">
           <RegenerateImageButton 
             paper={paper}
@@ -201,14 +187,12 @@ const PaperDetail: React.FC = () => {
           />
         </div>
         
-        {/* Categories - Already using formatted category names */}
         <motion.div 
           className="mb-4 flex flex-wrap gap-2 mt-6"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          {/* Display the formatted category names */}
           {formattedCategoryNames.map((category, idx) => (
             <Badge 
               key={idx}
@@ -220,7 +204,6 @@ const PaperDetail: React.FC = () => {
           ))}
         </motion.div>
         
-        {/* Title */}
         <motion.h1 
           className="text-3xl font-bold mb-6 text-gray-800"
           initial={{ opacity: 0, y: 10 }}
@@ -230,7 +213,6 @@ const PaperDetail: React.FC = () => {
           {paper.ai_headline || paper.title_org}
         </motion.h1>
         
-        {/* Original title if different */}
         {paper.ai_headline && paper.title_org && paper.ai_headline !== paper.title_org && (
           <motion.div 
             className="mb-6"
@@ -243,7 +225,6 @@ const PaperDetail: React.FC = () => {
           </motion.div>
         )}
         
-        {/* Key takeaways section */}
         {formattedTakeaways && formattedTakeaways.length > 0 && (
           <motion.div 
             className="mb-8"
@@ -275,7 +256,6 @@ const PaperDetail: React.FC = () => {
           </motion.div>
         )}
         
-        {/* Abstract section */}
         {cleanAbstract && (
           <motion.div 
             className="mb-8"
@@ -293,7 +273,6 @@ const PaperDetail: React.FC = () => {
           </motion.div>
         )}
         
-        {/* Paper stats */}
         <motion.div 
           className="mt-12 border-t border-gray-200 pt-4"
           initial={{ opacity: 0 }}
@@ -310,17 +289,14 @@ const PaperDetail: React.FC = () => {
           </div>
         </motion.div>
         
-        {/* Disclaimer and Donation section */}
         <DisclaimerSection />
       </div>
 
-      {/* Detail navigation buttons */}
       <DetailNavButtons 
         paperDoi={paper.doi}
         onClose={goBack}
       />
       
-      {/* Donation prompt */}
       <DonationPrompt
         isVisible={showDonationPrompt}
         onClose={handleCloseDonationPrompt}
@@ -328,7 +304,6 @@ const PaperDetail: React.FC = () => {
         onSubscribe={() => handleDonate(true)}
       />
       
-      {/* Donation modal */}
       <DonationModal
         isOpen={showDonationModal}
         onClose={() => setShowDonationModal(false)}

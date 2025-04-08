@@ -1,115 +1,56 @@
 
+import { Json } from "../integrations/supabase/types";
+
 export interface FormattedTakeaway {
   text: string;
   citation?: string;
-  tag?: string;
   type?: 'default' | 'why_it_matters';
 }
 
-/**
- * Parses key takeaways from various formats into a standardized FormattedTakeaway array
- */
-export const parseKeyTakeaways = (takeaways: string[] | string | null): FormattedTakeaway[] => {
+export const parseKeyTakeaways = (takeaways: any): FormattedTakeaway[] => {
   if (!takeaways) return [];
-  
-  // For debugging - log the raw value to understand its format
-  console.log('Raw takeaways value:', takeaways);
-  
-  // If it's already an array of objects
-  if (Array.isArray(takeaways) && typeof takeaways[0] === 'object') {
-    return takeaways.map((item: any) => ({
-      text: item.text || '',
-      citation: item.citation || undefined,
-      type: item.type === 'why_it_matters' ? 'why_it_matters' : 'default'
-    }));
+
+  // If takeaways is already an array of formatted objects, return it
+  if (Array.isArray(takeaways) && takeaways.length > 0) {
+    // Check if this is an array of objects with text property (already formatted)
+    if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
+      return takeaways as FormattedTakeaway[];
+    }
+    
+    // If it's an array of strings, convert to formatted takeaways
+    if (typeof takeaways[0] === 'string') {
+      return takeaways.map(text => ({ text, type: 'default' }));
+    }
   }
-  
-  // Handle if it's an array of strings (legacy format)
-  if (Array.isArray(takeaways) && typeof takeaways[0] === 'string') {
-    return takeaways.map((takeaway: string) => {
-      // Check if this array item might be a JSON string
-      if (typeof takeaway === 'string') {
-        try {
-          const parsedItem = JSON.parse(takeaway);
-          if (typeof parsedItem === 'object' && parsedItem !== null) {
-            return {
-              text: parsedItem.text || '',
-              citation: parsedItem.citation || undefined,
-              type: parsedItem.type === 'why_it_matters' ? 'why_it_matters' : 'default'
-            };
-          }
-          // If it parsed but isn't the expected format, use old format
-          const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-          if (match) {
-            return { text: match[2], tag: match[1], type: 'default' };
-          }
-          return { text: takeaway, type: 'default' };
-        } catch (e) {
-          // Not JSON, process as regular string using old format
-          const match = takeaway.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-          if (match) {
-            return { text: match[2], tag: match[1], type: 'default' };
-          }
-          return { text: takeaway, type: 'default' };
-        }
+
+  // Handle the case where takeaways is an object with keys like main, insight_1, etc.
+  if (typeof takeaways === 'object' && takeaways !== null && !Array.isArray(takeaways)) {
+    const formattedTakeaways: FormattedTakeaway[] = [];
+    
+    // Convert each key-value pair to a formatted takeaway
+    Object.entries(takeaways).forEach(([key, value]) => {
+      if (typeof value === 'string') {
+        formattedTakeaways.push({
+          text: value,
+          type: key === 'main' || key.includes('why') ? 'why_it_matters' : 'default'
+        });
       }
-      return { text: String(takeaway), type: 'default' };
     });
+    
+    return formattedTakeaways;
   }
-  
-  // Handle if it's a string that needs to be parsed as JSON
+
+  // Try to parse it if it's a string
   if (typeof takeaways === 'string') {
     try {
       const parsed = JSON.parse(takeaways);
-      
-      // If it's an array, process it
-      if (Array.isArray(parsed)) {
-        return parsed.map((item: any) => {
-          if (typeof item === 'object' && item !== null) {
-            return {
-              text: item.text || '',
-              citation: item.citation || undefined,
-              type: item.type === 'why_it_matters' ? 'why_it_matters' : 'default'
-            };
-          }
-          // If array item is a string, use old format
-          if (typeof item === 'string') {
-            const match = item.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-            if (match) {
-              return { text: match[2], tag: match[1], type: 'default' };
-            }
-            return { text: item, type: 'default' };
-          }
-          return { text: String(item), type: 'default' };
-        });
-      }
-      
-      // If it parsed as an object but not an array
-      if (typeof parsed === 'object' && parsed !== null) {
-        return [{ 
-          text: parsed.text || '',
-          citation: parsed.citation || undefined,
-          type: parsed.type === 'why_it_matters' ? 'why_it_matters' : 'default'
-        }];
-      }
-      
-      // Fallback for other JSON types
-      return [{ text: JSON.stringify(parsed), type: 'default' }];
+      return parseKeyTakeaways(parsed); // Recursively handle the parsed result
     } catch (e) {
-      // Not valid JSON, use the old format with /n/ separators
-      console.log('Splitting by /n/ separator as it\'s not valid JSON');
-      const parts = takeaways.split('/n/').filter(part => part.trim() !== '');
-      
-      return parts.map(part => {
-        // Check for Roman numeral or capital letter at the beginning
-        const match = part.match(/^([IVX]+|[A-Z])\.\s*(.*)/);
-        if (match) {
-          return { text: match[2], tag: match[1], type: 'default' };
-        }
-        return { text: part, type: 'default' };
-      });
+      // If parsing fails, treat it as a single takeaway
+      return [{ text: takeaways, type: 'default' }];
     }
   }
-  
+
+  // Fallback to empty array if none of the above conditions match
   return [];
 };
