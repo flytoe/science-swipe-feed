@@ -40,8 +40,8 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
   if (!abstract_org) return null;
 
   return (
-    <div className="mt-4 border-t border-white/10 pt-4">
-      <h3 className="text-sm font-medium text-white/80 mb-2">Abstract</h3>
+    <div className="mt-4 border-t border-gray-200 pt-4">
+      <h3 className="text-sm font-medium text-gray-700 mb-2">Abstract</h3>
       <Collapsible 
         open={isAbstractOpen} 
         onOpenChange={setIsAbstractOpen}
@@ -49,14 +49,14 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
       >
         {!isAbstractOpen ? (
           <div className="flex flex-col space-y-1">
-            <p className="text-sm text-white/70">{shortAbstract}</p>
+            <p className="text-sm text-gray-600">{shortAbstract}</p>
             
             {cleanAbstract.length > 120 && (
               <CollapsibleTrigger asChild onClick={handleReadMore}>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="self-start -ml-2 text-blue-400"
+                  className="self-start -ml-2 text-blue-600 hover:text-blue-800"
                 >
                   <span className="flex items-center gap-1">Read more <ChevronRight size={14} /></span>
                 </Button>
@@ -66,13 +66,13 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
         ) : null}
         
         <CollapsibleContent>
-          <p className="text-sm text-white/70">{cleanAbstract}</p>
+          <p className="text-sm text-gray-600">{cleanAbstract}</p>
           {cleanAbstract.length > 120 && (
             <CollapsibleTrigger asChild onClick={handleReadLess}>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="self-start -ml-2 mt-2 text-blue-400"
+                className="self-start -ml-2 mt-2 text-blue-600 hover:text-blue-800"
               >
                 <span className="flex items-center gap-1">Read less <ChevronDown size={14} /></span>
               </Button>

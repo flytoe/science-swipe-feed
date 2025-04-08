@@ -54,9 +54,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
   };
   
   return (
-    <div className="p-6 text-white space-y-4">
+    <div className="p-6 text-gray-800 space-y-4 bg-white">
       {/* Show title (AI headline or original title) */}
-      <h2 className="text-2xl md:text-3xl font-bold leading-tight text-white">
+      <h2 className="text-2xl md:text-3xl font-bold leading-tight text-gray-900">
         {title}
       </h2>
       
@@ -77,8 +77,8 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
       {/* Authors/creators */}
       {creator && (
         <div className="mt-4 text-sm">
-          <h3 className="text-white/80 font-medium mb-1">Authors</h3>
-          <p className="text-white/70">
+          <h3 className="text-gray-700 font-medium mb-1">Authors</h3>
+          <p className="text-gray-600">
             {Array.isArray(creator) 
               ? creator.join(', ') 
               : creator}
@@ -88,9 +88,9 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
       
       {/* Footer with date and links */}
       {!hideFooter && (
-        <div className="mt-8 pt-4 border-t border-white/10 flex justify-between items-center">
+        <div className="mt-8 pt-4 border-t border-gray-200 flex justify-between items-center">
           <div className="flex items-center">
-            <Badge variant="outline" className="bg-white/10 text-white border-none">
+            <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-300">
               {formattedDate}
             </Badge>
           </div>
@@ -100,7 +100,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white"
+                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                 onClick={handleDetailClick}
               >
                 <LayoutList className="h-4 w-4 mr-1" />
@@ -112,7 +112,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white"
+                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
                 onClick={handleExternalClick}
               >
                 <ExternalLink className="h-4 w-4 mr-1" />

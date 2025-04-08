@@ -20,7 +20,7 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="flex items-center text-xl font-semibold mb-4 text-white">
+      <h2 className="flex items-center text-xl font-semibold mb-4 text-gray-800">
         <LightbulbIcon className="mr-2 h-5 w-5 text-amber-500" />
         Key Insights
       </h2>
@@ -35,21 +35,28 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
               
               return (
                 <div key={idx} className="space-y-2">
-                  <KeyTakeaway 
-                    key={`main-${idx}`} 
-                    text={mainText} 
-                    citation={takeaway.citation} 
-                    type="default"
-                  />
+                  <Card className="bg-gray-50 border border-gray-200 p-4 shadow-sm">
+                    <div className="flex">
+                      <div className="mr-3 flex-shrink-0">
+                        <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium mb-1 text-gray-800">{mainText}</h3>
+                        {takeaway.citation && (
+                          <p className="text-gray-500 text-sm">{takeaway.citation}</p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
                   
                   {insights.length > 0 && (
                     <div className="pl-6 space-y-2">
                       {insights.map((insight, insightIdx) => (
                         <Card 
                           key={`insight-${idx}-${insightIdx}`} 
-                          className="bg-white/5 border-slate-800 p-3"
+                          className="bg-gray-50 border-gray-200 p-3"
                         >
-                          <p className="text-white/80 text-sm">{insight}</p>
+                          <p className="text-gray-700 text-sm">{insight}</p>
                         </Card>
                       ))}
                     </div>
@@ -60,12 +67,19 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
             
             // Handle regular string text
             return (
-              <KeyTakeaway 
-                key={idx} 
-                text={takeaway.text as string} 
-                citation={takeaway.citation} 
-                type="default"
-              />
+              <Card key={idx} className="bg-gray-50 border border-gray-200 p-4 shadow-sm">
+                <div className="flex">
+                  <div className="mr-3 flex-shrink-0">
+                    <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-medium mb-1 text-gray-800">{takeaway.text}</h3>
+                    {takeaway.citation && (
+                      <p className="text-gray-500 text-sm">{takeaway.citation}</p>
+                    )}
+                  </div>
+                </div>
+              </Card>
             );
           })}
         </div>
@@ -73,14 +87,24 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
       
       {whyItMattersTakeaway && (
         <div className="mt-4">
-          <KeyTakeaway 
-            text={typeof whyItMattersTakeaway.text === 'string' 
-              ? whyItMattersTakeaway.text 
-              : formatTakeawayText(whyItMattersTakeaway.text)
-            } 
-            citation={whyItMattersTakeaway.citation} 
-            type="why_it_matters"
-          />
+          <Card className="bg-indigo-50 border border-indigo-200 p-4 shadow-sm">
+            <div className="flex">
+              <div className="mr-3 flex-shrink-0">
+                <div className="w-1 h-full bg-gradient-to-b from-indigo-400 to-purple-500 rounded-full" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium mb-1 text-indigo-900">
+                  {typeof whyItMattersTakeaway.text === 'string' 
+                    ? whyItMattersTakeaway.text 
+                    : formatTakeawayText(whyItMattersTakeaway.text)
+                  }
+                </h3>
+                {whyItMattersTakeaway.citation && (
+                  <p className="text-indigo-600 text-sm">{whyItMattersTakeaway.citation}</p>
+                )}
+              </div>
+            </div>
+          </Card>
         </div>
       )}
     </div>

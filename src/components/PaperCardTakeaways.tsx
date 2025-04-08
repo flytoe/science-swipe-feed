@@ -23,21 +23,24 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
       {/* Display "why it matters" takeaways first with special styling */}
       {whyItMattersTakeaways.length > 0 && (
         <div className="mb-5">
-          {whyItMattersTakeaways.map((takeaway, index) => (
-            <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">
-              <Badge variant="outline" className="self-start text-xs bg-indigo-900/40 text-indigo-300 border-indigo-700/50">
-                Why It Matters
-              </Badge>
-              <KeyTakeaway 
-                text={typeof takeaway.text === 'string' 
-                  ? takeaway.text 
-                  : formatTakeawayText(takeaway.text)
-                } 
-                citation={takeaway.citation}
-                type="why_it_matters"
-              />
-            </div>
-          ))}
+          {whyItMattersTakeaways.map((takeaway, index) => {
+            const formattedText = typeof takeaway.text === 'string' 
+              ? takeaway.text 
+              : formatTakeawayText(takeaway.text);
+              
+            return (
+              <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">
+                <Badge variant="outline" className="self-start text-xs bg-indigo-100 text-indigo-800 border-indigo-300">
+                  Why It Matters
+                </Badge>
+                <KeyTakeaway 
+                  text={formattedText}
+                  citation={takeaway.citation}
+                  type="why_it_matters"
+                />
+              </div>
+            );
+          })}
         </div>
       )}
       
@@ -52,7 +55,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
             return (
               <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
                 {takeaway.citation && (
-                  <Badge variant="outline" className="self-start text-xs">
+                  <Badge variant="outline" className="self-start text-xs bg-blue-100 text-blue-800 border-blue-300">
                     {takeaway.citation}
                   </Badge>
                 )}
@@ -65,7 +68,10 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
                 {insights.length > 0 && (
                   <div className="pl-4 space-y-2 mt-2">
                     {insights.map((insight, insightIdx) => (
-                      <div key={`insight-${index}-${insightIdx}`} className="text-sm text-white/80 border-l-2 border-indigo-500/30 pl-3 py-1">
+                      <div 
+                        key={`insight-${index}-${insightIdx}`} 
+                        className="text-sm text-gray-700 border-l-2 border-blue-300 pl-3 py-1 bg-white/50"
+                      >
                         {insight}
                       </div>
                     ))}
@@ -79,7 +85,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
           return (
             <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
               {takeaway.citation && (
-                <Badge variant="outline" className="self-start text-xs">
+                <Badge variant="outline" className="self-start text-xs bg-blue-100 text-blue-800 border-blue-300">
                   {takeaway.citation}
                 </Badge>
               )}

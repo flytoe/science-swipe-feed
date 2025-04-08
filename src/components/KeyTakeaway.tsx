@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AlertCircle, AlertOctagon, ArrowUpRight } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 interface KeyTakeawayProps {
   text: string;
@@ -20,8 +20,8 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
     <div 
       className={`rounded-lg p-4 w-full shadow-sm ${
         isWhyItMatters 
-          ? 'bg-indigo-950/100' 
-          : 'bg-white/0'
+          ? 'bg-indigo-100 text-indigo-900' 
+          : 'bg-white text-gray-800'
       }`}
     >
       <div className="flex">
@@ -34,12 +34,12 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
         </div>
         
         <div className="flex-1">
-          <p className="text-white/90 text-base leading-relaxed">
+          <p className={`${isWhyItMatters ? 'text-indigo-900' : 'text-gray-800'} text-base leading-relaxed`}>
             {text}
           </p>
           
           {citation && (
-            <div className="text-xs text-white/60 mt-2 italic">
+            <div className={`text-xs ${isWhyItMatters ? 'text-indigo-700' : 'text-gray-600'} mt-2 italic`}>
               {citation}
             </div>
           )}
@@ -47,7 +47,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
         
         {isWhyItMatters && (
           <div className="ml-auto pl-3 flex-shrink-0">
-            <AlertCircle size={18} className="text-indigo-400" />
+            <AlertCircle size={18} className="text-indigo-600" />
           </div>
         )}
       </div>
