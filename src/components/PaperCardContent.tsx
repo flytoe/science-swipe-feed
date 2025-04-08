@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { ExternalLink, LayoutList } from 'lucide-react';
 import AbstractSection from './paper-content/AbstractSection';
 import OriginalTitleSection from './paper-content/OriginalTitleSection';
-import DetailTakeaways from './paper-content/DetailTakeaways';
+import PaperCardTakeaways from './PaperCardTakeaways';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import { useNavigate } from 'react-router-dom';
 
@@ -68,7 +68,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
       
       {/* Takeaways section */}
       {takeaways && takeaways.length > 0 && (
-        <DetailTakeaways takeaways={takeaways} />
+        <PaperCardTakeaways takeaways={takeaways} />
       )}
       
       {/* Abstract section */}

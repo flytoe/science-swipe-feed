@@ -5,7 +5,7 @@ export interface FormattedTakeaway {
   text: string | Record<string, string>;
   citation?: string;
   type?: 'default' | 'why_it_matters';
-  tag?: string; // Added tag property
+  tag?: string;
 }
 
 export const parseKeyTakeaways = (takeaways: any): FormattedTakeaway[] => {
@@ -89,4 +89,3 @@ export const extractInsightsFromTakeaway = (text: Record<string, string>): strin
   
   return insights;
 };
-

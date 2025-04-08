@@ -232,27 +232,7 @@ const PaperDetail: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <h2 className="flex items-center text-xl font-semibold mb-4 text-gray-800">
-              <LightbulbIcon className="mr-2 h-5 w-5 text-amber-500" />
-              Key Insights
-            </h2>
-            <div className="space-y-4">
-              {formattedTakeaways.map((takeaway, idx) => (
-                <Card key={idx} className="bg-gray-50 border border-gray-200 p-4 shadow-sm">
-                  <div className="flex">
-                    <div className="mr-3 flex-shrink-0">
-                      <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium mb-1 text-gray-800">{takeaway.text}</h3>
-                      {takeaway.citation && (
-                        <p className="text-gray-500 text-sm">{takeaway.citation}</p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            <DetailTakeaways takeaways={formattedTakeaways} />
           </motion.div>
         )}
         
