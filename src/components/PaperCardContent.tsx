@@ -48,6 +48,11 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
     }
   };
   
+  const handleExternalClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.open(doiUrl, '_blank', 'noopener,noreferrer');
+  };
+  
   return (
     <div className="p-6 text-white space-y-4">
       {/* Show title (AI headline or original title) */}
@@ -108,10 +113,7 @@ const PaperCardContent: React.FC<PaperCardContentProps> = ({
                 variant="ghost"
                 size="sm"
                 className="text-white/70 hover:text-white"
-                as="a"
-                href={doiUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                onClick={handleExternalClick}
               >
                 <ExternalLink className="h-4 w-4 mr-1" />
                 Source

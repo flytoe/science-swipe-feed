@@ -2,9 +2,10 @@
 import { Json } from "../integrations/supabase/types";
 
 export interface FormattedTakeaway {
-  text: string;
+  text: string | Record<string, string>;
   citation?: string;
   type?: 'default' | 'why_it_matters';
+  tag?: string; // Added tag property
 }
 
 export const parseKeyTakeaways = (takeaways: any): FormattedTakeaway[] => {
@@ -54,3 +55,38 @@ export const parseKeyTakeaways = (takeaways: any): FormattedTakeaway[] => {
   // Fallback to empty array if none of the above conditions match
   return [];
 };
+
+// Utility function to render text that might be an object or string
+export const formatTakeawayText = (text: string | Record<string, string>): string => {
+  if (typeof text === 'string') {
+    return text;
+  }
+  
+  // If text is an object, extract the 'main' property or the first available property
+  if (typeof text === 'object' && text !== null) {
+    if ('main' in text) {
+      return text.main;
+    }
+    
+    // If no 'main' property, use the first value
+    const firstKey = Object.keys(text)[0];
+    return firstKey ? text[firstKey] : '';
+  }
+  
+  return '';
+};
+
+// Function to extract insights from a complex takeaway object
+export const extractInsightsFromTakeaway = (text: Record<string, string>): string[] => {
+  const insights: string[] = [];
+  
+  Object.entries(text).forEach(([key, value]) => {
+    // Skip the main insight as it's displayed separately
+    if (key !== 'main' && value) {
+      insights.push(value);
+    }
+  });
+  
+  return insights;
+};
+

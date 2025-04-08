@@ -1,8 +1,9 @@
 
 import React from 'react';
 import KeyTakeaway from './KeyTakeaway';
-import { FormattedTakeaway } from '../utils/takeawayParser';
+import { FormattedTakeaway, formatTakeawayText, extractInsightsFromTakeaway } from '../utils/takeawayParser';
 import { Badge } from './ui/badge';
+import { Card } from './ui/card';
 
 interface PaperCardTakeawaysProps {
   takeaways: FormattedTakeaway[];
@@ -24,13 +25,14 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
         <div className="mb-5">
           {whyItMattersTakeaways.map((takeaway, index) => (
             <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">
-              {takeaway.tag && (
-                <Badge variant="outline" className="self-start text-xs bg-indigo-900/40 text-indigo-300 border-indigo-700/50">
-                  {takeaway.tag || 'Why It Matters'}
-                </Badge>
-              )}
+              <Badge variant="outline" className="self-start text-xs bg-indigo-900/40 text-indigo-300 border-indigo-700/50">
+                Why It Matters
+              </Badge>
               <KeyTakeaway 
-                text={takeaway.text} 
+                text={typeof takeaway.text === 'string' 
+                  ? takeaway.text 
+                  : formatTakeawayText(takeaway.text)
+                } 
                 citation={takeaway.citation}
                 type="why_it_matters"
               />
@@ -41,20 +43,54 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
       
       {/* Display other takeaways */}
       <div className="space-y-5">
-        {otherTakeaways.map((takeaway, index) => (
-          <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
-            {takeaway.tag && (
-              <Badge variant="outline" className="self-start text-xs">
-                {takeaway.tag}
-              </Badge>
-            )}
-            <KeyTakeaway 
-              text={takeaway.text} 
-              citation={takeaway.citation}
-              type="default"
-            />
-          </div>
-        ))}
+        {otherTakeaways.map((takeaway, index) => {
+          // Handle complex text objects
+          if (typeof takeaway.text === 'object') {
+            const mainText = formatTakeawayText(takeaway.text);
+            const insights = extractInsightsFromTakeaway(takeaway.text);
+            
+            return (
+              <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
+                {takeaway.citation && (
+                  <Badge variant="outline" className="self-start text-xs">
+                    {takeaway.citation}
+                  </Badge>
+                )}
+                <KeyTakeaway 
+                  text={mainText}
+                  citation={null}
+                  type="default"
+                />
+                
+                {insights.length > 0 && (
+                  <div className="pl-4 space-y-2 mt-2">
+                    {insights.map((insight, insightIdx) => (
+                      <div key={`insight-${index}-${insightIdx}`} className="text-sm text-white/80 border-l-2 border-indigo-500/30 pl-3 py-1">
+                        {insight}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          
+          // Handle simple string takeaways
+          return (
+            <div key={`other-${index}`} className="flex flex-col gap-2 mb-4">
+              {takeaway.citation && (
+                <Badge variant="outline" className="self-start text-xs">
+                  {takeaway.citation}
+                </Badge>
+              )}
+              <KeyTakeaway 
+                text={takeaway.text as string}
+                citation={null}
+                type="default"
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
