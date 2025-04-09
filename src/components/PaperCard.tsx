@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { type Paper } from '../lib/supabase';
 import { motion } from 'framer-motion';
@@ -13,13 +12,15 @@ interface PaperCardProps {
   isActive: boolean;
   isGeneratingImage?: boolean;
   onDetailToggle?: (isOpen: boolean) => void;
+  onDetailClick?: () => void;
 }
 
 const PaperCard: React.FC<PaperCardProps> = ({ 
   paper, 
   isActive, 
   isGeneratingImage = false,
-  onDetailToggle 
+  onDetailToggle,
+  onDetailClick
 }) => {
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [localIsGeneratingImage, setLocalIsGeneratingImage] = useState(false);
@@ -35,12 +36,10 @@ const PaperCard: React.FC<PaperCardProps> = ({
     }
   };
   
-  // If paper is undefined or null, return a placeholder card
   if (!paper) {
     return <PaperCardPlaceholder variants={cardVariants} isActive={isActive} />;
   }
 
-  // Extract and format paper data using custom hook
   const {
     categories,
     formattedCategoryNames,
@@ -61,7 +60,6 @@ const PaperCard: React.FC<PaperCardProps> = ({
   const handleRegenerationComplete = (imageUrl: string | null) => {
     setLocalIsGeneratingImage(false);
     if (imageUrl) {
-      // Refresh the data to show the new image
       refreshImageData(imageUrl);
     }
   };
@@ -74,7 +72,6 @@ const PaperCard: React.FC<PaperCardProps> = ({
 
   return (
     <div className="paper-card bg-black text-white min-h-[100vh] w-full">
-      {/* Hero image section - larger height with content overlay */}
       <div className="h-[70vh] relative">
         <PaperCardPreview 
           imageSrc={imageSrc}
@@ -86,10 +83,10 @@ const PaperCard: React.FC<PaperCardProps> = ({
           imageSourceType={imageSourceType}
           onRegenerateClick={handleOpenPromptModal}
           paperDoi={paper.doi}
+          onDetailClick={onDetailClick}
         />
       </div>
       
-      {/* Content section overlays onto the image when scrolled */}
       <div className="bg-gradient-to-t from-black via-black to-transparent pt-8 min-h-[80vh] -mt-28 relative z-10">
         <PaperCardContent
           title={displayTitle}
