@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { FilterX, SearchIcon, Settings } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -11,6 +10,8 @@ import {
   DialogContent,
   DialogOverlay,
   DialogPortal,
+  DialogTitle,
+  DialogHeader,
 } from '@/components/ui/dialog';
 import FeedModeSelector from '@/components/FeedModeSelector';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
@@ -21,6 +22,8 @@ import DonationModal from '@/components/donations/DonationModal';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
+import DatabaseToggle from '@/components/DatabaseToggle';
+import { useDatabaseToggle } from '@/hooks/use-database-toggle';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -30,8 +33,10 @@ const Index: React.FC = () => {
   const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const { currentMode } = useFeedModeStore();
+  const { databaseSource } = useDatabaseToggle();
   
   const { completedOnboarding, showOnboarding, setShowOnboarding } = useOnboardingStore();
   
@@ -47,43 +52,43 @@ const Index: React.FC = () => {
   }, [completedOnboarding, showOnboarding, setShowOnboarding]);
   
   useEffect(() => {
-    const checkDatabase = async () => {
-      try {
-        setIsLoading(true);
-        
-        const papersData = await getPapers();
-        setPapers(papersData);
-        
-        const { data, error, count } = await supabase
-          .from('n8n_table')
-          .select('doi', { count: 'exact' })
-          .eq('ai_summary_done', true)
-          .limit(1);
-        
-        if (error) {
-          console.error('Error checking database:', error);
-          toast.error('Error connecting to Supabase: ' + error.message);
-          setHasPapers(false);
-          return;
-        }
-        
-        console.log('Database check result:', { data, count });
-        setHasPapers(count !== null && count > 0);
-        
-        if (count !== null && count > 0) {
-          toast.success(`Found ${count} papers in the database`);
-        }
-      } catch (error) {
-        console.error('Error checking papers:', error);
-        toast.error('Error checking database');
+    fetchPapers();
+  }, [databaseSource]);
+  
+  const fetchPapers = async () => {
+    try {
+      setIsLoading(true);
+      
+      const papersData = await getPapers();
+      setPapers(papersData);
+      
+      const { data, error, count } = await supabase
+        .from(databaseSource)
+        .select('doi', { count: 'exact' })
+        .eq('ai_summary_done', true)
+        .limit(1);
+      
+      if (error) {
+        console.error('Error checking database:', error);
+        toast.error('Error connecting to Supabase: ' + error.message);
         setHasPapers(false);
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    };
-    
-    checkDatabase();
-  }, []);
+      
+      console.log('Database check result:', { data, count });
+      setHasPapers(count !== null && count > 0);
+      
+      if (count !== null && count > 0) {
+        toast.success(`Found ${count} papers in the ${databaseSource} database`);
+      }
+    } catch (error) {
+      console.error('Error checking papers:', error);
+      toast.error('Error checking database');
+      setHasPapers(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const categoryFiltered = selectedCategories.length === 0
@@ -128,7 +133,7 @@ const Index: React.FC = () => {
       };
       
       const { error } = await supabase
-        .from('n8n_table')
+        .from(databaseSource)
         .insert(samplePaper);
       
       if (error) {
@@ -140,6 +145,7 @@ const Index: React.FC = () => {
       toast.success('Sample paper added successfully! Refresh the page to see it.');
       setIsSample(true);
       setHasPapers(true);
+      fetchPapers();
     } catch (error) {
       console.error('Error adding sample paper:', error);
       toast.error('Failed to add sample paper');
@@ -195,6 +201,7 @@ const Index: React.FC = () => {
                 variant="ghost" 
                 size="icon" 
                 className="text-gray-600"
+                onClick={() => setIsSettingsOpen(true)}
               >
                 <Settings className="h-5 w-5" />
               </Button>
@@ -239,6 +246,30 @@ const Index: React.FC = () => {
           </DialogContent>
         </DialogPortal>
       </Dialog>
+      
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
+          <DialogContent className="bg-white border-gray-200 sm:max-w-md w-[95vw] max-h-[90vh] p-0 overflow-hidden">
+            <DialogHeader className="p-4 border-b border-gray-200">
+              <DialogTitle className="text-lg font-semibold">Settings</DialogTitle>
+            </DialogHeader>
+            <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
+              <DatabaseToggle />
+            </div>
+            <div className="p-4 border-t border-gray-200">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsSettingsOpen(false)}
+                className="w-full"
+              >
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
 
       <OnboardingModal 
         isOpen={showOnboarding} 
@@ -253,7 +284,7 @@ const Index: React.FC = () => {
         <div className="max-w-md mx-auto mt-2 px-4">
           <div className="flex flex-col items-center gap-2 bg-amber-50 p-4 rounded-md border border-amber-200 text-sm text-amber-800">
             <span>
-              No papers found in your database. Would you like to add a sample paper?
+              No papers found in your {databaseSource} database. Would you like to add a sample paper?
             </span>
             <button 
               onClick={addSamplePaper}

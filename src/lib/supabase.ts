@@ -2,6 +2,7 @@
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
@@ -74,10 +75,13 @@ export type Paper = {
 
 export const getPapers = async (): Promise<Paper[]> => {
   try {
-    console.log('Connecting to Supabase to fetch papers...');
+    // Get the current database source from the store
+    const databaseSource = useDatabaseToggle.getState().databaseSource;
+    
+    console.log(`Connecting to Supabase to fetch papers from ${databaseSource}...`);
     
     // Check if we can connect to the Supabase client
-    const connectionTest = await supabaseClient.from('n8n_table').select('count').limit(1);
+    const connectionTest = await supabaseClient.from(databaseSource).select('count').limit(1);
     if (connectionTest.error) {
       console.error('Connection test failed:', connectionTest.error);
       throw new Error(`Connection test failed: ${connectionTest.error.message}`);
@@ -86,17 +90,17 @@ export const getPapers = async (): Promise<Paper[]> => {
     
     // Using the imported Supabase client from integrations
     const { data, error } = await supabaseClient
-      .from('n8n_table')
+      .from(databaseSource)
       .select('*')
       .eq('ai_summary_done', true) // Only fetch papers with ai_summary_done = true
       .order('created_at', { ascending: false }); // Order by newest first
     
     if (error) {
-      console.error('Error fetching papers:', error);
+      console.error(`Error fetching papers from ${databaseSource}:`, error);
       throw error;
     }
     
-    console.log('Raw data from Supabase:', data);
+    console.log(`Raw data from Supabase (${databaseSource}):`, data);
     
     if (!data || data.length === 0) {
       console.info('No data returned from Supabase, using demo data instead');
@@ -191,7 +195,7 @@ export const getPapers = async (): Promise<Paper[]> => {
       };
     }) || [];
     
-    console.log('Fetched papers:', papers.length);
+    console.log(`Fetched papers from ${databaseSource}:`, papers.length);
     return papers;
   } catch (error) {
     console.error('Error fetching papers:', error);
@@ -207,9 +211,12 @@ export async function getPaperById(id: string): Promise<Paper | null> {
   try {
     console.log('Fetching paper by ID:', id);
     
+    // Get the current database source from the store
+    const databaseSource = useDatabaseToggle.getState().databaseSource;
+    
     // Check if we're using demo data due to connection issues
     try {
-      const connectionTest = await supabaseClient.from('n8n_table').select('count').limit(1);
+      const connectionTest = await supabaseClient.from(databaseSource).select('count').limit(1);
       if (connectionTest.error) {
         console.log('Using demo data due to connection issue');
         // Find paper in demo data
@@ -225,13 +232,13 @@ export async function getPaperById(id: string): Promise<Paper | null> {
 
     // Try to find by id first (which is actually the DOI)
     let { data, error } = await supabaseClient
-      .from('n8n_table')
+      .from(databaseSource)
       .select('*')
       .eq('doi', id)
       .single();
     
     if (error) {
-      console.error('Error fetching paper by ID:', error);
+      console.error(`Error fetching paper by ID from ${databaseSource}:`, error);
       // Try to find in demo data as fallback
       const demoPaper = demoData.find(paper => paper.doi === id);
       return demoPaper || null;
