@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from './ui/badge';
 import PaperCardMedia from './PaperCardMedia';
@@ -50,7 +50,6 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
       transition={{ duration: 0.2 }}
       onClick={handleClick}
     >
-      {/* Background Image - Full Height */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <PaperCardMedia 
           imageSrc={imageSrc}
@@ -62,22 +61,18 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
         />
       </div>
       
-      {/* Mind-blow badge - positioned at the top right */}
       {mindBlowCount > 0 && (
         <div className="absolute top-4 right-4 z-20">
           <MindBlowBadge count={mindBlowCount} />
         </div>
       )}
       
-      {/* Content overlaid on the image - positioned at the bottom */}
       <div className="relative z-10 mt-auto p-6 pt-36 pb-8 bg-gradient-to-t from-black/95 via-black/80 to-transparent">
-        {/* Date and categories */}
         <div className="flex flex-wrap gap-2 mb-3">
           <Badge variant="outline" className="bg-white/10 text-white border-none">
             {formattedDate}
           </Badge>
           
-          {/* Display formatted category names */}
           {categories.slice(0, 2).map((category, idx) => (
             <Badge 
               key={idx}
@@ -89,7 +84,6 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           ))}
         </div>
         
-        {/* Title with improved visibility */}
         <h2 className="text-3xl font-bold leading-tight text-white drop-shadow-lg mb-2">
           {displayTitle}
         </h2>
@@ -98,4 +92,5 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   );
 };
 
-export default PaperCardPreview;
+// Memoize the component to prevent unnecessary rerenders
+export default memo(PaperCardPreview);

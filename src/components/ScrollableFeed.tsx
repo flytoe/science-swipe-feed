@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { type Paper } from '../lib/supabase';
 import FeedItem from './FeedItem';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,13 +35,12 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
+      layout
     >
       <div className="max-w-md mx-auto">
-        <AnimatePresence>
-          {papers.map((paper, index) => (
-            <FeedItem key={paper.doi} paper={paper} index={index} />
-          ))}
-        </AnimatePresence>
+        {papers.map((paper, index) => (
+          <FeedItem key={paper.doi} paper={paper} index={index} />
+        ))}
       </div>
     </motion.div>
   );

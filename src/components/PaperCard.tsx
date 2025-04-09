@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, memo } from 'react';
 import { type Paper } from '../lib/supabase';
 import { motion } from 'framer-motion';
 import PaperCardPreview from './PaperCardPreview';
@@ -112,4 +113,5 @@ const PaperCard: React.FC<PaperCardProps> = ({
   );
 };
 
-export default PaperCard;
+// Memoize the component to prevent unnecessary rerenders
+export default memo(PaperCard);
