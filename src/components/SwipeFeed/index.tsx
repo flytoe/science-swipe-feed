@@ -6,6 +6,7 @@ import PaperCard from '../PaperCard';
 import SwipeControls from './SwipeControls';
 import { useSwipeNavigation } from './useSwipeNavigation';
 import { useIsMobile } from '../../hooks/use-mobile';
+import TemporaryDetailView from '../TemporaryDetailView';
 
 interface SwipeFeedProps {
   papers: Paper[];
@@ -22,6 +23,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
 }) => {
   const [internalIndex, setInternalIndex] = useState(0);
   const [isDetailView, setIsDetailView] = useState(false);
+  const [showTemporaryDetail, setShowTemporaryDetail] = useState(false);
   const feedRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -117,6 +119,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
 
+  // Handle opening the temporary detail view
+  const handleOpenTemporaryDetail = () => {
+    setShowTemporaryDetail(true);
+  };
+
   // Enhanced drag constraints with friction
   const dragConstraints = { left: 0, right: 0 };
   
@@ -191,6 +198,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
                 paper={currentPaper}
                 isActive={true}
                 isGeneratingImage={isGeneratingImage}
+                onDetailClick={handleOpenTemporaryDetail}
               />
             </motion.div>
           </AnimatePresence>
@@ -260,6 +268,13 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
           paperDoi={currentPaper?.doi}
         />
       )}
+
+      {/* Temporary Detail View */}
+      <TemporaryDetailView 
+        paper={currentPaper}
+        isOpen={showTemporaryDetail}
+        onClose={() => setShowTemporaryDetail(false)}
+      />
     </div>
   );
 };

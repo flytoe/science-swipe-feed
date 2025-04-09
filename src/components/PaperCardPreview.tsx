@@ -16,6 +16,7 @@ interface PaperCardPreviewProps {
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
   onRegenerateClick?: () => void;
   paperDoi: string;
+  onDetailClick?: () => void;
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
@@ -27,18 +28,27 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   isGeneratingImage = false,
   imageSourceType = 'database',
   onRegenerateClick,
-  paperDoi
+  paperDoi,
+  onDetailClick
 }) => {
   // Get mind-blow data for the paper
   const { count: mindBlowCount } = useMindBlow(paperDoi);
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (onDetailClick) {
+      e.preventDefault();
+      onDetailClick();
+    }
+  };
+
   return (
     <motion.div
-      className="h-full flex flex-col relative"
+      className="h-full flex flex-col relative cursor-pointer"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
+      onClick={handleClick}
     >
       {/* Background Image - Full Height */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
