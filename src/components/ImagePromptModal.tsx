@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from '../lib/supabase';
 import { generateImageForPaper } from '../lib/imageGenerationService';
+import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +33,8 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
 }) => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const { databaseSource } = useDatabaseToggle();
+  const idField = getIdFieldName(databaseSource);
 
   useEffect(() => {
     if (paper && isOpen) {
@@ -62,9 +65,9 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       
       // First update the prompt in the database
       const { error: updateError } = await supabase
-        .from('n8n_table')
+        .from(databaseSource)
         .update({ ai_image_prompt: prompt })
-        .eq('doi', paper.doi);
+        .eq(idField, paper.doi);
       
       if (updateError) {
         throw new Error(`Failed to update prompt: ${updateError.message}`);

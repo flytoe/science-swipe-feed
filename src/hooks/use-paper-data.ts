@@ -5,6 +5,7 @@ import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../ut
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
+import { useDatabaseToggle } from './use-database-toggle';
 
 interface UsePaperDataResult {
   categories: string[];
@@ -37,6 +38,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   // Always initialize state, even if paper is null
   const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { databaseSource } = useDatabaseToggle();
   
   // Effect to generate image if needed
   useEffect(() => {
@@ -84,7 +86,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     generateImageIfNeeded();
-  }, [paper]);
+  }, [paper, databaseSource]); // Added databaseSource dependency to trigger regeneration on toggle
   
   useEffect(() => {
     const loadPaperData = async () => {
@@ -164,7 +166,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     loadPaperData();
-  }, [paper, isGenerating]);
+  }, [paper, isGenerating, databaseSource]); // Added databaseSource dependency to refresh on toggle
   
   return formattedData;
 };

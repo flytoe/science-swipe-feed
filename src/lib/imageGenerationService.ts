@@ -2,6 +2,7 @@
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from './supabase';
 import { toast } from 'sonner';
+import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
 
 /**
  * Generates an image for a paper using the edge function
@@ -24,7 +25,8 @@ export async function generateImageForPaper(paper: Paper): Promise<string | null
       body: {
         paperId: paper.doi,
         prompt: paper.ai_image_prompt,
-        forceRegenerate: false // Don't force regeneration if image already exists
+        forceRegenerate: false,
+        databaseSource: useDatabaseToggle.getState().databaseSource // Send the current database source
       }
     });
     
@@ -88,13 +90,15 @@ export async function regenerateImage(paper: Paper): Promise<string | null> {
   }
   
   try {
+    const databaseSource = useDatabaseToggle.getState().databaseSource;
     toast.loading('Regenerating image...', { id: `regenerate-image-${paper.doi}` });
     
     const { data, error } = await supabase.functions.invoke('generate-image', {
       body: {
         paperId: paper.doi,
         prompt: paper.ai_image_prompt,
-        forceRegenerate: true // Force regeneration even if image already exists
+        forceRegenerate: true, // Force regeneration even if image already exists
+        databaseSource: databaseSource // Send the current database source
       }
     });
     

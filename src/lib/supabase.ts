@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -112,8 +111,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     }
     
     // Transform the data to match the Paper type
-    // Note: using doi or oai as id depending on the source
-    const papers: Paper[] = data?.map((item: any) => {
+    const papers: Paper[] = data.map((item: any) => {
       // Get the appropriate ID based on the database source
       const paperId = databaseSource === 'n8n_table' ? item.doi : item.oai;
       
@@ -235,7 +233,7 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     }
 
     // Try to find by id in the appropriate field
-    let { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from(databaseSource)
       .select('*')
       .eq(idField, id)
@@ -284,7 +282,6 @@ export async function getPaperById(id: string): Promise<Paper | null> {
   }
 }
 
-// Helper functions to parse data
 function parseKeyTakeaways(takeaways: any): string[] | null {
   if (!takeaways) return null;
   
@@ -335,5 +332,4 @@ function parseCreator(creator: any): string[] | string | null {
   }
 }
 
-// Export the client for potential use elsewhere
 export default supabaseClient;

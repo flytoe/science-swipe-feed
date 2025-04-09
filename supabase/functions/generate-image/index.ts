@@ -129,7 +129,12 @@ serve(async (req) => {
   }
 
   try {
-    const { paperId, prompt, forceRegenerate } = await req.json();
+    const { paperId, prompt, forceRegenerate, databaseSource = 'n8n_table' } = await req.json();
+    
+    // Use the correct field name based on the database source
+    const idField = databaseSource === 'n8n_table' ? 'doi' : 'oai';
+    
+    console.log(`Using database: ${databaseSource}, ID field: ${idField}`);
     
     if (!paperId) {
       return new Response(
@@ -148,9 +153,9 @@ serve(async (req) => {
     // Check if the paper already has an image and we're not forcing regeneration
     if (!forceRegenerate) {
       const { data: existingPaper, error: queryError } = await supabase
-        .from("n8n_table")
+        .from(databaseSource)
         .select("image_url")
-        .eq("doi", paperId)
+        .eq(idField, paperId)
         .single();
         
       if (queryError) {
@@ -182,11 +187,11 @@ serve(async (req) => {
       );
     }
 
-    // Update the paper record with the new image URL
+    // Update the paper record in the appropriate database table with the new image URL
     const { error: updateError } = await supabase
-      .from("n8n_table")
+      .from(databaseSource)
       .update({ image_url: path })
-      .eq("doi", paperId);
+      .eq(idField, paperId);
 
     if (updateError) {
       console.error("Error updating paper record:", updateError);
@@ -196,7 +201,7 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Successfully updated paper ${paperId} with image URL: ${path}`);
+    console.log(`Successfully updated paper ${paperId} in ${databaseSource} with image URL: ${path}`);
 
     return new Response(
       JSON.stringify({ imageUrl: path }),
