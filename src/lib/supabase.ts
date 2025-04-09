@@ -2,7 +2,7 @@
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
-import { useDatabaseToggle } from '../hooks/use-database-toggle';
+import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
@@ -77,6 +77,7 @@ export const getPapers = async (): Promise<Paper[]> => {
   try {
     // Get the current database source from the store
     const databaseSource = useDatabaseToggle.getState().databaseSource;
+    const idField = getIdFieldName(databaseSource);
     
     console.log(`Connecting to Supabase to fetch papers from ${databaseSource}...`);
     
@@ -111,8 +112,11 @@ export const getPapers = async (): Promise<Paper[]> => {
     }
     
     // Transform the data to match the Paper type
-    // Note: using doi as id since the table doesn't have an id column
+    // Note: using doi or oai as id depending on the source
     const papers: Paper[] = data?.map((item: any) => {
+      // Get the appropriate ID based on the database source
+      const paperId = databaseSource === 'n8n_table' ? item.doi : item.oai;
+      
       // Handle ai_key_takeaways safely
       let takeaways: string[] | null = null;
       if (item.ai_key_takeaways) {
@@ -125,7 +129,7 @@ export const getPapers = async (): Promise<Paper[]> => {
             takeaways = null;
           }
         } catch (e) {
-          console.warn(`Could not parse ai_key_takeaways for doi ${item.doi}:`, e);
+          console.warn(`Could not parse ai_key_takeaways for id ${paperId}:`, e);
           // If the string can't be parsed as JSON, use it as a single item array if it's a string
           takeaways = typeof item.ai_key_takeaways === 'string' 
             ? [item.ai_key_takeaways] 
@@ -145,7 +149,7 @@ export const getPapers = async (): Promise<Paper[]> => {
             categories = null;
           }
         } catch (e) {
-          console.warn(`Could not parse category for doi ${item.doi}:`, e);
+          console.warn(`Could not parse category for id ${paperId}:`, e);
           categories = typeof item.category === 'string' ? [item.category] : null;
         }
       }
@@ -165,7 +169,7 @@ export const getPapers = async (): Promise<Paper[]> => {
             creators = null;
           }
         } catch (e) {
-          console.warn(`Could not parse creator for doi ${item.doi}:`, e);
+          console.warn(`Could not parse creator for id ${paperId}:`, e);
           creators = typeof item.creator === 'string' ? item.creator : null;
         }
       }
@@ -176,10 +180,9 @@ export const getPapers = async (): Promise<Paper[]> => {
         createdAt = new Date().toISOString();
       }
 
-      // Critical change: Use doi as the id
       return {
-        id: item.doi, // Using doi as the id
-        doi: item.doi,
+        id: paperId, // Using appropriate id field based on database source
+        doi: paperId, // Set doi equal to paperId for consistency in the app
         title_org: item.title_org || '',
         abstract_org: item.abstract_org || '',
         score: item.score,
@@ -213,6 +216,7 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     
     // Get the current database source from the store
     const databaseSource = useDatabaseToggle.getState().databaseSource;
+    const idField = getIdFieldName(databaseSource);
     
     // Check if we're using demo data due to connection issues
     try {
@@ -230,11 +234,11 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       return demoPaper || null;
     }
 
-    // Try to find by id first (which is actually the DOI)
+    // Try to find by id in the appropriate field
     let { data, error } = await supabaseClient
       .from(databaseSource)
       .select('*')
-      .eq('doi', id)
+      .eq(idField, id)
       .single();
     
     if (error) {
@@ -252,9 +256,11 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     }
     
     // Transform the data to match the Paper type
+    const paperId = databaseSource === 'n8n_table' ? data.doi : data.oai;
+    
     const paper: Paper = {
-      id: data.doi, // Use doi as id
-      doi: data.doi,
+      id: paperId, // Use appropriate id field
+      doi: paperId, // Use the same for doi to maintain consistency
       title_org: data.title_org || '',
       abstract_org: data.abstract_org || '',
       score: data.score,

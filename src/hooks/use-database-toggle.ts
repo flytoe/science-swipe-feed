@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type DatabaseSource = 'n8n_table' | 'core_paper';
+export type DatabaseSource = 'n8n_table' | 'core_paper';
 
 interface DatabaseToggleState {
   databaseSource: DatabaseSource;
@@ -22,3 +22,8 @@ export const useDatabaseToggle = create<DatabaseToggleState>()(
     }
   )
 );
+
+// Helper function to get the ID field name based on database source
+export const getIdFieldName = (databaseSource: DatabaseSource): string => {
+  return databaseSource === 'n8n_table' ? 'doi' : 'oai';
+};

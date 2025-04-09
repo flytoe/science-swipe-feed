@@ -12,7 +12,9 @@ const DatabaseToggle = () => {
   const handleToggle = (checked: boolean) => {
     const newSource = checked ? 'core_paper' : 'n8n_table';
     toggleDatabase(newSource);
-    toast.success(`Switched to ${newSource === 'core_paper' ? 'Core Papers' : 'N8N Papers'} database`);
+    
+    const displayName = newSource === 'core_paper' ? 'Core Papers' : 'N8N Papers';
+    toast.success(`Switched to ${displayName} database`);
   };
 
   return (

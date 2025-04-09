@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { FilterX, SearchIcon, Settings } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -23,7 +24,7 @@ import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatabaseToggle from '@/components/DatabaseToggle';
-import { useDatabaseToggle } from '@/hooks/use-database-toggle';
+import { useDatabaseToggle, getIdFieldName } from '@/hooks/use-database-toggle';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -62,9 +63,11 @@ const Index: React.FC = () => {
       const papersData = await getPapers();
       setPapers(papersData);
       
+      const idField = getIdFieldName(databaseSource);
+      
       const { data, error, count } = await supabase
         .from(databaseSource)
-        .select('doi', { count: 'exact' })
+        .select(idField, { count: 'exact' })
         .eq('ai_summary_done', true)
         .limit(1);
       
