@@ -1,15 +1,19 @@
 
-import React from 'react';
-import { X } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, ArrowLeft, Share } from 'lucide-react';
 import { Paper } from '../lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Dialog, DialogContent } from './ui/dialog';
 import { Drawer, DrawerContent } from './ui/drawer';
-import { Sheet, SheetContent } from './ui/sheet';
 import PaperCardDetail from './PaperCardDetail';
 import { usePaperData } from '../hooks/use-paper-data';
 import { useIsMobile } from '../hooks/use-mobile';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ScrollArea } from './ui/scroll-area';
+import ImagePromptModal from './ImagePromptModal';
+import { useMindBlow } from '../hooks/use-mind-blow';
+import MindBlowButton from './MindBlowButton';
 
 interface TemporaryDetailViewProps {
   paper: Paper | null;
@@ -23,78 +27,230 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   onClose
 }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const paperData = usePaperData(paper);
   
-  if (!paper) return null;
+  // Get mind-blow data for the paper if available
+  const { hasMindBlown, count: mindBlowCount, isLoading, isTopPaper, toggleMindBlow } = 
+    useMindBlow(paper?.doi || '');
+
+  // Get from URL if we're in direct route or from props
+  const isDirectRoute = location.pathname.startsWith('/paper/');
+  
+  // Handle the case where we're at /paper/:id route
+  const handleClose = () => {
+    if (isDirectRoute) {
+      navigate('/');
+    } else {
+      onClose();
+    }
+  };
+
+  const handleShare = async () => {
+    if (!paper) return;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: paper.ai_headline || paper.title_org,
+          text: 'Check out this interesting paper I found!',
+          url: `${window.location.origin}/paper/${paper.doi}`
+        });
+      } else {
+        // Fallback for browsers that don't support the Web Share API
+        await navigator.clipboard.writeText(`${window.location.origin}/paper/${paper.doi}`);
+        alert('Link copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
+  const handleRegenerationStart = () => {
+    setIsGeneratingImage(true);
+  };
+
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setIsGeneratingImage(false);
+  };
+  
+  if (!paper && !isDirectRoute) return null;
   
   const {
-    formattedCategoryNames,
     formattedDate,
     imageSrc,
     displayTitle,
     formattedTakeaways
   } = paperData;
 
-  // Mobile: Use bottom drawer
+  // Mobile: Use bottom drawer that fills the screen
   if (isMobile) {
     return (
-      <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className="max-h-[95vh] overflow-y-auto">
-          <div className="p-0 overflow-hidden rounded-t-xl bg-white">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="absolute right-2 top-2 z-50 bg-white/80 backdrop-blur-sm hover:bg-white/90 text-gray-700"
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            
-            <PaperCardDetail
-              displayTitle={displayTitle}
-              title_org={paper.title_org}
-              abstract_org={paper.abstract_org}
-              formattedDate={formattedDate}
-              doi={paper.doi}
-              takeaways={formattedTakeaways}
-              creator={paper.creator}
-              imageSrc={imageSrc}
-              onClose={onClose}
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <>
+        <Drawer open={isOpen} onOpenChange={handleClose}>
+          <DrawerContent className="h-[95vh] max-h-[95vh] p-0">
+            <div className="flex flex-col h-full overflow-hidden bg-white">
+              <div className="flex justify-between items-center p-4 border-b">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleClose}
+                  className="text-gray-700"
+                >
+                  {isDirectRoute ? <ArrowLeft className="h-5 w-5" /> : <X className="h-5 w-5" />}
+                </Button>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="rounded-full bg-white text-gray-700 hover:bg-white/90"
+                    onClick={handleShare}
+                  >
+                    <Share className="h-5 w-5" />
+                  </Button>
+                  
+                  <MindBlowButton
+                    hasMindBlown={hasMindBlown}
+                    count={mindBlowCount}
+                    isTopPaper={isTopPaper}
+                    isLoading={isLoading}
+                    onClick={toggleMindBlow}
+                    size="icon"
+                    variant="outline"
+                    className="rounded-full bg-white text-gray-700 hover:bg-white/90"
+                    showCount={false}
+                  />
+                </div>
+              </div>
+              
+              <ScrollArea className="flex-1 overflow-y-auto">
+                <div className="p-4">
+                  <PaperCardDetail
+                    displayTitle={displayTitle}
+                    title_org={paper?.title_org}
+                    abstract_org={paper?.abstract_org}
+                    formattedDate={formattedDate}
+                    doi={paper?.doi}
+                    takeaways={formattedTakeaways}
+                    creator={paper?.creator}
+                    imageSrc={imageSrc}
+                    onClose={handleClose}
+                  />
+                  
+                  <div className="mt-4">
+                    <Button 
+                      onClick={() => setIsPromptModalOpen(true)}
+                      variant="outline"
+                      className="w-full"
+                      disabled={isGeneratingImage}
+                    >
+                      {isGeneratingImage ? 'Generating...' : 'Regenerate Image'}
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            </div>
+          </DrawerContent>
+        </Drawer>
+        
+        {paper && (
+          <ImagePromptModal
+            isOpen={isPromptModalOpen}
+            onClose={() => setIsPromptModalOpen(false)}
+            paper={paper}
+            onRegenerationStart={handleRegenerationStart}
+            onRegenerationComplete={handleRegenerationComplete}
+          />
+        )}
+      </>
     );
   }
   
-  // Tablet/desktop: Use side sheet
+  // Tablet/desktop: Use centered dialog
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-[90%] max-w-xl p-0 overflow-y-auto">
-        <div className="h-full overflow-y-auto">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="absolute right-2 top-2 z-50 bg-white/80 backdrop-blur-sm hover:bg-white/90 text-gray-700"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          
-          <PaperCardDetail
-            displayTitle={displayTitle}
-            title_org={paper.title_org}
-            abstract_org={paper.abstract_org}
-            formattedDate={formattedDate}
-            doi={paper.doi}
-            takeaways={formattedTakeaways}
-            creator={paper.creator}
-            imageSrc={imageSrc}
-            onClose={onClose}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0 overflow-hidden bg-white">
+          <div className="flex flex-col h-full">
+            <div className="flex justify-between items-center p-4 border-b">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleClose}
+                className="text-gray-700"
+              >
+                {isDirectRoute ? <ArrowLeft className="h-5 w-5" /> : <X className="h-5 w-5" />}
+              </Button>
+              
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-white text-gray-700 hover:bg-white/90"
+                  onClick={handleShare}
+                >
+                  <Share className="h-5 w-5" />
+                </Button>
+                
+                <MindBlowButton
+                  hasMindBlown={hasMindBlown}
+                  count={mindBlowCount}
+                  isTopPaper={isTopPaper}
+                  isLoading={isLoading}
+                  onClick={toggleMindBlow}
+                  size="icon"
+                  variant="outline"
+                  className="rounded-full bg-white text-gray-700 hover:bg-white/90"
+                  showCount={false}
+                />
+              </div>
+            </div>
+            
+            <ScrollArea className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <PaperCardDetail
+                  displayTitle={displayTitle}
+                  title_org={paper?.title_org}
+                  abstract_org={paper?.abstract_org}
+                  formattedDate={formattedDate}
+                  doi={paper?.doi}
+                  takeaways={formattedTakeaways}
+                  creator={paper?.creator}
+                  imageSrc={imageSrc}
+                  onClose={handleClose}
+                />
+                
+                <div className="mt-4">
+                  <Button 
+                    onClick={() => setIsPromptModalOpen(true)}
+                    variant="outline"
+                    className="w-full"
+                    disabled={isGeneratingImage}
+                  >
+                    {isGeneratingImage ? 'Generating...' : 'Regenerate Image'}
+                  </Button>
+                </div>
+              </div>
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {paper && (
+        <ImagePromptModal
+          isOpen={isPromptModalOpen}
+          onClose={() => setIsPromptModalOpen(false)}
+          paper={paper}
+          onRegenerationStart={handleRegenerationStart}
+          onRegenerationComplete={handleRegenerationComplete}
+        />
+      )}
+    </>
   );
 };
 
