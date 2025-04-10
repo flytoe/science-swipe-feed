@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import PaperCardMedia from './PaperCardMedia';
 import MindBlowBadge from './MindBlowBadge';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import { Paper } from '../lib/supabase';
 
 interface PaperCardPreviewProps {
   imageSrc: string;
@@ -14,9 +15,9 @@ interface PaperCardPreviewProps {
   firstTakeaway: string;
   isGeneratingImage?: boolean;
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
-  onRegenerateClick?: () => void;
-  paperDoi: string;
+  paper: Paper | null;
   onDetailClick?: () => void;
+  onRegenerateComplete?: (imageUrl: string | null) => void;
 }
 
 const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
@@ -27,12 +28,12 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
   firstTakeaway,
   isGeneratingImage = false,
   imageSourceType = 'database',
-  onRegenerateClick,
-  paperDoi,
-  onDetailClick
+  paper,
+  onDetailClick,
+  onRegenerateComplete
 }) => {
   // Get mind-blow data for the paper
-  const { count: mindBlowCount } = useMindBlow(paperDoi);
+  const { count: mindBlowCount } = useMindBlow(paper?.id || '');
 
   const handleClick = (e: React.MouseEvent) => {
     if (onDetailClick) {
@@ -57,7 +58,8 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
           categories={[]}
           isGenerating={isGeneratingImage}
           imageSourceType={imageSourceType}
-          onRegenerateClick={onRegenerateClick}
+          paper={paper}
+          onRegenerateComplete={onRegenerateComplete}
         />
       </div>
       

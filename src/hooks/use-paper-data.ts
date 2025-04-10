@@ -5,7 +5,7 @@ import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../ut
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
-import { useDatabaseToggle, getPaperId } from './use-database-toggle';
+import { useDatabaseToggle } from './use-database-toggle';
 import { supabase } from '../integrations/supabase/client';
 
 interface UsePaperDataResult {
@@ -19,6 +19,7 @@ interface UsePaperDataResult {
   isGeneratingImage: boolean;
   imageSourceType: 'default' | 'database' | 'generated' | 'runware';
   refreshImageData: (newImageUrl?: string) => void;
+  paper: Paper | null;
 }
 
 // Create default values for when paper is null
@@ -33,11 +34,15 @@ const defaultPaperData: UsePaperDataResult = {
   isGeneratingImage: false,
   imageSourceType: 'default',
   refreshImageData: () => {},
+  paper: null,
 };
 
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   // Always initialize state, even if paper is null
-  const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
+  const [formattedData, setFormattedData] = useState<UsePaperDataResult>({
+    ...defaultPaperData, 
+    paper
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const { databaseSource } = useDatabaseToggle();
   
@@ -49,55 +54,38 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
       // Skip if the paper already has an image or we're already generating
       if (paper.image_url || isGenerating) return;
       
-      // Generate if we have a prompt OR automatically generate a prompt if none exists
-      if (paper.ai_image_prompt || !paper.image_url) {
-        try {
-          setIsGenerating(true);
+      try {
+        setIsGenerating(true);
+        setFormattedData(prev => ({
+          ...prev,
+          isGeneratingImage: true
+        }));
+        
+        // If no prompt exists, checkAndGenerateImageIfNeeded will create one
+        const imageUrl = await checkAndGenerateImageIfNeeded(paper);
+        
+        if (imageUrl) {
+          // Update the state with the new image URL
           setFormattedData(prev => ({
             ...prev,
-            isGeneratingImage: true
+            imageSrc: imageUrl,
+            imageSourceType: 'runware',
+            isGeneratingImage: false
           }));
           
-          // If no prompt exists, create one based on the title
-          let imagePrompt = paper.ai_image_prompt;
-          if (!imagePrompt) {
-            imagePrompt = `Scientific visualization of: ${paper.title_org}`;
-            
-            // Save the generated prompt to the database
-            await supabase
-              .from(databaseSource)
-              .update({ ai_image_prompt: imagePrompt })
-              .eq('id', paper.id);
-              
-            // Update the paper object with the new prompt
-            paper.ai_image_prompt = imagePrompt;
-          }
-          
-          const imageUrl = await generateImageForPaper(paper);
-          
-          if (imageUrl) {
-            // Update the state with the new image URL
-            setFormattedData(prev => ({
-              ...prev,
-              imageSrc: imageUrl,
-              imageSourceType: 'generated',
-              isGeneratingImage: false
-            }));
-            
-            console.log(`Successfully generated image for paper: ${paper.id}`);
-          } else {
-            console.warn(`Failed to generate image for paper: ${paper.id}`);
-            setFormattedData(prev => ({
-              ...prev,
-              isGeneratingImage: false
-            }));
-          }
-        } catch (error) {
-          console.error(`Error generating image for paper ${paper.id}:`, error);
-          toast.error('Failed to generate image');
-        } finally {
-          setIsGenerating(false);
+          console.log(`Successfully generated image for paper: ${paper.id}`);
+        } else {
+          console.warn(`Failed to generate image for paper: ${paper.id}`);
+          setFormattedData(prev => ({
+            ...prev,
+            isGeneratingImage: false
+          }));
         }
+      } catch (error) {
+        console.error(`Error generating image for paper ${paper.id}:`, error);
+        toast.error('Failed to generate image');
+      } finally {
+        setIsGenerating(false);
       }
     };
     
@@ -107,7 +95,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   useEffect(() => {
     const loadPaperData = async () => {
       if (!paper) {
-        setFormattedData(defaultPaperData);
+        setFormattedData({...defaultPaperData, paper: null});
         return;
       }
       
@@ -164,12 +152,13 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           formattedTakeaways,
           isGeneratingImage: isGenerating,
           imageSourceType,
+          paper: paper,
           refreshImageData: (newImageUrl?: string) => {
             if (newImageUrl) {
               setFormattedData(prev => ({
                 ...prev,
                 imageSrc: newImageUrl,
-                imageSourceType: 'generated',
+                imageSourceType: 'runware',
                 isGeneratingImage: false
               }));
             }
@@ -177,7 +166,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         });
       } catch (error) {
         console.error('Error in usePaperData:', error);
-        setFormattedData(defaultPaperData);
+        setFormattedData({...defaultPaperData, paper});
       }
     };
     

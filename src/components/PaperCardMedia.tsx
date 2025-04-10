@@ -1,6 +1,8 @@
 
 import React from 'react';
 import { RefreshCw } from 'lucide-react';
+import RegenerateImageButton from './RegenerateImageButton';
+import { Paper } from '../lib/supabase';
 
 interface PaperCardMediaProps {
   imageSrc: string;
@@ -8,7 +10,8 @@ interface PaperCardMediaProps {
   categories: string[];
   isGenerating?: boolean;
   imageSourceType?: 'default' | 'database' | 'generated' | 'runware';
-  onRegenerateClick?: () => void;
+  paper?: Paper | null;
+  onRegenerateComplete?: (imageUrl: string | null) => void;
 }
 
 const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
@@ -17,13 +20,11 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
   categories,
   isGenerating = false,
   imageSourceType = 'database',
-  onRegenerateClick
+  paper,
+  onRegenerateComplete
 }) => {
-  const handleRegenerateClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onRegenerateClick) {
-      onRegenerateClick();
-    }
+  const handleRegenerateStart = () => {
+    // This will be handled by the RegenerateImageButton component
   };
 
   return (
@@ -50,16 +51,17 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
         </div>
       )}
       
-      {/* Regenerate button */}
-      {onRegenerateClick && (
-        <button 
-          onClick={handleRegenerateClick}
-          className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
-          disabled={isGenerating}
-          aria-label="Regenerate image"
-        >
-          <RefreshCw className={`h-4 w-4 text-white ${isGenerating ? 'animate-spin' : ''}`} />
-        </button>
+      {/* Regenerate button - now using our enhanced RegenerateImageButton */}
+      {paper && (
+        <div className="absolute top-2 right-2">
+          <RegenerateImageButton 
+            paper={paper}
+            onRegenerationComplete={onRegenerateComplete}
+            variant="outline"
+            size="icon"
+            className="rounded-full bg-black/50 text-white hover:bg-black/70 border-none"
+          />
+        </div>
       )}
     </div>
   );

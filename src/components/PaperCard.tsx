@@ -51,7 +51,8 @@ const PaperCard: React.FC<PaperCardProps> = ({
     formattedTakeaways,
     isGeneratingImage: isGeneratingFromHook,
     imageSourceType,
-    refreshImageData
+    refreshImageData,
+    paper: paperData
   } = usePaperData(paper);
 
   const handleRegenerationStart = () => {
@@ -82,9 +83,9 @@ const PaperCard: React.FC<PaperCardProps> = ({
           firstTakeaway={firstTakeaway}
           isGeneratingImage={isGenerating}
           imageSourceType={imageSourceType}
-          onRegenerateClick={handleOpenPromptModal}
-          paperDoi={paper.doi}
+          paper={paperData}
           onDetailClick={onDetailClick}
+          onRegenerateComplete={handleRegenerationComplete}
         />
       </div>
       
@@ -95,7 +96,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
           abstract={paper.abstract_org}
           abstract_org={paper.abstract_org}
           formattedDate={formattedDate}
-          doi={paper.doi}
+          doi={paper.id}
           takeaways={formattedTakeaways}
           creator={paper.creator}
           imageSrc={imageSrc}

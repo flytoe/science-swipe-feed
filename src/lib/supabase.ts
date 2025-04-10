@@ -67,8 +67,21 @@ export type Paper = {
   category: string[] | null;
   image_url: string | null;
   creator: string[] | string | null;
+  // For compatibility with existing code that uses 'doi'
+  get doi(): string;
   oai?: string; // Optional field for core_paper
 };
+
+// Create a Paper object from raw data, implementing the getter for 'doi'
+function createPaper(rawData: any): Paper {
+  return {
+    ...rawData,
+    // Add getter for doi that returns the id
+    get doi() {
+      return this.id;
+    }
+  };
+}
 
 export const getPapers = async (): Promise<Paper[]> => {
   try {
@@ -100,12 +113,14 @@ export const getPapers = async (): Promise<Paper[]> => {
       console.info('No data returned from Supabase, using demo data instead');
       return demoData
         .filter(paper => paper.ai_summary_done === true)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .map(createPaper);
     }
     
     // Transform the data to match the Paper type
     const papers: Paper[] = data.map((item: any) => {
-      return formatPaperData(item, databaseSource);
+      const formattedPaper = formatPaperData(item, databaseSource);
+      return createPaper(formattedPaper);
     });
     
     console.log(`Fetched papers from ${databaseSource}:`, papers.length);
@@ -116,7 +131,8 @@ export const getPapers = async (): Promise<Paper[]> => {
     // Filter and sort demo data
     return demoData
       .filter(paper => paper.ai_summary_done === true)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .map(createPaper);
   }
 };
 
@@ -134,13 +150,13 @@ export async function getPaperById(id: string): Promise<Paper | null> {
         console.log('Using demo data due to connection issue');
         // Find paper in demo data
         const demoPaper = demoData.find(paper => paper.id === id);
-        return demoPaper || null;
+        return demoPaper ? createPaper(demoPaper) : null;
       }
     } catch (e) {
       console.error('Connection test failed:', e);
       // Find paper in demo data
       const demoPaper = demoData.find(paper => paper.id === id);
-      return demoPaper || null;
+      return demoPaper ? createPaper(demoPaper) : null;
     }
 
     // Try to find by id
@@ -154,28 +170,29 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       console.error(`Error fetching paper by ID from ${databaseSource}:`, error);
       // Try to find in demo data as fallback
       const demoPaper = demoData.find(paper => paper.id === id);
-      return demoPaper || null;
+      return demoPaper ? createPaper(demoPaper) : null;
     }
     
     if (!data) {
       console.log('No data found in database, checking demo data');
       // Try to find in demo data as fallback
       const demoPaper = demoData.find(paper => paper.id === id);
-      return demoPaper || null;
+      return demoPaper ? createPaper(demoPaper) : null;
     }
     
     // Format the paper data
-    return formatPaperData(data, databaseSource);
+    const formattedPaper = formatPaperData(data, databaseSource);
+    return createPaper(formattedPaper);
   } catch (error) {
     console.error('Error in getPaperById:', error);
     // Try to find in demo data as fallback
     const demoPaper = demoData.find(paper => paper.id === id);
-    return demoPaper || null;
+    return demoPaper ? createPaper(demoPaper) : null;
   }
 }
 
 // Helper function to format paper data from database response
-function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
+function formatPaperData(item: any, databaseSource: DatabaseSource): any {
   // Handle ai_key_takeaways safely
   let takeaways: string[] | null = parseKeyTakeaways(item.ai_key_takeaways);
   
@@ -192,7 +209,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
   }
   
   // Create the paper object with proper typing
-  const paper: Paper = {
+  const paper = {
     id: item.id,
     title_org: item.title_org || '',
     abstract_org: item.abstract_org || '',

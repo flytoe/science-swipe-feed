@@ -6,6 +6,7 @@ import { Paper } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { usePaperData } from '../hooks/use-paper-data';
 import TemporaryDetailView from './TemporaryDetailView';
+import RegenerateImageButton from './RegenerateImageButton';
 
 interface FeedItemProps {
   paper: Paper;
@@ -15,12 +16,15 @@ interface FeedItemProps {
 const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [showDetail, setShowDetail] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   
   const { 
     formattedCategoryNames, 
     formattedDate, 
     imageSrc, 
     displayTitle,
+    refreshImageData,
+    paper: paperWithData
   } = usePaperData(paper);
 
   // Create properly encoded paper ID for the URL
@@ -35,6 +39,13 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     navigate(`/paper/${encodedPaperId}`);
   };
 
+  const handleRegenerationComplete = (imageUrl: string | null) => {
+    setIsRegenerating(false);
+    if (imageUrl) {
+      refreshImageData(imageUrl);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -42,21 +53,37 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
         className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100"
-        onClick={handleCardClick}
         layout
       >
         <div className="block cursor-pointer">
           <div className="flex flex-col">
-            <div className="aspect-square relative">
+            <div className="aspect-square relative" onClick={handleCardClick}>
               <img 
                 src={imageSrc} 
                 alt={displayTitle}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
+              {/* Regenerate button overlay */}
+              <div className="absolute top-2 right-2">
+                <RegenerateImageButton 
+                  paper={paperWithData}
+                  onRegenerationStart={() => setIsRegenerating(true)}
+                  onRegenerationComplete={handleRegenerationComplete}
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-black/50 text-white hover:bg-black/70 border-none"
+                />
+              </div>
+              {/* Loading overlay */}
+              {isRegenerating && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <div className="text-white text-sm">Regenerating...</div>
+                </div>
+              )}
             </div>
             
-            <div className="p-4">
+            <div className="p-4" onClick={handleCardClick}>
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 {displayTitle}
               </h2>
