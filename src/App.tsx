@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import TemporaryDetailView from "./components/TemporaryDetailView";
 import { Toaster } from "./components/ui/custom-toaster";
 import { getPaperById, Paper } from "./lib/supabase";
+import { useDatabaseToggle } from "./hooks/use-database-toggle";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const PaperDetailRoute = () => {
   const { id } = useParams<{ id: string }>();
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
+  const { databaseSource } = useDatabaseToggle();
   
   useEffect(() => {
     const loadPaper = async () => {
@@ -35,7 +37,7 @@ const PaperDetailRoute = () => {
     };
     
     loadPaper();
-  }, [id]);
+  }, [id, databaseSource]); // Add databaseSource as dependency to reload when it changes
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">

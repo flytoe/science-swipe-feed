@@ -41,11 +41,11 @@ export type Database = {
           ai_key_takeaways: Json | null
           ai_summary_done: boolean | null
           category: Json | null
+          core_id: string
           created_at: string | null
           creator: Json | null
           html_available: boolean | null
           html_url: string | null
-          id: string | null
           image_url: string | null
           oai: string
           rerun: boolean | null
@@ -59,11 +59,11 @@ export type Database = {
           ai_key_takeaways?: Json | null
           ai_summary_done?: boolean | null
           category?: Json | null
+          core_id: string
           created_at?: string | null
           creator?: Json | null
           html_available?: boolean | null
           html_url?: string | null
-          id?: string | null
           image_url?: string | null
           oai: string
           rerun?: boolean | null
@@ -77,11 +77,11 @@ export type Database = {
           ai_key_takeaways?: Json | null
           ai_summary_done?: boolean | null
           category?: Json | null
+          core_id?: string
           created_at?: string | null
           creator?: Json | null
           html_available?: boolean | null
           html_url?: string | null
-          id?: string | null
           image_url?: string | null
           oai?: string
           rerun?: boolean | null

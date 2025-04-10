@@ -25,5 +25,10 @@ export const useDatabaseToggle = create<DatabaseToggleState>()(
 
 // Helper function to get the ID field name based on database source
 export const getIdFieldName = (databaseSource: DatabaseSource): string => {
-  return databaseSource === 'n8n_table' ? 'doi' : 'oai';
+  return databaseSource === 'n8n_table' ? 'doi' : 'core_id';
+};
+
+// Helper function to get the unique ID value from a paper based on database source
+export const getPaperId = (paper: any, databaseSource: DatabaseSource): string => {
+  return databaseSource === 'n8n_table' ? paper.doi : paper.core_id;
 };

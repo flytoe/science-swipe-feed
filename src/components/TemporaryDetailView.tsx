@@ -14,6 +14,7 @@ import { ScrollArea } from './ui/scroll-area';
 import ImagePromptModal from './ImagePromptModal';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import MindBlowButton from './MindBlowButton';
+import { useDatabaseToggle, getPaperId } from '../hooks/use-database-toggle';
 
 interface TemporaryDetailViewProps {
   paper: Paper | null;
@@ -33,6 +34,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const paperData = usePaperData(paper);
+  const { databaseSource } = useDatabaseToggle();
   
   // Get mind-blow data for the paper if available
   const { hasMindBlown, count: mindBlowCount, isLoading, isTopPaper, toggleMindBlow } = 
@@ -54,15 +56,18 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
     if (!paper) return;
     
     try {
+      // Get the correct ID to use in the share URL
+      const paperId = paper.id;
+      
       if (navigator.share) {
         await navigator.share({
           title: paper.ai_headline || paper.title_org,
           text: 'Check out this interesting paper I found!',
-          url: `${window.location.origin}/paper/${paper.doi}`
+          url: `${window.location.origin}/paper/${paperId}`
         });
       } else {
         // Fallback for browsers that don't support the Web Share API
-        await navigator.clipboard.writeText(`${window.location.origin}/paper/${paper.doi}`);
+        await navigator.clipboard.writeText(`${window.location.origin}/paper/${paperId}`);
         alert('Link copied to clipboard!');
       }
     } catch (error) {

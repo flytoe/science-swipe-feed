@@ -2,7 +2,7 @@
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
-import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
+import { useDatabaseToggle, getIdFieldName, getPaperId } from '../hooks/use-database-toggle';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
@@ -59,6 +59,7 @@ const demoData: Paper[] = [
 export type Paper = {
   id: string;
   doi: string;
+  core_id?: string;
   title_org: string;
   abstract_org: string;
   score: any;
@@ -114,7 +115,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     // Transform the data to match the Paper type
     const papers: Paper[] = data.map((item: any) => {
       // Get the appropriate ID based on the database source
-      const paperId = databaseSource === 'n8n_table' ? item.doi : item.oai;
+      const paperId = getPaperId(item, databaseSource);
       
       // Handle ai_key_takeaways safely
       let takeaways: string[] | null = null;
@@ -181,7 +182,8 @@ export const getPapers = async (): Promise<Paper[]> => {
 
       return {
         id: paperId, // Using appropriate id field based on database source
-        doi: paperId, // Set doi equal to paperId for consistency in the app
+        doi: databaseSource === 'n8n_table' ? paperId : item.doi || '', // Set doi to paperId for n8n_table or use the doi field for core_paper
+        core_id: databaseSource === 'core_paper' ? paperId : undefined, // Set core_id for core_paper
         title_org: item.title_org || '',
         abstract_org: item.abstract_org || '',
         score: item.score,
@@ -254,12 +256,13 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       return demoPaper || null;
     }
     
-    // Transform the data to match the Paper type
-    const paperId = databaseSource === 'n8n_table' ? data.doi : data.oai;
+    // Get the appropriate ID from the data
+    const paperId = getPaperId(data, databaseSource);
     
     const paper: Paper = {
-      id: paperId, // Use appropriate id field
-      doi: paperId, // Use the same for doi to maintain consistency
+      id: paperId,
+      doi: databaseSource === 'n8n_table' ? paperId : data.doi || '',
+      core_id: databaseSource === 'core_paper' ? paperId : undefined,
       title_org: data.title_org || '',
       abstract_org: data.abstract_org || '',
       score: data.score,

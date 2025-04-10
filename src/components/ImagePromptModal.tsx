@@ -1,27 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { supabase } from '../integrations/supabase/client';
+import React, { useState } from 'react';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 import { Paper } from '../lib/supabase';
-import { generateImageForPaper } from '../lib/imageGenerationService';
+import { supabase } from '../integrations/supabase/client';
+import { toast } from 'sonner';
+import { AspectRatio } from './ui/aspect-ratio';
 import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  paper: Paper | null;
+  paper: Paper;
   onRegenerationStart?: () => void;
-  onRegenerationComplete: (imageUrl: string | null) => void;
+  onRegenerationComplete?: (imageUrl: string | null) => void;
 }
 
 const ImagePromptModal: React.FC<ImagePromptModalProps> = ({ 
@@ -31,111 +25,136 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
   onRegenerationStart,
   onRegenerationComplete
 }) => {
-  const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [prompt, setPrompt] = useState(paper.ai_image_prompt || '');
+  const [isLoading, setIsLoading] = useState(false);
   const { databaseSource } = useDatabaseToggle();
   const idField = getIdFieldName(databaseSource);
 
-  useEffect(() => {
-    if (paper && isOpen) {
-      setPrompt(paper.ai_image_prompt || '');
-    }
-  }, [paper, isOpen]);
-
-  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPrompt(e.target.value);
-  };
-
-  const handleSubmit = async () => {
-    if (!paper) {
-      toast.error('No paper available to regenerate image');
-      return;
-    }
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!prompt.trim()) {
-      toast.error('Please enter a valid prompt');
+      toast.error('Please enter an image prompt');
       return;
     }
-
+    
     try {
-      setIsGenerating(true);
-      if (onRegenerationStart) onRegenerationStart();
+      setIsLoading(true);
+      onRegenerationStart?.();
       
-      toast.info('Updating prompt and regenerating image...', { duration: 10000 });
-      
-      // First update the prompt in the database
+      // First, update the image prompt in the database
       const { error: updateError } = await supabase
         .from(databaseSource)
         .update({ ai_image_prompt: prompt })
-        .eq(idField, paper.doi);
+        .eq(idField, paper.id);
       
       if (updateError) {
-        throw new Error(`Failed to update prompt: ${updateError.message}`);
+        console.error('Error updating image prompt:', updateError);
+        toast.error('Failed to update image prompt');
+        return;
       }
       
-      // Update the paper object with the new prompt
-      const updatedPaper = { ...paper, ai_image_prompt: prompt };
+      // Call the edge function to generate the image
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          paperId: paper.id
+        }),
+      });
       
-      // Generate a new image with the updated prompt
-      const imageUrl = await generateImageForPaper(updatedPaper);
-      
-      if (imageUrl) {
-        toast.success('Image regenerated successfully');
-        onRegenerationComplete(imageUrl);
-        onClose();
-      } else {
-        toast.error('Failed to regenerate image');
-        onRegenerationComplete(null);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error generating image:', errorText);
+        toast.error('Failed to generate image');
+        onRegenerationComplete?.(null);
+        return;
       }
+      
+      const result = await response.json();
+      const imageUrl = result.imageUrl;
+      
+      if (!imageUrl) {
+        toast.error('No image URL returned');
+        onRegenerationComplete?.(null);
+        return;
+      }
+      
+      // Update the database with the new image URL
+      const { error: imageUpdateError } = await supabase
+        .from(databaseSource)
+        .update({ image_url: imageUrl })
+        .eq(idField, paper.id);
+      
+      if (imageUpdateError) {
+        console.error('Error updating image URL:', imageUpdateError);
+        toast.error('Failed to save image URL');
+        // Still return the URL even if we couldn't save it
+        onRegenerationComplete?.(imageUrl);
+        return;
+      }
+      
+      toast.success('Image generated and saved successfully!');
+      onRegenerationComplete?.(imageUrl);
+      onClose();
     } catch (error) {
-      console.error('Error regenerating image:', error);
-      toast.error('Error regenerating image');
-      onRegenerationComplete(null);
+      console.error('Error in image generation process:', error);
+      toast.error('An unexpected error occurred');
+      onRegenerationComplete?.(null);
     } finally {
-      setIsGenerating(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg bg-gray-900 border-gray-700 text-white">
+    <Dialog open={isOpen} onOpenChange={() => !isLoading && onClose()}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">Edit Image Prompt</DialogTitle>
+          <DialogTitle>Generate New Image</DialogTitle>
         </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div>
-            <label htmlFor="prompt" className="block text-sm font-medium mb-1 text-gray-200">
-              Prompt for Image Generation
-            </label>
-            <Textarea
-              id="prompt"
-              value={prompt}
-              onChange={handlePromptChange}
-              rows={6}
-              placeholder="Enter a detailed prompt to generate an image..."
-              className="w-full bg-gray-800 border-gray-700 text-white placeholder-gray-400"
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            {paper.image_url && (
+              <div className="mb-4">
+                <Label htmlFor="current-image">Current Image</Label>
+                <AspectRatio ratio={16 / 9} className="bg-gray-100 rounded-md overflow-hidden mt-1">
+                  <img 
+                    src={paper.image_url} 
+                    alt="Current paper illustration" 
+                    className="w-full h-full object-cover"
+                  />
+                </AspectRatio>
+              </div>
+            )}
+            
+            <div className="grid gap-2">
+              <Label htmlFor="prompt">Image Prompt</Label>
+              <Input
+                id="prompt"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Enter a detailed description for the image"
+                className="w-full"
+              />
+            </div>
           </div>
-        </div>
-        
-        <DialogFooter className="sm:justify-end">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isGenerating}
-            className="border-gray-600 text-gray-200 hover:bg-gray-800 hover:text-white"
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isGenerating}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {isGenerating ? 'Generating...' : 'Regenerate Image'}
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading || !prompt.trim()}>
+              {isLoading ? 'Generating...' : 'Generate New Image'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

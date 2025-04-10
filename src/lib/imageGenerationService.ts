@@ -1,123 +1,80 @@
 
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from './supabase';
-import { toast } from 'sonner';
-import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
+import { useDatabaseToggle, getIdFieldName, getPaperId } from '../hooks/use-database-toggle';
 
-/**
- * Generates an image for a paper using the edge function
- * @param paper The paper to generate an image for
- * @returns The URL of the generated image, or null if generation failed
- */
-export async function generateImageForPaper(paper: Paper): Promise<string | null> {
-  if (!paper.ai_image_prompt) {
-    console.warn('No image prompt available for paper:', paper.doi);
-    return null;
-  }
-  
-  try {
-    console.log(`Generating image with Runware for paper ${paper.doi} with prompt: ${paper.ai_image_prompt}`);
-    
-    // Show a toast notification to let the user know we're generating an image
-    toast.loading('Generating image...', { id: `generate-image-${paper.doi}` });
-    
-    const { data, error } = await supabase.functions.invoke('generate-image', {
-      body: {
-        paperId: paper.doi,
-        prompt: paper.ai_image_prompt,
-        forceRegenerate: false,
-        databaseSource: useDatabaseToggle.getState().databaseSource // Send the current database source
-      }
-    });
-    
-    if (error) {
-      console.error('Error invoking generate-image function:', error);
-      toast.error('Failed to generate image', { id: `generate-image-${paper.doi}` });
-      return null;
-    }
-    
-    console.log('Runware image generation response:', data);
-    
-    if (data && data.imageUrl) {
-      console.log(`Successfully generated image with Runware for paper: ${paper.doi}`);
-      toast.success('Image generated successfully', { id: `generate-image-${paper.doi}` });
-      return data.imageUrl;
-    }
-    
-    console.warn(`No image URL returned from Runware for paper: ${paper.doi}`);
-    toast.error('Failed to generate image', { id: `generate-image-${paper.doi}` });
-    return null;
-  } catch (error) {
-    console.error('Error generating image with Runware:', error);
-    toast.error('Failed to generate image', { id: `generate-image-${paper.doi}` });
-    return null;
-  }
-}
-
-/**
- * Checks if a paper has an image and generates one if not
- * @param paper The paper to check
- * @returns The URL of the existing or newly generated image, or null if generation failed
- */
-export async function checkAndGenerateImageIfNeeded(paper: Paper): Promise<string | null> {
-  // If the paper already has an image, just return that URL
+// Check if a paper needs an image and generate one if needed
+export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<string | null> => {
   if (paper.image_url) {
-    console.log(`Paper ${paper.doi} already has an image: ${paper.image_url}`);
+    console.log('Paper already has an image URL:', paper.image_url);
     return paper.image_url;
   }
   
-  console.log(`Paper ${paper.doi} has no image. Checking if generation is possible...`);
-  
-  // Only generate if we have a prompt AND no existing image
-  if (paper.ai_image_prompt) {
-    console.log(`Found prompt for paper ${paper.doi}, generating image with Runware...`);
-    return await generateImageForPaper(paper);
+  if (!paper.ai_image_prompt) {
+    console.log('Paper has no image prompt. Skipping image generation.');
+    return null;
   }
   
-  console.log(`No prompt available for paper ${paper.doi}, cannot generate image`);
-  return null;
-}
+  console.log('Generating image for paper with ID:', paper.id);
+  return generateImageForPaper(paper);
+};
 
-/**
- * Regenerates an image for a paper even if it already has one
- * @param paper The paper to regenerate an image for
- * @returns The URL of the newly generated image, or null if generation failed
- */
-export async function regenerateImage(paper: Paper): Promise<string | null> {
+// Generate an image for a paper and store it in the database
+export const generateImageForPaper = async (paper: Paper): Promise<string | null> => {
   if (!paper.ai_image_prompt) {
-    toast.error('No image prompt available for this paper');
+    console.log('No image prompt available. Cannot generate image.');
     return null;
   }
   
   try {
-    const databaseSource = useDatabaseToggle.getState().databaseSource;
-    toast.loading('Regenerating image...', { id: `regenerate-image-${paper.doi}` });
+    console.log('Starting image generation with prompt:', paper.ai_image_prompt);
     
-    const { data, error } = await supabase.functions.invoke('generate-image', {
-      body: {
-        paperId: paper.doi,
+    // Call the edge function to generate an image
+    const response = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         prompt: paper.ai_image_prompt,
-        forceRegenerate: true, // Force regeneration even if image already exists
-        databaseSource: databaseSource // Send the current database source
-      }
+        paperId: paper.id
+      }),
     });
     
-    if (error) {
-      console.error('Error regenerating image:', error);
-      toast.error('Failed to regenerate image', { id: `regenerate-image-${paper.doi}` });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error generating image:', errorText);
       return null;
     }
     
-    if (data && data.imageUrl) {
-      toast.success('Image regenerated successfully', { id: `regenerate-image-${paper.doi}` });
-      return data.imageUrl;
+    const result = await response.json();
+    const imageUrl = result.imageUrl;
+    
+    if (!imageUrl) {
+      console.error('No image URL returned from image generation.');
+      return null;
     }
     
-    toast.error('Failed to regenerate image', { id: `regenerate-image-${paper.doi}` });
-    return null;
+    console.log('Image generated successfully:', imageUrl);
+    
+    // Update the database with the new image URL
+    const databaseSource = useDatabaseToggle.getState().databaseSource;
+    const idField = getIdFieldName(databaseSource);
+    
+    const { error } = await supabase
+      .from(databaseSource)
+      .update({ image_url: imageUrl })
+      .eq(idField, paper.id);
+    
+    if (error) {
+      console.error('Error updating paper with new image URL:', error);
+      return imageUrl; // Still return the URL even if we couldn't save it
+    }
+    
+    console.log('Paper updated with new image URL');
+    return imageUrl;
   } catch (error) {
-    console.error('Error regenerating image:', error);
-    toast.error('Failed to regenerate image', { id: `regenerate-image-${paper.doi}` });
+    console.error('Error in generateImageForPaper:', error);
     return null;
   }
-}
+};

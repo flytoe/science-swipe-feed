@@ -5,7 +5,7 @@ import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../ut
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
-import { useDatabaseToggle } from './use-database-toggle';
+import { useDatabaseToggle, getPaperId } from './use-database-toggle';
 
 interface UsePaperDataResult {
   categories: string[];
@@ -68,16 +68,16 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
               isGeneratingImage: false
             }));
             
-            console.log(`Successfully generated image for paper: ${paper.doi}`);
+            console.log(`Successfully generated image for paper: ${paper.id}`);
           } else {
-            console.warn(`Failed to generate image for paper: ${paper.doi}`);
+            console.warn(`Failed to generate image for paper: ${paper.id}`);
             setFormattedData(prev => ({
               ...prev,
               isGeneratingImage: false
             }));
           }
         } catch (error) {
-          console.error(`Error generating image for paper ${paper.doi}:`, error);
+          console.error(`Error generating image for paper ${paper.id}:`, error);
           toast.error('Failed to generate image');
         } finally {
           setIsGenerating(false);
