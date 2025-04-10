@@ -8,7 +8,7 @@ import { Paper } from '../lib/supabase';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { AspectRatio } from './ui/aspect-ratio';
-import { useDatabaseToggle, getIdFieldName } from '../hooks/use-database-toggle';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -28,7 +28,6 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
   const [prompt, setPrompt] = useState(paper.ai_image_prompt || '');
   const [isLoading, setIsLoading] = useState(false);
   const { databaseSource } = useDatabaseToggle();
-  const idField = getIdFieldName(databaseSource);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +45,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       const { error: updateError } = await supabase
         .from(databaseSource)
         .update({ ai_image_prompt: prompt })
-        .eq(idField, paper.id);
+        .eq('id', paper.id);
       
       if (updateError) {
         console.error('Error updating image prompt:', updateError);
@@ -63,8 +62,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
         body: JSON.stringify({
           prompt,
           paperId: paper.id,
-          databaseSource,
-          idField
+          databaseSource
         }),
       });
       
@@ -89,7 +87,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       const { error: imageUpdateError } = await supabase
         .from(databaseSource)
         .update({ image_url: imageUrl })
-        .eq(idField, paper.id);
+        .eq('id', paper.id);
       
       if (imageUpdateError) {
         console.error('Error updating image URL:', imageUpdateError);

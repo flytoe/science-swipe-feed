@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, paperId, databaseSource, idField } = await req.json()
+    const { prompt, paperId, databaseSource } = await req.json()
 
     if (!prompt) {
       return new Response(
@@ -23,7 +23,7 @@ serve(async (req) => {
       )
     }
 
-    console.log(`Generating image for ${databaseSource} with ID: ${paperId} (field: ${idField})`)
+    console.log(`Generating image for ${databaseSource} with ID: ${paperId}`)
 
     // For this example, we'll use a placeholder image service
     // In production, replace this with actual AI image generation (like DALL-E)

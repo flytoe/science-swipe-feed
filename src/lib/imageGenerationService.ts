@@ -1,7 +1,7 @@
 
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from './supabase';
-import { useDatabaseToggle, getIdFieldName, getPaperId } from '../hooks/use-database-toggle';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 
 // Check if a paper needs an image and generate one if needed
 export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<string | null> => {
@@ -31,7 +31,6 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     
     // Get the current database source
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const idField = getIdFieldName(databaseSource);
     const paperId = paper.id;
     
     // Call the edge function to generate an image
@@ -43,8 +42,7 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
       body: JSON.stringify({
         prompt: paper.ai_image_prompt,
         paperId: paperId,
-        databaseSource,
-        idField
+        databaseSource
       }),
     });
     
@@ -68,7 +66,7 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     const { error } = await supabase
       .from(databaseSource)
       .update({ image_url: imageUrl })
-      .eq(idField, paperId);
+      .eq('id', paperId);
     
     if (error) {
       console.error('Error updating paper with new image URL:', error);

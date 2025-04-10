@@ -6,6 +6,7 @@ import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
 import { useDatabaseToggle, getPaperId } from './use-database-toggle';
+import { supabase } from '../integrations/supabase/client';
 
 interface UsePaperDataResult {
   categories: string[];
@@ -63,11 +64,10 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
             imagePrompt = `Scientific visualization of: ${paper.title_org}`;
             
             // Save the generated prompt to the database
-            const idField = getIdFieldName(databaseSource);
             await supabase
               .from(databaseSource)
               .update({ ai_image_prompt: imagePrompt })
-              .eq(idField, paper.id);
+              .eq('id', paper.id);
               
             // Update the paper object with the new prompt
             paper.ai_image_prompt = imagePrompt;
@@ -102,7 +102,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     generateImageIfNeeded();
-  }, [paper, databaseSource]); // Added databaseSource dependency to trigger regeneration on toggle
+  }, [paper, databaseSource]); 
   
   useEffect(() => {
     const loadPaperData = async () => {
@@ -182,7 +182,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     loadPaperData();
-  }, [paper, isGenerating, databaseSource]); // Added databaseSource dependency to refresh on toggle
+  }, [paper, isGenerating, databaseSource]);
   
   return formattedData;
 };

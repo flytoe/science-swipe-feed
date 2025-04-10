@@ -24,7 +24,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   } = usePaperData(paper);
 
   // Create properly encoded paper ID for the URL
-  const encodedPaperId = encodeURIComponent(paper.doi);
+  const encodedPaperId = encodeURIComponent(paper.id);
   
   const handleCardClick = (e: React.MouseEvent) => {
     e.preventDefault();

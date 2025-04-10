@@ -1,13 +1,13 @@
+
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
-import { useDatabaseToggle, getIdFieldName, getPaperId, DatabaseSource } from '../hooks/use-database-toggle';
+import { useDatabaseToggle, DatabaseSource } from '../hooks/use-database-toggle';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
   {
-    id: '1',
-    doi: '10.1234/demo.1',
+    id: '10.1234/demo.1',
     title_org: 'Advances in Quantum Computing: A New Paradigm',
     abstract_org: 'This paper explores recent breakthroughs in quantum computing, demonstrating significant improvements in qubit stability and coherence times. We present a novel approach to error correction that could accelerate practical quantum computing applications.',
     score: 4.8,
@@ -22,8 +22,7 @@ const demoData: Paper[] = [
     creator: ['John Doe', 'Jane Smith']
   },
   {
-    id: '2',
-    doi: '10.1234/demo.2',
+    id: '10.1234/demo.2',
     title_org: 'Marine Microplastics: Impact on Ocean Ecosystems',
     abstract_org: 'This comprehensive study examines the prevalence and effects of microplastics across major ocean ecosystems. We found significant concentration in deepwater habitats and evidence of bioaccumulation throughout the food chain, with notable impacts on marine biodiversity.',
     score: 4.5,
@@ -38,8 +37,7 @@ const demoData: Paper[] = [
     creator: ['Marine Research Institute']
   },
   {
-    id: '3',
-    doi: '10.1234/demo.3',
+    id: '10.1234/demo.3',
     title_org: 'Neural Pathways in Memory Formation: A Longitudinal Study',
     abstract_org: 'This 5-year study tracks neural pathway development during memory formation and recall. Using advanced imaging techniques, we identified key synaptic mechanisms that differentiate short-term from long-term memory encoding, with implications for treating memory-related disorders.',
     score: 4.9,
@@ -57,8 +55,6 @@ const demoData: Paper[] = [
 
 export type Paper = {
   id: string;
-  doi?: string;
-  core_id?: string;
   title_org: string;
   abstract_org: string;
   score: any;
@@ -71,13 +67,13 @@ export type Paper = {
   category: string[] | null;
   image_url: string | null;
   creator: string[] | string | null;
+  oai?: string; // Optional field for core_paper
 };
 
 export const getPapers = async (): Promise<Paper[]> => {
   try {
     // Get the current database source from the store
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const idField = getIdFieldName(databaseSource);
     
     console.log(`Connecting to Supabase to fetch papers from ${databaseSource}...`);
     
@@ -130,7 +126,6 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     
     // Get the current database source from the store
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const idField = getIdFieldName(databaseSource);
     
     // Check if we're using demo data due to connection issues
     try {
@@ -138,34 +133,34 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       if (connectionTest.error) {
         console.log('Using demo data due to connection issue');
         // Find paper in demo data
-        const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
+        const demoPaper = demoData.find(paper => paper.id === id);
         return demoPaper || null;
       }
     } catch (e) {
       console.error('Connection test failed:', e);
       // Find paper in demo data
-      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
+      const demoPaper = demoData.find(paper => paper.id === id);
       return demoPaper || null;
     }
 
-    // Try to find by id in the appropriate field
+    // Try to find by id
     const { data, error } = await supabaseClient
       .from(databaseSource)
       .select('*')
-      .eq(idField, id)
+      .eq('id', id)
       .single();
     
     if (error) {
       console.error(`Error fetching paper by ID from ${databaseSource}:`, error);
       // Try to find in demo data as fallback
-      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
+      const demoPaper = demoData.find(paper => paper.id === id);
       return demoPaper || null;
     }
     
     if (!data) {
       console.log('No data found in database, checking demo data');
       // Try to find in demo data as fallback
-      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
+      const demoPaper = demoData.find(paper => paper.id === id);
       return demoPaper || null;
     }
     
@@ -174,16 +169,13 @@ export async function getPaperById(id: string): Promise<Paper | null> {
   } catch (error) {
     console.error('Error in getPaperById:', error);
     // Try to find in demo data as fallback
-    const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
+    const demoPaper = demoData.find(paper => paper.id === id);
     return demoPaper || null;
   }
 }
 
 // Helper function to format paper data from database response
 function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
-  // Get the appropriate ID from the data
-  const paperId = getPaperId(item, databaseSource);
-  
   // Handle ai_key_takeaways safely
   let takeaways: string[] | null = parseKeyTakeaways(item.ai_key_takeaways);
   
@@ -201,7 +193,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
   
   // Create the paper object with proper typing
   const paper: Paper = {
-    id: paperId,
+    id: item.id,
     title_org: item.title_org || '',
     abstract_org: item.abstract_org || '',
     score: item.score,
@@ -216,11 +208,9 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
     creator: creators,
   };
   
-  // Add the appropriate ID fields based on database source
-  if (databaseSource === 'n8n_table') {
-    paper.doi = paperId;
-  } else {
-    paper.core_id = paperId;
+  // Add the oai field for core_paper table
+  if (databaseSource === 'core_paper' && item.oai) {
+    paper.oai = item.oai;
   }
   
   return paper;

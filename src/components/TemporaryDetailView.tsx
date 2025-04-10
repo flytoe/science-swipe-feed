@@ -13,7 +13,7 @@ import { ScrollArea } from './ui/scroll-area';
 import ImagePromptModal from './ImagePromptModal';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import MindBlowButton from './MindBlowButton';
-import { useDatabaseToggle, getPaperId } from '../hooks/use-database-toggle';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 
 interface TemporaryDetailViewProps {
   paper: Paper | null;
@@ -36,9 +36,8 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   
   // Get mind-blow data for the paper if available
   const paperId = paper?.id || '';
-  const paperIdentifier = databaseSource === 'n8n_table' ? paper?.doi || '' : paper?.core_id || '';
   const { hasMindBlown, count: mindBlowCount, isLoading, isTopPaper, toggleMindBlow } = 
-    useMindBlow(paperIdentifier);
+    useMindBlow(paperId);
 
   // Get from URL if we're in direct route or from props
   const isDirectRoute = location.pathname.startsWith('/paper/');
@@ -143,7 +142,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                     title_org={paper?.title_org}
                     abstract_org={paper?.abstract_org}
                     formattedDate={formattedDate}
-                    doi={paperIdentifier}
+                    doi={paperId}
                     takeaways={formattedTakeaways}
                     creator={paper?.creator}
                     imageSrc={imageSrc}
@@ -226,7 +225,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                   title_org={paper?.title_org}
                   abstract_org={paper?.abstract_org}
                   formattedDate={formattedDate}
-                  doi={paperIdentifier}
+                  doi={paperId}
                   takeaways={formattedTakeaways}
                   creator={paper?.creator}
                   imageSrc={imageSrc}
