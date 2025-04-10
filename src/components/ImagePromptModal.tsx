@@ -62,7 +62,9 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
         },
         body: JSON.stringify({
           prompt,
-          paperId: paper.id
+          paperId: paper.id,
+          databaseSource,
+          idField
         }),
       });
       

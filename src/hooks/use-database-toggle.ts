@@ -30,5 +30,9 @@ export const getIdFieldName = (databaseSource: DatabaseSource): string => {
 
 // Helper function to get the unique ID value from a paper based on database source
 export const getPaperId = (paper: any, databaseSource: DatabaseSource): string => {
-  return databaseSource === 'n8n_table' ? paper.doi : paper.core_id;
+  if (databaseSource === 'n8n_table') {
+    return paper.doi;
+  } else {
+    return paper.core_id;
+  }
 };

@@ -29,6 +29,11 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
   try {
     console.log('Starting image generation with prompt:', paper.ai_image_prompt);
     
+    // Get the current database source
+    const databaseSource = useDatabaseToggle.getState().databaseSource;
+    const idField = getIdFieldName(databaseSource);
+    const paperId = paper.id;
+    
     // Call the edge function to generate an image
     const response = await fetch('/api/generate-image', {
       method: 'POST',
@@ -37,7 +42,9 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
       },
       body: JSON.stringify({
         prompt: paper.ai_image_prompt,
-        paperId: paper.id
+        paperId: paperId,
+        databaseSource,
+        idField
       }),
     });
     
@@ -58,13 +65,10 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     console.log('Image generated successfully:', imageUrl);
     
     // Update the database with the new image URL
-    const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const idField = getIdFieldName(databaseSource);
-    
     const { error } = await supabase
       .from(databaseSource)
       .update({ image_url: imageUrl })
-      .eq(idField, paper.id);
+      .eq(idField, paperId);
     
     if (error) {
       console.error('Error updating paper with new image URL:', error);

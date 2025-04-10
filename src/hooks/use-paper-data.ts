@@ -48,14 +48,30 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
       // Skip if the paper already has an image or we're already generating
       if (paper.image_url || isGenerating) return;
       
-      // Only generate if we have a prompt
-      if (paper.ai_image_prompt) {
+      // Generate if we have a prompt OR automatically generate a prompt if none exists
+      if (paper.ai_image_prompt || !paper.image_url) {
         try {
           setIsGenerating(true);
           setFormattedData(prev => ({
             ...prev,
             isGeneratingImage: true
           }));
+          
+          // If no prompt exists, create one based on the title
+          let imagePrompt = paper.ai_image_prompt;
+          if (!imagePrompt) {
+            imagePrompt = `Scientific visualization of: ${paper.title_org}`;
+            
+            // Save the generated prompt to the database
+            const idField = getIdFieldName(databaseSource);
+            await supabase
+              .from(databaseSource)
+              .update({ ai_image_prompt: imagePrompt })
+              .eq(idField, paper.id);
+              
+            // Update the paper object with the new prompt
+            paper.ai_image_prompt = imagePrompt;
+          }
           
           const imageUrl = await generateImageForPaper(paper);
           

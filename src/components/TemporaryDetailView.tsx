@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { X, ArrowLeft, Share } from 'lucide-react';
 import { Paper } from '../lib/supabase';
-import { motion } from 'framer-motion';
 import { Button } from './ui/button';
 import { Dialog, DialogContent } from './ui/dialog';
 import { Drawer, DrawerContent } from './ui/drawer';
@@ -30,15 +29,16 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   const isMobile = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
-  const params = useParams();
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const paperData = usePaperData(paper);
   const { databaseSource } = useDatabaseToggle();
   
   // Get mind-blow data for the paper if available
+  const paperId = paper?.id || '';
+  const paperIdentifier = databaseSource === 'n8n_table' ? paper?.doi || '' : paper?.core_id || '';
   const { hasMindBlown, count: mindBlowCount, isLoading, isTopPaper, toggleMindBlow } = 
-    useMindBlow(paper?.doi || '');
+    useMindBlow(paperIdentifier);
 
   // Get from URL if we're in direct route or from props
   const isDirectRoute = location.pathname.startsWith('/paper/');
@@ -81,6 +81,9 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
 
   const handleRegenerationComplete = (imageUrl: string | null) => {
     setIsGeneratingImage(false);
+    if (imageUrl) {
+      paperData.refreshImageData(imageUrl);
+    }
   };
   
   if (!paper && !isDirectRoute) return null;
@@ -140,7 +143,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                     title_org={paper?.title_org}
                     abstract_org={paper?.abstract_org}
                     formattedDate={formattedDate}
-                    doi={paper?.doi}
+                    doi={paperIdentifier}
                     takeaways={formattedTakeaways}
                     creator={paper?.creator}
                     imageSrc={imageSrc}
@@ -223,7 +226,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                   title_org={paper?.title_org}
                   abstract_org={paper?.abstract_org}
                   formattedDate={formattedDate}
-                  doi={paper?.doi}
+                  doi={paperIdentifier}
                   takeaways={formattedTakeaways}
                   creator={paper?.creator}
                   imageSrc={imageSrc}

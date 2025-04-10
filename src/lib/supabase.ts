@@ -1,8 +1,7 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
-import { useDatabaseToggle, getIdFieldName, getPaperId } from '../hooks/use-database-toggle';
+import { useDatabaseToggle, getIdFieldName, getPaperId, DatabaseSource } from '../hooks/use-database-toggle';
 
 // Demo data for when connection fails or for development
 const demoData: Paper[] = [
@@ -58,7 +57,7 @@ const demoData: Paper[] = [
 
 export type Paper = {
   id: string;
-  doi: string;
+  doi?: string;
   core_id?: string;
   title_org: string;
   abstract_org: string;
@@ -88,7 +87,6 @@ export const getPapers = async (): Promise<Paper[]> => {
       console.error('Connection test failed:', connectionTest.error);
       throw new Error(`Connection test failed: ${connectionTest.error.message}`);
     }
-    console.log('Connection test successful.');
     
     // Using the imported Supabase client from integrations
     const { data, error } = await supabaseClient
@@ -102,101 +100,16 @@ export const getPapers = async (): Promise<Paper[]> => {
       throw error;
     }
     
-    console.log(`Raw data from Supabase (${databaseSource}):`, data);
-    
     if (!data || data.length === 0) {
       console.info('No data returned from Supabase, using demo data instead');
-      // Filter and sort demo data to match the same condition
       return demoData
         .filter(paper => paper.ai_summary_done === true)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); // Sort by newest first
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
     
     // Transform the data to match the Paper type
     const papers: Paper[] = data.map((item: any) => {
-      // Get the appropriate ID based on the database source
-      const paperId = getPaperId(item, databaseSource);
-      
-      // Handle ai_key_takeaways safely
-      let takeaways: string[] | null = null;
-      if (item.ai_key_takeaways) {
-        try {
-          if (Array.isArray(item.ai_key_takeaways)) {
-            takeaways = item.ai_key_takeaways;
-          } else if (typeof item.ai_key_takeaways === 'string') {
-            takeaways = JSON.parse(item.ai_key_takeaways);
-          } else {
-            takeaways = null;
-          }
-        } catch (e) {
-          console.warn(`Could not parse ai_key_takeaways for id ${paperId}:`, e);
-          // If the string can't be parsed as JSON, use it as a single item array if it's a string
-          takeaways = typeof item.ai_key_takeaways === 'string' 
-            ? [item.ai_key_takeaways] 
-            : null;
-        }
-      }
-
-      // Handle category safely
-      let categories: string[] | null = null;
-      if (item.category) {
-        try {
-          if (Array.isArray(item.category)) {
-            categories = item.category;
-          } else if (typeof item.category === 'string') {
-            categories = [item.category];
-          } else {
-            categories = null;
-          }
-        } catch (e) {
-          console.warn(`Could not parse category for id ${paperId}:`, e);
-          categories = typeof item.category === 'string' ? [item.category] : null;
-        }
-      }
-      
-      // Handle creator field safely
-      let creators: string[] | string | null = null;
-      if (item.creator) {
-        try {
-          if (Array.isArray(item.creator)) {
-            creators = item.creator;
-          } else if (typeof item.creator === 'string') {
-            creators = item.creator;
-          } else if (typeof item.creator === 'object') {
-            // Try to parse as JSON if it's an object
-            creators = Array.isArray(item.creator) ? item.creator : [JSON.stringify(item.creator)];
-          } else {
-            creators = null;
-          }
-        } catch (e) {
-          console.warn(`Could not parse creator for id ${paperId}:`, e);
-          creators = typeof item.creator === 'string' ? item.creator : null;
-        }
-      }
-
-      // Ensure created_at is a valid date string
-      let createdAt = item.created_at || new Date().toISOString();
-      if (typeof createdAt !== 'string') {
-        createdAt = new Date().toISOString();
-      }
-
-      return {
-        id: paperId, // Using appropriate id field based on database source
-        doi: databaseSource === 'n8n_table' ? paperId : item.doi || '', // Set doi to paperId for n8n_table or use the doi field for core_paper
-        core_id: databaseSource === 'core_paper' ? paperId : undefined, // Set core_id for core_paper
-        title_org: item.title_org || '',
-        abstract_org: item.abstract_org || '',
-        score: item.score,
-        html_available: !!item.html_available,
-        ai_summary_done: !!item.ai_summary_done,
-        ai_image_prompt: item.ai_image_prompt || '',
-        ai_headline: item.ai_headline || '',
-        ai_key_takeaways: takeaways,
-        created_at: createdAt,
-        category: categories,
-        image_url: item.image_url || null,
-        creator: creators,
-      };
+      return formatPaperData(item, databaseSource);
     });
     
     console.log(`Fetched papers from ${databaseSource}:`, papers.length);
@@ -207,7 +120,7 @@ export const getPapers = async (): Promise<Paper[]> => {
     // Filter and sort demo data
     return demoData
       .filter(paper => paper.ai_summary_done === true)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()); // Sort by newest first
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }
 };
 
@@ -225,13 +138,13 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       if (connectionTest.error) {
         console.log('Using demo data due to connection issue');
         // Find paper in demo data
-        const demoPaper = demoData.find(paper => paper.doi === id);
+        const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
         return demoPaper || null;
       }
     } catch (e) {
       console.error('Connection test failed:', e);
       // Find paper in demo data
-      const demoPaper = demoData.find(paper => paper.doi === id);
+      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
       return demoPaper || null;
     }
 
@@ -245,45 +158,72 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     if (error) {
       console.error(`Error fetching paper by ID from ${databaseSource}:`, error);
       // Try to find in demo data as fallback
-      const demoPaper = demoData.find(paper => paper.doi === id);
+      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
       return demoPaper || null;
     }
     
     if (!data) {
       console.log('No data found in database, checking demo data');
       // Try to find in demo data as fallback
-      const demoPaper = demoData.find(paper => paper.doi === id);
+      const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
       return demoPaper || null;
     }
     
-    // Get the appropriate ID from the data
-    const paperId = getPaperId(data, databaseSource);
-    
-    const paper: Paper = {
-      id: paperId,
-      doi: databaseSource === 'n8n_table' ? paperId : data.doi || '',
-      core_id: databaseSource === 'core_paper' ? paperId : undefined,
-      title_org: data.title_org || '',
-      abstract_org: data.abstract_org || '',
-      score: data.score,
-      html_available: !!data.html_available,
-      ai_summary_done: !!data.ai_summary_done,
-      ai_image_prompt: data.ai_image_prompt || '',
-      ai_headline: data.ai_headline || '',
-      ai_key_takeaways: parseKeyTakeaways(data.ai_key_takeaways),
-      created_at: data.created_at || new Date().toISOString(),
-      category: parseCategory(data.category),
-      image_url: data.image_url || null,
-      creator: parseCreator(data.creator),
-    };
-    
-    return paper;
+    // Format the paper data
+    return formatPaperData(data, databaseSource);
   } catch (error) {
     console.error('Error in getPaperById:', error);
     // Try to find in demo data as fallback
-    const demoPaper = demoData.find(paper => paper.doi === id);
+    const demoPaper = demoData.find(paper => paper.doi === id || paper.core_id === id);
     return demoPaper || null;
   }
+}
+
+// Helper function to format paper data from database response
+function formatPaperData(item: any, databaseSource: DatabaseSource): Paper {
+  // Get the appropriate ID from the data
+  const paperId = getPaperId(item, databaseSource);
+  
+  // Handle ai_key_takeaways safely
+  let takeaways: string[] | null = parseKeyTakeaways(item.ai_key_takeaways);
+  
+  // Handle category safely
+  let categories: string[] | null = parseCategory(item.category);
+  
+  // Handle creator field safely
+  let creators: string[] | string | null = parseCreator(item.creator);
+  
+  // Ensure created_at is a valid date string
+  let createdAt = item.created_at || new Date().toISOString();
+  if (typeof createdAt !== 'string') {
+    createdAt = new Date().toISOString();
+  }
+  
+  // Create the paper object with proper typing
+  const paper: Paper = {
+    id: paperId,
+    title_org: item.title_org || '',
+    abstract_org: item.abstract_org || '',
+    score: item.score,
+    html_available: !!item.html_available,
+    ai_summary_done: !!item.ai_summary_done,
+    ai_image_prompt: item.ai_image_prompt || '',
+    ai_headline: item.ai_headline || '',
+    ai_key_takeaways: takeaways,
+    created_at: createdAt,
+    category: categories,
+    image_url: item.image_url || null,
+    creator: creators,
+  };
+  
+  // Add the appropriate ID fields based on database source
+  if (databaseSource === 'n8n_table') {
+    paper.doi = paperId;
+  } else {
+    paper.core_id = paperId;
+  }
+  
+  return paper;
 }
 
 function parseKeyTakeaways(takeaways: any): string[] | null {
@@ -327,6 +267,7 @@ function parseCreator(creator: any): string[] | string | null {
     } else if (typeof creator === 'string') {
       return creator;
     } else if (typeof creator === 'object') {
+      // Try to parse as JSON if it's an object
       return Array.isArray(creator) ? creator : [JSON.stringify(creator)];
     }
     return null;
