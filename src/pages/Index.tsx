@@ -122,7 +122,7 @@ const Index: React.FC = () => {
   const addSamplePaper = async () => {
     try {
       const samplePaper = {
-        doi: `sample-${Date.now()}`,
+        id: `sample-${Date.now()}`, // Changed from doi to id
         title_org: 'Sample Paper: Machine Learning in Healthcare',
         abstract_org: 'This sample paper explores the applications of machine learning in modern healthcare, including predictive diagnostics, personalized treatment plans, and medical imaging analysis.',
         score: 4.7,
