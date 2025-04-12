@@ -109,6 +109,13 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
     }
   };
 
+  // Create a click handler for the image area
+  const handleImageClick = () => {
+    if (!isLoading) {
+      handleSubmit(new Event('submit') as any);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={() => !isLoading && onClose()}>
       <DialogContent className="sm:max-w-md">
@@ -120,12 +127,21 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
             {paper.image_url && (
               <div className="mb-4">
                 <Label htmlFor="current-image">Current Image</Label>
-                <AspectRatio ratio={16 / 9} className="bg-gray-100 rounded-md overflow-hidden mt-1">
+                <AspectRatio 
+                  ratio={16 / 9} 
+                  className="bg-gray-100 rounded-md overflow-hidden mt-1 cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={handleImageClick}
+                >
                   <img 
                     src={paper.image_url} 
                     alt="Current paper illustration" 
                     className="w-full h-full object-cover"
                   />
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-white">
+                      Generating...
+                    </div>
+                  )}
                 </AspectRatio>
               </div>
             )}
@@ -138,6 +154,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Enter a detailed description for the image"
                 className="w-full"
+                disabled={isLoading}
               />
             </div>
           </div>

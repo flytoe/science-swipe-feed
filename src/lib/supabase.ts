@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -19,7 +18,8 @@ const demoData: Paper[] = [
     created_at: '2023-10-15T09:30:00Z',
     category: ['physics', 'technology'],
     image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070',
-    creator: ['John Doe', 'Jane Smith']
+    creator: ['John Doe', 'Jane Smith'],
+    get doi() { return this.id; }
   },
   {
     id: '10.1234/demo.2',
@@ -34,7 +34,8 @@ const demoData: Paper[] = [
     created_at: '2023-11-28T14:15:00Z',
     category: ['biology', 'environment'],
     image_url: 'https://images.unsplash.com/photo-1621451066633-97aa60c27376?q=80&w=1974',
-    creator: ['Marine Research Institute']
+    creator: ['Marine Research Institute'],
+    get doi() { return this.id; }
   },
   {
     id: '10.1234/demo.3',
@@ -49,7 +50,8 @@ const demoData: Paper[] = [
     created_at: '2023-12-10T11:45:00Z',
     category: ['neuroscience', 'psychology'],
     image_url: 'https://images.unsplash.com/photo-1559757175-7cb036edc7b3?q=80&w=2071',
-    creator: null
+    creator: null,
+    get doi() { return this.id; }
   }
 ];
 
@@ -67,20 +69,21 @@ export type Paper = {
   category: string[] | null;
   image_url: string | null;
   creator: string[] | string | null;
-  // For compatibility with existing code that uses 'doi'
-  get doi(): string;
+  // For backward compatibility, add doi getter
+  doi: string;
   oai?: string; // Optional field for core_paper
 };
 
 // Create a Paper object from raw data, implementing the getter for 'doi'
 function createPaper(rawData: any): Paper {
-  return {
+  // Create the paper object with all standard properties
+  const paper = {
     ...rawData,
-    // Add getter for doi that returns the id
-    get doi() {
-      return this.id;
-    }
+    // Ensure the doi property is always available
+    doi: rawData.id
   };
+  
+  return paper;
 }
 
 export const getPapers = async (): Promise<Paper[]> => {
@@ -223,12 +226,8 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
     category: categories,
     image_url: item.image_url || null,
     creator: creators,
+    doi: item.id, // Set doi to id for compatibility
   };
-  
-  // Add the oai field for core_paper table
-  if (databaseSource === 'core_paper' && item.oai) {
-    paper.oai = item.oai;
-  }
   
   return paper;
 }

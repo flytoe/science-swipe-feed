@@ -47,10 +47,11 @@ export type Database = {
           html_url: string | null
           id: string
           image_url: string | null
-          oai: string
-          rerun: boolean | null
+          oai: string | null
+          rerun: boolean
           score: number | null
           title_org: string
+          too_long: boolean
         }
         Insert: {
           abstract_org?: string | null
@@ -65,10 +66,11 @@ export type Database = {
           html_url?: string | null
           id: string
           image_url?: string | null
-          oai: string
-          rerun?: boolean | null
+          oai?: string | null
+          rerun?: boolean
           score?: number | null
           title_org: string
+          too_long?: boolean
         }
         Update: {
           abstract_org?: string | null
@@ -83,10 +85,86 @@ export type Database = {
           html_url?: string | null
           id?: string
           image_url?: string | null
-          oai?: string
-          rerun?: boolean | null
+          oai?: string | null
+          rerun?: boolean
           score?: number | null
           title_org?: string
+          too_long?: boolean
+        }
+        Relationships: []
+      }
+      europe_paper: {
+        Row: {
+          abstract_org: string | null
+          ai_headline: string | null
+          ai_image_prompt: string | null
+          ai_key_takeaways: Json | null
+          ai_matter: string | null
+          ai_search_queries: string | null
+          ai_summary_done: boolean | null
+          category: Json | null
+          created_at: string | null
+          creator: Json | null
+          doi: string | null
+          full_text_sections: Json[] | null
+          html_url: string | null
+          id: number
+          image_url: string | null
+          is_open_access: boolean | null
+          oai: string | null
+          rerun: boolean
+          score: number | null
+          score_raw: string | null
+          title_org: string | null
+          too_long: boolean
+        }
+        Insert: {
+          abstract_org?: string | null
+          ai_headline?: string | null
+          ai_image_prompt?: string | null
+          ai_key_takeaways?: Json | null
+          ai_matter?: string | null
+          ai_search_queries?: string | null
+          ai_summary_done?: boolean | null
+          category?: Json | null
+          created_at?: string | null
+          creator?: Json | null
+          doi?: string | null
+          full_text_sections?: Json[] | null
+          html_url?: string | null
+          id?: number
+          image_url?: string | null
+          is_open_access?: boolean | null
+          oai?: string | null
+          rerun?: boolean
+          score?: number | null
+          score_raw?: string | null
+          title_org?: string | null
+          too_long?: boolean
+        }
+        Update: {
+          abstract_org?: string | null
+          ai_headline?: string | null
+          ai_image_prompt?: string | null
+          ai_key_takeaways?: Json | null
+          ai_matter?: string | null
+          ai_search_queries?: string | null
+          ai_summary_done?: boolean | null
+          category?: Json | null
+          created_at?: string | null
+          creator?: Json | null
+          doi?: string | null
+          full_text_sections?: Json[] | null
+          html_url?: string | null
+          id?: number
+          image_url?: string | null
+          is_open_access?: boolean | null
+          oai?: string | null
+          rerun?: boolean
+          score?: number | null
+          score_raw?: string | null
+          title_org?: string | null
+          too_long?: boolean
         }
         Relationships: []
       }
