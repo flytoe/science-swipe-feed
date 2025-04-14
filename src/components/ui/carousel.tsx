@@ -2,7 +2,7 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, Circle, CircleDot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -250,6 +250,52 @@ const CarouselNext = React.forwardRef<
 });
 CarouselNext.displayName = "CarouselNext";
 
+const CarouselDots = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+  const { api } = useCarousel();
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setSelectedIndex(api.selectedScrollSnap());
+    };
+
+    api.on('select', onSelect);
+    return () => {
+      api.off('select', onSelect);
+    };
+  }, [api]);
+
+  if (!api) return null;
+
+  return (
+    <div 
+      ref={ref} 
+      className={cn("flex items-center justify-center space-x-2", className)} 
+      {...props}
+    >
+      {Array.from({ length: api.scrollSnapList().length }).map((_, index) => (
+        <button
+          key={index}
+          onClick={() => api.scrollTo(index)}
+          className="focus:outline-none"
+        >
+          {index === selectedIndex ? (
+            <CircleDot className="h-3 w-3 text-primary" />
+          ) : (
+            <Circle className="h-2 w-2 text-gray-300" />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+});
+CarouselDots.displayName = "CarouselDots";
+
 export {
   type CarouselApi,
   Carousel,
@@ -257,4 +303,5 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  CarouselDots
 }

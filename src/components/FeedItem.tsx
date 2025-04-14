@@ -11,6 +11,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  CarouselDots // New import for dots
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
@@ -35,7 +36,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     paper: paperWithData
   } = usePaperData(paper);
 
-  // Create properly encoded paper ID for the URL
   const encodedPaperId = encodeURIComponent(paper.id);
   
   const handleRegenerationComplete = (imageUrl: string | null) => {
@@ -50,7 +50,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 aspect-[3/4]"
+      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]" // Fixed height
       layout
     >
       <Carousel className="w-full h-full">
@@ -80,6 +80,11 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         
         <CarouselPrevious className="left-2" />
         <CarouselNext className="right-2" />
+        
+        {/* Add Carousel Dots */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <CarouselDots />
+        </div>
       </Carousel>
 
       {/* Regenerate button overlay */}
