@@ -1,11 +1,18 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import PaperCardContent from './PaperCardContent';
 import { FormattedTakeaway } from '../utils/takeawayParser';
-import { Badge } from './ui/badge';
-import MindBlowBadge from './MindBlowBadge';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from './ui/carousel';
+import HeroSlide from './paper-slides/HeroSlide';
+import TakeawaysSlide from './paper-slides/TakeawaysSlide';
+import DetailSlide from './paper-slides/DetailSlide';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -28,10 +35,9 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   takeaways,
   creator,
   imageSrc,
-  onClose
 }) => {
   // Get mind-blow data for the paper
-  const { count: mindBlowCount, isTopPaper } = useMindBlow(doi || '');
+  const { count: mindBlowCount } = useMindBlow(doi || '');
   
   return (
     <motion.div
@@ -41,34 +47,35 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Show date at the top */}
-      <div className="absolute top-4 left-4 z-10">
-        <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
-          {formattedDate}
-        </Badge>
-      </div>
-      
-      {/* Mind-blow badge - positioned at the top right */}
-      {mindBlowCount > 0 && (
-        <div className="absolute top-4 right-4 z-10">
-          <MindBlowBadge count={mindBlowCount} />
-        </div>
-      )}
-      
-      <div className="flex-1 overflow-hidden h-full">
-        <PaperCardContent
-          title={displayTitle}
-          title_org={title_org}
-          abstract={abstract_org}
-          abstract_org={abstract_org}
-          formattedDate={formattedDate}
-          doi={doi}
-          takeaways={takeaways}
-          creator={creator}
-          imageSrc={imageSrc}
-          hideFooter={true} // Hide the footer with date and link
-        />
-      </div>
+      <Carousel className="w-full h-full">
+        <CarouselContent className="h-full">
+          <CarouselItem className="h-full">
+            <HeroSlide
+              title={displayTitle}
+              imageSrc={imageSrc}
+              formattedDate={formattedDate}
+              mindBlowCount={mindBlowCount}
+              creator={creator}
+            />
+          </CarouselItem>
+          
+          <CarouselItem className="h-full">
+            <TakeawaysSlide takeaways={takeaways} />
+          </CarouselItem>
+          
+          <CarouselItem className="h-full">
+            <DetailSlide
+              title={displayTitle}
+              title_org={title_org}
+              abstract_org={abstract_org}
+              doi={doi}
+            />
+          </CarouselItem>
+        </CarouselContent>
+        
+        <CarouselPrevious className="left-2" />
+        <CarouselNext className="right-2" />
+      </Carousel>
     </motion.div>
   );
 };
