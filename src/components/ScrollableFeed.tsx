@@ -31,7 +31,7 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
 
   return (
     <motion.div 
-      className="scrollable-feed px-4 pb-20"
+      className="scrollable-feed px-4 pb-20 space-y-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
