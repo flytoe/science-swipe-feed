@@ -1,11 +1,11 @@
 
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import { getPapers, getPaperById } from '../services/paperService';
-import { Paper } from '../types/paper';
+import type { Paper } from '../types/paper';
 
 // Export all the functionality
-export { getPapers, getPaperById, Paper };
+export { getPapers, getPaperById };
+export type { Paper };
 
 // Export the supabase client as default
 export default supabaseClient;
-
