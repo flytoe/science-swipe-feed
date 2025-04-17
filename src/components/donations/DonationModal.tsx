@@ -17,16 +17,13 @@ const DonationModal: React.FC<DonationModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   
-  // In a real app, this would connect to a payment gateway
   const handleDonate = () => {
     setIsSubmitting(true);
     
-    // Simulate payment processing
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
       
-      // Close after success message
       setTimeout(() => {
         onClose();
         setIsSuccess(false);
@@ -54,7 +51,7 @@ const DonationModal: React.FC<DonationModalProps> = ({
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="relative w-full max-w-md bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-white/10"
+            className="relative w-full max-w-[min(420px,90vw)] bg-gray-900 rounded-xl overflow-hidden shadow-xl border border-white/10"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -62,10 +59,10 @@ const DonationModal: React.FC<DonationModalProps> = ({
           >
             {/* Header */}
             <div className="relative p-4 border-b border-white/10">
-              <h2 className="text-lg font-semibold text-white text-center">{title}</h2>
+              <h2 className="text-lg font-semibold text-white text-center pr-8">{title}</h2>
               <button 
                 onClick={onClose} 
-                className="absolute right-4 top-4 text-gray-400 hover:text-white"
+                className="absolute right-4 top-4 text-gray-400 hover:text-white p-1"
                 disabled={isSubmitting}
               >
                 <X size={20} />
@@ -109,10 +106,10 @@ const DonationModal: React.FC<DonationModalProps> = ({
                     onClick={handleDonate}
                     disabled={isSubmitting}
                     className={`
-                      w-full py-3 rounded-lg font-medium transition
+                      w-full py-3 px-4 rounded-lg font-medium transition
                       ${isSubmitting 
                         ? 'bg-indigo-600/50 text-white/70 cursor-not-allowed' 
-                        : 'bg-indigo-600 text-white hover:bg-indigo-700'}
+                        : 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]'}
                     `}
                     whileHover={!isSubmitting ? { scale: 1.02 } : {}}
                     whileTap={!isSubmitting ? { scale: 0.98 } : {}}

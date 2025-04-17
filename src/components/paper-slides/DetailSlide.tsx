@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { ExternalLink } from 'lucide-react';
 import AbstractSection from '../paper-content/AbstractSection';
@@ -28,7 +27,7 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
   };
 
   return (
-    <Card className="w-full h-full overflow-y-auto p-6 bg-white">
+    <div className="w-full h-full overflow-y-auto p-6 bg-white/95 backdrop-blur-sm">
       <div className="space-y-6">
         <OriginalTitleSection title={title} title_org={title_org} />
         <AbstractSection abstract_org={abstract_org} />
@@ -46,7 +45,7 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 
