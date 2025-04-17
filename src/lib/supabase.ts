@@ -1,3 +1,4 @@
+
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -165,11 +166,18 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     // For europe_paper table, we might need to query using either id or doi
     let query;
     if (databaseSource === 'europe_paper') {
-      // Try first with id field
+      // Try first with id field - use the appropriate type for the comparison
+      // Since europe_paper.id is a smallint, we need to convert the string id to a number
+      // Only try to convert to number if the id looks like a numeric string
+      let idValue: string | number = id;
+      if (/^\d+$/.test(id)) {
+        idValue = parseInt(id, 10);
+      }
+      
       const idQuery = await supabaseClient
         .from(databaseSource)
         .select('*')
-        .eq('id', id)
+        .eq('id', idValue)
         .maybeSingle();
       
       if (idQuery.data) {
@@ -236,10 +244,11 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
   // Handle ID field safely for europe_paper
   let paperId: string;
   if (databaseSource === 'europe_paper') {
-    // For europe_paper, prefer doi if available, then convert id to string if it's a number
-    paperId = item.doi || (typeof item.id === 'number' ? item.id.toString() : item.id);
+    // For europe_paper, prefer doi if available
+    // Then convert id to string if it's a number, or use as is if already a string
+    paperId = item.doi || (typeof item.id === 'number' ? item.id.toString() : item.id || '');
   } else {
-    paperId = item.id;
+    paperId = item.id || '';
   }
   
   // Create the paper object with proper typing
@@ -252,11 +261,11 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
     ai_summary_done: !!item.ai_summary_done,
     ai_image_prompt: item.ai_image_prompt || '',
     ai_headline: item.ai_headline || '',
-    ai_key_takeaways: takeaways,
-    created_at: createdAt,
-    category: categories,
+    ai_key_takeaways: parseKeyTakeaways(item.ai_key_takeaways),
+    created_at: item.created_at || new Date().toISOString(),
+    category: parseCategory(item.category),
     image_url: item.image_url || null,
-    creator: creators,
+    creator: parseCreator(item.creator),
     doi: item.doi || paperId, // Set doi to id for compatibility
   };
   
