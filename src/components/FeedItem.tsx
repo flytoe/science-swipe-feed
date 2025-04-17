@@ -51,6 +51,10 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
+  const handleCarouselChange = (value: string) => {
+    setActiveIndex(parseInt(value));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -59,7 +63,13 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]"
       layout
     >
-      <Carousel className="w-full h-full" onValueChange={(value) => setActiveIndex(parseInt(value))}>
+      <Carousel className="w-full h-full" setApi={(api) => {
+        // Use the setApi prop instead of onValueChange
+        api?.on("select", () => {
+          const selectedIndex = api.selectedScrollSnap();
+          setActiveIndex(selectedIndex);
+        });
+      }}>
         <CarouselContent className="h-full">
           {/* Hero Slide */}
           <CarouselItem className="h-full">

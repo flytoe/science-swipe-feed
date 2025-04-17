@@ -13,10 +13,17 @@ interface MindBlowTrackerState {
   animations: MindBlowAnimation[];
   increment: () => void;
   remove: (id: string) => void;
+  // Adding missing properties for donation prompt functionality
+  lastPromptTimestamp: number;
+  shouldShowDonationPrompt: () => boolean;
+  markDonationPromptSeen: () => void;
+  resetPromptTimestamp: () => void;
 }
 
-export const useMindBlowTracker = create<MindBlowTrackerState>()((set) => ({
+export const useMindBlowTracker = create<MindBlowTrackerState>()((set, get) => ({
   animations: [],
+  lastPromptTimestamp: 0,
+  
   increment: () => {
     const id = Math.random().toString(36).substring(2, 9);
     // Random position within viewport
@@ -38,9 +45,26 @@ export const useMindBlowTracker = create<MindBlowTrackerState>()((set) => ({
       }));
     }, 2000);
   },
+  
   remove: (id: string) => set(state => ({
     animations: state.animations.filter(animation => animation.id !== id)
-  }))
+  })),
+  
+  // Donation prompt utility functions
+  shouldShowDonationPrompt: () => {
+    const { lastPromptTimestamp } = get();
+    const now = Date.now();
+    // Show prompt every 24 hours (86400000 milliseconds)
+    return now - lastPromptTimestamp > 86400000;
+  },
+  
+  markDonationPromptSeen: () => {
+    set({ lastPromptTimestamp: Date.now() });
+  },
+  
+  resetPromptTimestamp: () => {
+    set({ lastPromptTimestamp: 0 });
+  }
 }));
 
 export const MindBlowAnimations = () => {
