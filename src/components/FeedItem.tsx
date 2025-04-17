@@ -11,11 +11,12 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  CarouselDots // New import for dots
+  CarouselDots
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
+import { ImageOff } from 'lucide-react';
 
 interface FeedItemProps {
   paper: Paper;
@@ -50,18 +51,26 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]" // Fixed height
+      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]"
       layout
     >
       <Carousel className="w-full h-full">
         <CarouselContent className="h-full">
           <CarouselItem className="h-full">
-            <HeroSlide
-              title={displayTitle}
-              imageSrc={imageSrc}
-              formattedDate={formattedDate}
-              creator={paper.creator}
-            />
+            {imageSrc ? (
+              <HeroSlide
+                title={displayTitle}
+                imageSrc={imageSrc}
+                formattedDate={formattedDate}
+                creator={paper.creator}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
+                <ImageOff className="h-12 w-12 text-gray-400 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-700">{displayTitle}</h2>
+                <p className="text-gray-500 mt-2">Image not available</p>
+              </div>
+            )}
           </CarouselItem>
           
           <CarouselItem className="h-full">
@@ -81,7 +90,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         <CarouselPrevious className="left-2" />
         <CarouselNext className="right-2" />
         
-        {/* Add Carousel Dots */}
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
           <CarouselDots />
         </div>

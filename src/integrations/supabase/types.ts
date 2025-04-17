@@ -106,6 +106,8 @@ export type Database = {
           created_at: string | null
           creator: Json | null
           doi: string | null
+          feed_worthy: boolean
+          feed_worthy_reason: string | null
           full_text_sections: Json[] | null
           html_url: string | null
           id: number
@@ -130,6 +132,8 @@ export type Database = {
           created_at?: string | null
           creator?: Json | null
           doi?: string | null
+          feed_worthy?: boolean
+          feed_worthy_reason?: string | null
           full_text_sections?: Json[] | null
           html_url?: string | null
           id?: number
@@ -154,6 +158,8 @@ export type Database = {
           created_at?: string | null
           creator?: Json | null
           doi?: string | null
+          feed_worthy?: boolean
+          feed_worthy_reason?: string | null
           full_text_sections?: Json[] | null
           html_url?: string | null
           id?: number

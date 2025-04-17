@@ -101,7 +101,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
       
       try {
         // Format the date
-        const createdAt = new Date(paper.created_at);
+        let createdAt = new Date(paper.created_at);
+        // Check if date is valid
+        if (isNaN(createdAt.getTime())) {
+          createdAt = new Date(); // Use current date as fallback
+        }
+        
         const formattedDate = new Intl.DateTimeFormat('en-US', {
           year: 'numeric',
           month: 'short',
@@ -126,7 +131,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           paper.ai_key_takeaways : 
           (paper.ai_key_takeaways ? [paper.ai_key_takeaways] : []);
           
-        // Image source handling
+        // Image source handling - use a placeholder if empty
         const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973';
         
         // Determine image source type
@@ -142,12 +147,15 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         // Format takeaways
         const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
         
+        // Use either the AI headline or original title, with fallback
+        const displayTitle = paper.ai_headline || paper.title_org || 'Untitled Paper';
+        
         setFormattedData({
           categories: paperCategories,
           formattedCategoryNames,
           formattedDate,
           imageSrc,
-          displayTitle: paper.ai_headline || paper.title_org,
+          displayTitle,
           firstTakeaway: takeaways[0] || '',
           formattedTakeaways,
           isGeneratingImage: isGenerating,

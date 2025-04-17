@@ -80,7 +80,7 @@ function createPaper(rawData: any): Paper {
   const paper = {
     ...rawData,
     // Ensure the doi property is always available
-    doi: rawData.id
+    doi: rawData.doi || rawData.id
   };
   
   return paper;
@@ -162,21 +162,43 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       return demoPaper ? createPaper(demoPaper) : null;
     }
 
-    // Try to find by id
-    const { data, error } = await supabaseClient
-      .from(databaseSource)
-      .select('*')
-      .eq('id', id)
-      .single();
+    // For europe_paper table, we might need to query using either id or doi
+    let query;
+    if (databaseSource === 'europe_paper') {
+      // Try first with id field
+      const idQuery = await supabaseClient
+        .from(databaseSource)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      
+      if (idQuery.data) {
+        const formattedPaper = formatPaperData(idQuery.data, databaseSource);
+        return createPaper(formattedPaper);
+      }
+      
+      // If not found, try with doi field
+      query = await supabaseClient
+        .from(databaseSource)
+        .select('*')
+        .eq('doi', id)
+        .maybeSingle();
+    } else {
+      query = await supabaseClient
+        .from(databaseSource)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+    }
     
-    if (error) {
-      console.error(`Error fetching paper by ID from ${databaseSource}:`, error);
+    if (query.error) {
+      console.error(`Error fetching paper by ID from ${databaseSource}:`, query.error);
       // Try to find in demo data as fallback
       const demoPaper = demoData.find(paper => paper.id === id);
       return demoPaper ? createPaper(demoPaper) : null;
     }
     
-    if (!data) {
+    if (!query.data) {
       console.log('No data found in database, checking demo data');
       // Try to find in demo data as fallback
       const demoPaper = demoData.find(paper => paper.id === id);
@@ -184,7 +206,7 @@ export async function getPaperById(id: string): Promise<Paper | null> {
     }
     
     // Format the paper data
-    const formattedPaper = formatPaperData(data, databaseSource);
+    const formattedPaper = formatPaperData(query.data, databaseSource);
     return createPaper(formattedPaper);
   } catch (error) {
     console.error('Error in getPaperById:', error);
@@ -213,7 +235,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
   
   // Create the paper object with proper typing
   const paper = {
-    id: item.id,
+    id: databaseSource === 'europe_paper' ? (item.doi || item.id.toString()) : item.id,
     title_org: item.title_org || '',
     abstract_org: item.abstract_org || '',
     score: item.score,
@@ -226,7 +248,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
     category: categories,
     image_url: item.image_url || null,
     creator: creators,
-    doi: item.id, // Set doi to id for compatibility
+    doi: item.doi || item.id.toString(), // Set doi to id for compatibility
   };
   
   return paper;
