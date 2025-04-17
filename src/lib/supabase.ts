@@ -233,9 +233,18 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
     createdAt = new Date().toISOString();
   }
   
+  // Handle ID field safely for europe_paper
+  let paperId: string;
+  if (databaseSource === 'europe_paper') {
+    // For europe_paper, prefer doi if available, then convert id to string if it's a number
+    paperId = item.doi || item.id.toString();
+  } else {
+    paperId = item.id;
+  }
+  
   // Create the paper object with proper typing
   const paper = {
-    id: databaseSource === 'europe_paper' ? (item.doi || item.id.toString()) : item.id,
+    id: paperId,
     title_org: item.title_org || '',
     abstract_org: item.abstract_org || '',
     score: item.score,
@@ -248,7 +257,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
     category: categories,
     image_url: item.image_url || null,
     creator: creators,
-    doi: item.doi || item.id.toString(), // Set doi to id for compatibility
+    doi: item.doi || paperId, // Set doi to id for compatibility
   };
   
   return paper;

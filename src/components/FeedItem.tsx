@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { usePaperData } from '../hooks/use-paper-data';
@@ -17,6 +17,8 @@ import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
 import { ImageOff } from 'lucide-react';
+import MindBlowButton from './MindBlowButton';
+import { useMindBlow } from '../hooks/use-mind-blow';
 
 interface FeedItemProps {
   paper: Paper;
@@ -26,6 +28,7 @@ interface FeedItemProps {
 const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const { 
     formattedCategoryNames, 
@@ -36,6 +39,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     formattedTakeaways,
     paper: paperWithData
   } = usePaperData(paper);
+
+  const { count, hasMindBlown, isLoading, isTopPaper, toggleMindBlow } = useMindBlow(paper.id);
 
   const encodedPaperId = encodeURIComponent(paper.id);
   
@@ -54,29 +59,33 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]"
       layout
     >
-      <Carousel className="w-full h-full">
+      <Carousel className="w-full h-full" onValueChange={(value) => setActiveIndex(parseInt(value))}>
         <CarouselContent className="h-full">
+          {/* Hero Slide */}
           <CarouselItem className="h-full">
-            {imageSrc ? (
-              <HeroSlide
-                title={displayTitle}
-                imageSrc={imageSrc}
-                formattedDate={formattedDate}
-                creator={paper.creator}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full bg-gray-100 p-6">
-                <ImageOff className="h-12 w-12 text-gray-400 mb-4" />
-                <h2 className="text-2xl font-bold text-gray-700">{displayTitle}</h2>
-                <p className="text-gray-500 mt-2">Image not available</p>
-              </div>
-            )}
+            <HeroSlide
+              title={displayTitle}
+              imageSrc={imageSrc}
+              formattedDate={formattedDate}
+              creator={paper.creator}
+              mindBlowCount={count}
+            />
           </CarouselItem>
           
-          <CarouselItem className="h-full">
-            <TakeawaysSlide takeaways={formattedTakeaways} />
-          </CarouselItem>
+          {/* Individual Takeaway Slides */}
+          {formattedTakeaways && formattedTakeaways.length > 0 ? (
+            formattedTakeaways.map((takeaway, idx) => (
+              <CarouselItem key={`takeaway-${idx}`} className="h-full">
+                <TakeawaysSlide takeaways={[takeaway]} />
+              </CarouselItem>
+            ))
+          ) : (
+            <CarouselItem className="h-full">
+              <TakeawaysSlide takeaways={[]} />
+            </CarouselItem>
+          )}
           
+          {/* Detail Slide */}
           <CarouselItem className="h-full">
             <DetailSlide
               title={displayTitle}
@@ -91,9 +100,25 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         <CarouselNext className="right-2" />
         
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          <CarouselDots />
+          <CarouselDots className="flex gap-1" />
         </div>
       </Carousel>
+
+      {/* Mind Blow button (visible only on the hero slide) */}
+      {activeIndex === 0 && (
+        <div className="absolute bottom-16 right-6 z-10">
+          <MindBlowButton 
+            hasMindBlown={hasMindBlown}
+            count={count}
+            isTopPaper={isTopPaper}
+            isLoading={isLoading}
+            onClick={toggleMindBlow}
+            size="lg"
+            showCount={true}
+            className="shadow-md"
+          />
+        </div>
+      )}
 
       {/* Regenerate button overlay */}
       <div className="absolute top-2 right-2 z-10">

@@ -2,96 +2,105 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+ 
 @layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
   body {
-    @apply bg-white text-gray-800 overscroll-none;
+    @apply bg-background text-foreground;
   }
 }
 
-@layer components {
-  .swipe-feed-container {
-    @apply relative h-screen overflow-hidden bg-white;
+/* Add floating animation for mind-blow effects */
+@keyframes float {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
   }
-  
-  .paper-card {
-    @apply overflow-hidden flex flex-col h-full w-full animate-fade-in;
+  50% {
+    transform: translate(-50%, calc(-50% - 100px)) scale(1.2);
   }
-  
-  .paper-card.overlapping-design {
-    @apply relative h-full;
+  100% {
+    transform: translate(-50%, calc(-50% - 200px)) scale(0.8);
   }
-  
-  .paper-card-image-container {
-    @apply w-full h-40 md:h-48 bg-gradient-to-b from-blue-100 to-blue-50;
+}
+
+@keyframes fade-out {
+  0% {
+    opacity: 1;
   }
-  
-  /* Mobile optimized: image takes less space on mobile */
-  @media (max-width: 768px) {
-    .paper-card-image-container {
-      @apply h-auto flex-shrink-0;
-    }
+  80% {
+    opacity: 0.8;
   }
-  
-  .paper-card-image {
-    @apply w-full h-full object-cover;
+  100% {
+    opacity: 0;
   }
-  
-  .paper-card-content {
-    @apply flex flex-col flex-1;
-  }
-  
-  .paper-card-title {
-    @apply text-lg md:text-xl font-bold mb-3 text-gray-800;
-  }
-  
-  .paper-card-abstract {
-    @apply text-sm md:text-base text-gray-700 line-clamp-3 mb-2;
-  }
-  
-  .paper-card-meta {
-    @apply flex items-center justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-gray-100;
-  }
-  
-  .category-tag {
-    @apply text-xs px-2 py-1 rounded-full mr-2 mb-2 font-medium bg-gray-100 text-gray-600;
-  }
-  
-  .key-takeaway {
-    @apply flex items-start gap-2 text-sm text-gray-700;
-  }
-  
-  .key-takeaway-icon {
-    @apply mt-1 flex-shrink-0;
-  }
-  
-  .key-takeaway-text {
-    @apply flex-1;
-  }
-  
-  .loading-spinner {
-    @apply w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin;
-  }
-  
-  .swipe-instruction {
-    @apply absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm z-20 shadow-lg;
-  }
-  
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-in-out;
-  }
-  
-  /* Feed item styles */
-  .feed-item {
-    @apply transition-transform duration-200 hover:scale-[1.02] cursor-pointer;
-  }
+}
+
+.animate-float {
+  animation: float 2s ease-out forwards, fade-out 2s ease-out forwards;
 }

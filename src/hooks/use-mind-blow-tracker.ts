@@ -1,59 +1,75 @@
 
+import { useState, useEffect } from 'react';
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 
-interface MindBlowState {
-  totalCount: number;
-  lastPromptedAt: number | null;
-  hasSeenDonationPrompt: boolean;
-  increment: () => void;
-  shouldShowDonationPrompt: () => boolean;
-  markDonationPromptSeen: () => void;
-  resetPromptTimestamp: () => void;
+interface MindBlowAnimation {
+  id: string;
+  x: number;
+  y: number;
+  type: 'smile' | 'mindblown' | 'heart' | 'fire';
 }
 
-export const useMindBlowTracker = create<MindBlowState>()(
-  persist(
-    (set, get) => ({
-      totalCount: 0,
-      lastPromptedAt: null,
-      hasSeenDonationPrompt: false,
-      
-      increment: () => set((state) => ({ 
-        totalCount: state.totalCount + 1 
-      })),
-      
-      shouldShowDonationPrompt: () => {
-        const state = get();
-        
-        // Don't show if user has seen it recently
-        if (state.lastPromptedAt) {
-          const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
-          if (state.lastPromptedAt > threeDaysAgo) return false;
-        }
-        
-        // First threshold at 5 mind blows - always show for first time
-        if (state.totalCount >= 5 && !state.hasSeenDonationPrompt) return true;
-        
-        // After the first time seen (hasSeenDonationPrompt is true), only show every 10 mind blows
-        if (state.hasSeenDonationPrompt && state.totalCount % 10 === 0 && state.totalCount > 0) {
-          return true;
-        }
-        
-        return false;
-      },
-      
-      markDonationPromptSeen: () => set({
-        hasSeenDonationPrompt: true,
-        lastPromptedAt: Date.now(),
-      }),
-      
-      resetPromptTimestamp: () => set({
-        lastPromptedAt: Date.now(),
-      }),
-    }),
-    {
-      name: 'mind-blow-tracker',
-    }
-  )
-);
+interface MindBlowTrackerState {
+  animations: MindBlowAnimation[];
+  increment: () => void;
+  remove: (id: string) => void;
+}
+
+export const useMindBlowTracker = create<MindBlowTrackerState>()((set) => ({
+  animations: [],
+  increment: () => {
+    const id = Math.random().toString(36).substring(2, 9);
+    // Random position within viewport
+    const x = Math.random() * (window.innerWidth * 0.8);
+    const y = Math.random() * (window.innerHeight * 0.8);
+    
+    // Random animation type
+    const types: ('smile' | 'mindblown' | 'heart' | 'fire')[] = ['smile', 'mindblown', 'heart', 'fire'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    set(state => ({
+      animations: [...state.animations, { id, x, y, type }]
+    }));
+    
+    // Remove the animation after 2 seconds
+    setTimeout(() => {
+      set(state => ({
+        animations: state.animations.filter(anim => anim.id !== id)
+      }));
+    }, 2000);
+  },
+  remove: (id: string) => set(state => ({
+    animations: state.animations.filter(animation => animation.id !== id)
+  }))
+}));
+
+export const MindBlowAnimations = () => {
+  const animations = useMindBlowTracker(state => state.animations);
+  const remove = useMindBlowTracker(state => state.remove);
+  
+  return (
+    <div className="fixed inset-0 pointer-events-none z-[9999] overflow-hidden">
+      {animations.map(anim => (
+        <div
+          key={anim.id}
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 animate-float"
+          style={{ 
+            left: `${anim.x}px`, 
+            top: `${anim.y}px`,
+            animation: `float 2s ease-out forwards, fade-out 2s ease-out forwards`,
+          }}
+          onAnimationEnd={() => remove(anim.id)}
+        >
+          <div className="text-4xl">
+            {anim.type === 'smile' && '😊'}
+            {anim.type === 'mindblown' && '🤯'}
+            {anim.type === 'heart' && '❤️'}
+            {anim.type === 'fire' && '🔥'}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default useMindBlowTracker;
