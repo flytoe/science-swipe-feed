@@ -108,8 +108,12 @@ export const regenerateImage = async (
     // Use the new prompt if provided, otherwise use the existing one
     const promptToUse = newPrompt || paper.ai_image_prompt || `Scientific visualization of: ${paper.title_org}`;
     
+    console.log('Regenerating image for paper:', paperId);
+    console.log('Using prompt:', promptToUse);
+    
     // Update the prompt in the database if a new one is provided
     if (newPrompt && newPrompt !== paper.ai_image_prompt) {
+      console.log('Updating prompt in database');
       const { error } = await supabase
         .from(databaseSource)
         .update({ ai_image_prompt: newPrompt })
@@ -121,7 +125,7 @@ export const regenerateImage = async (
       }
     }
     
-    // Generate the new image
+    // Call the edge function to generate the new image
     const response = await fetch('/api/generate-image', {
       method: 'POST',
       headers: {

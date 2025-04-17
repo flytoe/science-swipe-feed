@@ -28,7 +28,7 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
   }, [creator]);
 
   return (
-    <Card className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full min-h-[280px] overflow-hidden">
       <div className="absolute inset-0">
         <img
           src={imageSrc}
@@ -71,7 +71,7 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
           </motion.p>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 

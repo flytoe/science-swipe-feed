@@ -72,7 +72,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       }}>
         <CarouselContent className="h-full">
           {/* Hero Slide */}
-          <CarouselItem className="h-full">
+          <CarouselItem className="h-full min-h-[280px]">
             <HeroSlide
               title={displayTitle}
               imageSrc={imageSrc}
@@ -85,18 +85,18 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           {/* Individual Takeaway Slides */}
           {formattedTakeaways && formattedTakeaways.length > 0 ? (
             formattedTakeaways.map((takeaway, idx) => (
-              <CarouselItem key={`takeaway-${idx}`} className="h-full">
+              <CarouselItem key={`takeaway-${idx}`} className="h-full min-h-[280px]">
                 <TakeawaysSlide takeaways={[takeaway]} />
               </CarouselItem>
             ))
           ) : (
-            <CarouselItem className="h-full">
+            <CarouselItem className="h-full min-h-[280px]">
               <TakeawaysSlide takeaways={[]} />
             </CarouselItem>
           )}
           
           {/* Detail Slide */}
-          <CarouselItem className="h-full">
+          <CarouselItem className="h-full min-h-[280px]">
             <DetailSlide
               title={displayTitle}
               title_org={paper.title_org}

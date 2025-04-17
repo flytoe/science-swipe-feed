@@ -23,16 +23,14 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
   paper,
   onRegenerateComplete
 }) => {
-  const handleRegenerateStart = () => {
-    // This will be handled by the RegenerateImageButton component
-  };
-
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full min-h-[280px]">
       {/* Image */}
-      <div className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${isGenerating ? 'opacity-30' : 'opacity-100'}`}
+      <div 
+        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${isGenerating ? 'opacity-30' : 'opacity-100'}`}
         style={{ backgroundImage: `url(${imageSrc})` }}
-        aria-label={imageAlt}>
+        aria-label={imageAlt}
+      >
         {/* Dark overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent pointer-events-none" />
       </div>

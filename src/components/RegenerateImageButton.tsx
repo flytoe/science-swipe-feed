@@ -4,7 +4,6 @@ import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Paper } from '../lib/supabase';
-import { regenerateImage } from '../lib/imageGenerationService';
 import ImagePromptModal from './ImagePromptModal';
 
 interface RegenerateImageButtonProps {

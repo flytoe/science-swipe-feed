@@ -9,6 +9,7 @@ import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { AspectRatio } from './ui/aspect-ratio';
 import { useDatabaseToggle } from '../hooks/use-database-toggle';
+import { regenerateImage } from '../lib/imageGenerationService';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -41,63 +42,17 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       setIsLoading(true);
       onRegenerationStart?.();
       
-      // First, update the image prompt in the database
-      const { error: updateError } = await supabase
-        .from(databaseSource)
-        .update({ ai_image_prompt: prompt })
-        .eq('id', paper.id);
-      
-      if (updateError) {
-        console.error('Error updating image prompt:', updateError);
-        toast.error('Failed to update image prompt');
-        return;
-      }
-      
-      // Call the edge function to generate the image
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          paperId: paper.id,
-          databaseSource
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error generating image:', errorText);
-        toast.error('Failed to generate image');
-        onRegenerationComplete?.(null);
-        return;
-      }
-      
-      const result = await response.json();
-      const imageUrl = result.imageUrl;
+      // Call the regenerateImage function from imageGenerationService
+      const imageUrl = await regenerateImage(paper, prompt);
       
       if (!imageUrl) {
-        toast.error('No image URL returned');
+        toast.error('Failed to generate image');
+        setIsLoading(false);
         onRegenerationComplete?.(null);
         return;
       }
       
-      // Update the database with the new image URL
-      const { error: imageUpdateError } = await supabase
-        .from(databaseSource)
-        .update({ image_url: imageUrl })
-        .eq('id', paper.id);
-      
-      if (imageUpdateError) {
-        console.error('Error updating image URL:', imageUpdateError);
-        toast.error('Failed to save image URL');
-        // Still return the URL even if we couldn't save it
-        onRegenerationComplete?.(imageUrl);
-        return;
-      }
-      
-      toast.success('Image generated and saved successfully!');
+      toast.success('Image generated successfully!');
       onRegenerationComplete?.(imageUrl);
       onClose();
     } catch (error) {
