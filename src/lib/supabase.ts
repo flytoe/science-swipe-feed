@@ -1,4 +1,3 @@
-
 import { supabase as supabaseClient } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 import type { Json } from '../integrations/supabase/types';
@@ -169,23 +168,21 @@ export async function getPaperById(id: string): Promise<Paper | null> {
       // Try first with id field - use the appropriate type for the comparison
       // Since europe_paper.id is a smallint, we need to convert the string id to a number
       // Only try to convert to number if the id looks like a numeric string
-      let idValue: string | number = id;
       if (/^\d+$/.test(id)) {
-        idValue = parseInt(id, 10);
+        // If the ID is numeric, create a query with a number
+        const idQuery = await supabaseClient
+          .from(databaseSource)
+          .select('*')
+          .eq('id', parseInt(id, 10))
+          .maybeSingle();
+        
+        if (idQuery.data) {
+          const formattedPaper = formatPaperData(idQuery.data, databaseSource);
+          return createPaper(formattedPaper);
+        }
       }
       
-      const idQuery = await supabaseClient
-        .from(databaseSource)
-        .select('*')
-        .eq('id', idValue)
-        .maybeSingle();
-      
-      if (idQuery.data) {
-        const formattedPaper = formatPaperData(idQuery.data, databaseSource);
-        return createPaper(formattedPaper);
-      }
-      
-      // If not found, try with doi field
+      // If id is not numeric or no results found, try with doi field
       query = await supabaseClient
         .from(databaseSource)
         .select('*')
