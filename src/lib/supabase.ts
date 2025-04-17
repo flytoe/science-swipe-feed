@@ -237,7 +237,7 @@ function formatPaperData(item: any, databaseSource: DatabaseSource): any {
   let paperId: string;
   if (databaseSource === 'europe_paper') {
     // For europe_paper, prefer doi if available, then convert id to string if it's a number
-    paperId = item.doi || item.id.toString();
+    paperId = item.doi || (typeof item.id === 'number' ? item.id.toString() : item.id);
   } else {
     paperId = item.id;
   }
