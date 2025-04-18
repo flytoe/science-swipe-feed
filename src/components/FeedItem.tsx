@@ -19,6 +19,7 @@ import DetailSlide from './paper-slides/DetailSlide';
 import { ImageOff } from 'lucide-react';
 import MindBlowButton from './MindBlowButton';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 
 interface FeedItemProps {
   paper: Paper;
@@ -29,6 +30,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { databaseSource } = useDatabaseToggle();
   
   const { 
     formattedCategoryNames, 

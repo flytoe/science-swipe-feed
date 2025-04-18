@@ -52,6 +52,8 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       setIsLoading(true);
       onRegenerationStart?.();
       
+      console.log(`Regenerating image for paper ID: ${paper.id} in database: ${databaseSource}`);
+      
       // Call the regenerateImage function with the new prompt
       const imageUrl = await regenerateImage(paper, prompt);
       
@@ -125,6 +127,9 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
               {error && (
                 <p className="text-sm text-red-500 mt-1">{error}</p>
               )}
+              <p className="text-xs text-gray-500">
+                Current database: <span className="font-semibold">{databaseSource}</span>
+              </p>
             </div>
           </div>
           <DialogFooter>

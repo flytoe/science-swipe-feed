@@ -114,6 +114,7 @@ export const regenerateImage = async (
     
     console.log('Regenerating image for paper:', paperId);
     console.log('Using prompt:', promptToUse);
+    console.log('Database source:', databaseSource);
     
     // Call the new edge function to generate the new image
     const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image-v2', {
