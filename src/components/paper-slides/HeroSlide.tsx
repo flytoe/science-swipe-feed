@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import MindBlowBadge from '../MindBlowBadge';
+import { Badge } from '../ui/badge';
 
 interface HeroSlideProps {
   title: string;
@@ -10,6 +11,7 @@ interface HeroSlideProps {
   mindBlowCount?: number;
   creator?: string[] | string | null;
   isFirstSlide?: boolean;
+  activeIndex?: number;
 }
 
 const HeroSlide: React.FC<HeroSlideProps> = ({
@@ -18,14 +20,15 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
   formattedDate,
   mindBlowCount,
   creator,
-  isFirstSlide = false
+  isFirstSlide = false,
+  activeIndex = 0
 }) => {
   const creatorDisplay = React.useMemo(() => {
-    if (!creator || isFirstSlide) return null;
+    if (!creator || isFirstSlide || activeIndex === 0) return null;
     if (typeof creator === 'string') return creator;
     if (Array.isArray(creator)) return creator.join(', ');
     return null;
-  }, [creator, isFirstSlide]);
+  }, [creator, isFirstSlide, activeIndex]);
 
   return (
     <div className="relative w-full h-full min-h-[280px]">
