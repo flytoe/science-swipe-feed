@@ -34,6 +34,14 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     paper: paperWithData
   } = usePaperData(paper);
 
+  const handleCarouselChange = (api: any) => {
+    if (api) {
+      api.on('select', () => {
+        setActiveIndex(api.selectedScrollSnap());
+      });
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -101,4 +109,3 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
 };
 
 export default FeedItem;
-
