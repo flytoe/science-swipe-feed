@@ -59,6 +59,7 @@ const RegenerateImageButton: React.FC<RegenerateImageButtonProps> = ({
         onClick={handleClick}
         disabled={isGenerating || !paper}
         title="Edit prompt and regenerate image"
+        aria-label="Regenerate image"
       >
         <RefreshCw className={`h-4 w-4 text-white ${isGenerating ? 'animate-spin' : ''}`} />
         {text && <span className="ml-2">Regenerate</span>}

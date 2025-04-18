@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import RegenerateImageButton from './RegenerateImageButton';
 import { Paper } from '../lib/supabase';
 
@@ -25,7 +25,7 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
 }) => {
   return (
     <div className="relative h-full w-full min-h-[280px]">
-      {/* Image */}
+      {/* Image with object-cover to maintain aspect ratio while filling container */}
       <div 
         className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${isGenerating ? 'opacity-30' : 'opacity-100'}`}
         style={{ backgroundImage: `url(${imageSrc})` }}
@@ -38,16 +38,16 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
       {/* Loading indicator */}
       {isGenerating && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <RefreshCw className="h-8 w-8 text-white animate-spin" />
+          <Loader2 className="h-8 w-8 text-white animate-spin" />
         </div>
       )}
       
       {/* Image source indicator */}
-      {imageSourceType === 'generated' && (
+      {imageSourceType === 'generated' || imageSourceType === 'runware' ? (
         <div className="absolute bottom-2 right-2 bg-black/50 text-xs text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">
           AI Generated
         </div>
-      )}
+      ) : null}
       
       {/* Regenerate button - now using our enhanced RegenerateImageButton */}
       {paper && (

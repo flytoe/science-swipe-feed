@@ -38,19 +38,19 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
       </div>
 
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-4 left-4 z-10">
         <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
           {formattedDate}
         </Badge>
       </div>
 
       {mindBlowCount && mindBlowCount > 0 && (
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-10">
           <MindBlowBadge count={mindBlowCount} />
         </div>
       )}
 
-      <div className="absolute bottom-0 left-0 right-0 p-6">
+      <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
         <motion.h1 
           className="text-3xl font-bold text-white mb-4"
           initial={{ opacity: 0, y: 20 }}

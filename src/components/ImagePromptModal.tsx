@@ -5,11 +5,11 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Paper } from '../lib/supabase';
-import { supabase } from '../integrations/supabase/client';
+import { regenerateImage } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
 import { AspectRatio } from './ui/aspect-ratio';
 import { useDatabaseToggle } from '../hooks/use-database-toggle';
-import { regenerateImage } from '../lib/imageGenerationService';
+import { Loader2 } from 'lucide-react';
 
 interface ImagePromptModalProps {
   isOpen: boolean;
@@ -28,13 +28,23 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
 }) => {
   const [prompt, setPrompt] = useState(paper.ai_image_prompt || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { databaseSource } = useDatabaseToggle();
+
+  // Reset state when modal opens with new paper
+  React.useEffect(() => {
+    if (isOpen && paper) {
+      setPrompt(paper.ai_image_prompt || '');
+      setError(null);
+    }
+  }, [isOpen, paper]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (!prompt.trim()) {
-      toast.error('Please enter an image prompt');
+      setError('Please enter an image prompt');
       return;
     }
     
@@ -46,7 +56,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       const imageUrl = await regenerateImage(paper, prompt);
       
       if (!imageUrl) {
-        toast.error('Failed to generate image');
+        setError('Failed to generate image. Please try again.');
         setIsLoading(false);
         onRegenerationComplete?.(null);
         return;
@@ -57,7 +67,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error in image generation process:', error);
-      toast.error('An unexpected error occurred');
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       onRegenerationComplete?.(null);
     } finally {
       setIsLoading(false);
@@ -72,7 +82,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => !isLoading && onClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !isLoading && !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Generate New Image</DialogTitle>
@@ -94,7 +104,8 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
                   />
                   {isLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30 text-white">
-                      Generating...
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                      <span className="ml-2">Generating...</span>
                     </div>
                   )}
                 </AspectRatio>
@@ -111,6 +122,9 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
                 className="w-full"
                 disabled={isLoading}
               />
+              {error && (
+                <p className="text-sm text-red-500 mt-1">{error}</p>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -122,8 +136,17 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !prompt.trim()}>
-              {isLoading ? 'Generating...' : 'Generate New Image'}
+            <Button 
+              type="submit" 
+              disabled={isLoading || !prompt.trim()}
+              className="relative"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : 'Generate New Image'}
             </Button>
           </DialogFooter>
         </form>

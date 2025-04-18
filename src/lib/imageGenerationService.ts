@@ -67,9 +67,10 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorData = await response.json().catch(() => null);
+      const errorText = errorData?.details || await response.text();
       console.error('Error generating image:', errorText);
-      toast.error('Failed to generate image');
+      toast.error('Failed to generate image: ' + (errorData?.details || 'Unknown error'));
       return null;
     }
     
@@ -111,22 +112,11 @@ export const regenerateImage = async (
     console.log('Regenerating image for paper:', paperId);
     console.log('Using prompt:', promptToUse);
     
-    // Update the prompt in the database if a new one is provided
-    if (newPrompt && newPrompt !== paper.ai_image_prompt) {
-      console.log('Updating prompt in database');
-      const { error } = await supabase
-        .from(databaseSource)
-        .update({ ai_image_prompt: newPrompt })
-        .eq('id', paperId);
-      
-      if (error) {
-        console.error('Error updating paper with new prompt:', error);
-        toast.error('Failed to update image prompt');
-      }
-    }
+    // The edge function will handle storing the prompt in the database,
+    // so we don't need a separate database call here
     
     // Call the edge function to generate the new image
-    const response = await fetch('/api/generate-image', {
+    const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -134,14 +124,17 @@ export const regenerateImage = async (
       body: JSON.stringify({
         prompt: promptToUse,
         paperId: paperId,
-        databaseSource
+        databaseSource,
+        width: 1024,
+        height: 768
       }),
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorData = await response.json().catch(() => null);
+      const errorText = errorData?.details || await response.text();
       console.error('Error regenerating image:', errorText);
-      toast.error('Failed to regenerate image');
+      toast.error('Failed to regenerate image: ' + (errorData?.details || 'Unknown error'));
       return null;
     }
     
@@ -160,7 +153,7 @@ export const regenerateImage = async (
     return imageUrl;
   } catch (error) {
     console.error('Error in regenerateImage:', error);
-    toast.error('Error regenerating image');
+    toast.error('Error regenerating image: ' + (error instanceof Error ? error.message : 'Unknown error'));
     return null;
   }
 };

@@ -17,7 +17,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, paperId, databaseSource } = await req.json()
+    const { prompt, paperId, databaseSource, width = 1024, height = 768 } = await req.json()
 
     if (!prompt) {
       return new Response(
@@ -26,7 +26,22 @@ serve(async (req) => {
       )
     }
 
+    if (!paperId) {
+      return new Response(
+        JSON.stringify({ error: 'Paper ID is required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
+    if (!databaseSource) {
+      return new Response(
+        JSON.stringify({ error: 'Database source is required' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
     console.log(`Generating image for ${databaseSource} with ID: ${paperId}`)
+    console.log(`Using prompt: ${prompt}`)
     
     // Get the Runware API key from environment variables
     const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY')
@@ -40,6 +55,17 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // First, update the prompt in the database right away
+    const { error: promptUpdateError } = await supabaseAdmin
+      .from(databaseSource)
+      .update({ ai_image_prompt: prompt })
+      .eq('id', paperId)
+
+    if (promptUpdateError) {
+      console.error('Error updating paper with prompt:', promptUpdateError)
+      throw new Error(`Failed to update prompt: ${promptUpdateError.message}`)
+    }
+
     // Call Runware API to generate the image
     const payload = JSON.stringify([
       {
@@ -51,8 +77,8 @@ serve(async (req) => {
         taskUUID: crypto.randomUUID(),
         positivePrompt: prompt,
         model: "runware:100@1",
-        width: 1024,
-        height: 768,
+        width: width,
+        height: height,
         numberResults: 1,
         outputFormat: "WEBP",
         CFGScale: 1,
@@ -61,7 +87,7 @@ serve(async (req) => {
       }
     ])
 
-    console.log("Calling Runware API with payload:", payload)
+    console.log("Calling Runware API...")
     
     const response = await fetch(API_ENDPOINT, {
       method: 'POST',
@@ -78,7 +104,7 @@ serve(async (req) => {
     }
 
     const result = await response.json()
-    console.log("Runware API response:", JSON.stringify(result))
+    console.log("Runware API response received")
 
     // Find the imageInference task result
     const imageTask = result.data.find(item => item.taskType === 'imageInference')
@@ -93,24 +119,36 @@ serve(async (req) => {
     // Update the database with the new image URL
     const { error: updateError } = await supabaseAdmin
       .from(databaseSource)
-      .update({ image_url: imageUrl })
+      .update({ 
+        image_url: imageUrl,
+        ai_image_prompt: prompt // Ensure prompt is stored along with the image
+      })
       .eq('id', paperId)
 
     if (updateError) {
       console.error('Error updating paper with image URL:', updateError)
+      throw new Error(`Failed to update database: ${updateError.message}`)
     } else {
       console.log(`Successfully updated ${databaseSource} with image URL for paper ID: ${paperId}`)
     }
 
     // Return the generated image URL
     return new Response(
-      JSON.stringify({ imageUrl }),
+      JSON.stringify({ 
+        imageUrl,
+        success: true,
+        message: 'Image generated successfully'
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred', details: error.message }),
+      JSON.stringify({ 
+        error: 'An unexpected error occurred', 
+        details: error.message,
+        success: false
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
