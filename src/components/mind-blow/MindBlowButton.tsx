@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
 
