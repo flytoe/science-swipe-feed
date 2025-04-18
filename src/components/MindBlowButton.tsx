@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
@@ -56,17 +57,21 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     setIsHolding(true);
     controls.start({
-      scale: [1, 2],
-      transition: { duration: 1.5, ease: "easeInOut" }
+      scale: [1, 4],
+      rotate: [0, -10, 10, -10, 0],
+      transition: { 
+        scale: { duration: 1.5, ease: "easeInOut" },
+        rotate: { duration: 0.5, ease: "easeInOut", repeat: 3 }
+      }
     });
 
     holdTimeoutRef.current = setTimeout(() => {
       setIsHolding(false);
       setIsWowed(false);
+      controls.start({ scale: 1, rotate: 0 });
       onClick();
       increment();
       setShowOverlay(true);
-      controls.start({ scale: 1 });
     }, 1500);
   };
 
@@ -162,7 +167,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative inline-block">
       <motion.div
         animate={controls}
         onMouseDown={handleMouseDown}
@@ -171,13 +176,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         onTouchEnd={handleMouseUp}
         onMouseLeave={handleMouseUp}
         className="touch-none select-none"
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: isHolding ? 100 : 1
-        }}
       >
         <Button 
           variant={variant}
@@ -186,7 +184,8 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           className={`relative group ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
           ref={buttonRef}
         >
-          <motion.span
+          <motion.div
+            className="relative"
             animate={hasMindBlown ? {
               scale: [1, 1.4, 1],
               rotate: [0, -10, 10, -10, 0]
@@ -197,19 +196,20 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
               repeatType: "reverse",
               repeatDelay: 2
             }}
-            className="inline-flex items-center"
           >
-            {getEmoji()}
-            {showCount && count > 0 && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="ml-1 text-sm font-bold"
-              >
-                +{count}
-              </motion.span>
-            )}
-          </motion.span>
+            <span className="inline-flex items-center">
+              {getEmoji()}
+              {showCount && count > 0 && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.5, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  className="ml-1 text-sm font-bold"
+                >
+                  +{count}
+                </motion.span>
+              )}
+            </span>
+          </motion.div>
           
           {isTopPaper && (
             <motion.div 
@@ -223,6 +223,26 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         </Button>
       </motion.div>
 
+      {/* Explosion effect when triggered */}
+      <AnimatePresence>
+        {isWowed && (
+          <motion.div
+            initial={{ scale: 1, opacity: 1 }}
+            animate={{ 
+              scale: [1, 2, 3],
+              opacity: [1, 0.8, 0],
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
+            style={{ zIndex: 101 }}
+          >
+            <span className="text-4xl">🤯</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Overlay for additional reactions */}
       <AnimatePresence>
         {showOverlay && (
           <motion.div 
