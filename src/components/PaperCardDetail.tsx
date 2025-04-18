@@ -1,14 +1,11 @@
-
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
@@ -36,8 +33,9 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   creator,
   imageSrc,
 }) => {
-  // Get mind-blow data for the paper
   const { count: mindBlowCount } = useMindBlow(doi || '');
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   return (
     <motion.div
@@ -47,7 +45,31 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
     >
-      <Carousel className="w-full h-full">
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className={`absolute inset-0 transition-all duration-500 ${
+            isTransitioning ? 'blur-lg' : 'blur-none'
+          }`}
+          style={{
+            backgroundImage: `url(${imageSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+      </div>
+
+      <Carousel 
+        className="w-full h-full"
+        setApi={(api) => {
+          if (api) {
+            api.on('select', () => {
+              setIsTransitioning(true);
+              setTimeout(() => setIsTransitioning(false), 300);
+              setCurrentSlide(api.selectedScrollSnap());
+            });
+          }
+        }}
+      >
         <CarouselContent className="h-full">
           <CarouselItem className="h-full">
             <HeroSlide
@@ -56,6 +78,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               formattedDate={formattedDate}
               mindBlowCount={mindBlowCount}
               creator={creator}
+              isFirstSlide={currentSlide === 0}
             />
           </CarouselItem>
           
@@ -72,9 +95,6 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
             />
           </CarouselItem>
         </CarouselContent>
-        
-        <CarouselPrevious className="left-2" />
-        <CarouselNext className="right-2" />
       </Carousel>
     </motion.div>
   );

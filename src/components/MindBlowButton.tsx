@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
@@ -18,7 +17,6 @@ interface MindBlowButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
 }
 
-// Predefined quick tag options for mind-blow reasons
 const QUICK_TAGS = [
   "Novel approach",
   "Groundbreaking results",
@@ -52,9 +50,9 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   
   const { increment } = useMindBlowTracker();
 
-  // Handle mousedown to start the hold animation
-  const handleMouseDown = () => {
-    if (hasMindBlown) return; // Prevent animation if already mind-blown
+  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    if (hasMindBlown) return;
     
     setIsHolding(true);
     controls.start({
@@ -62,7 +60,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
       transition: { duration: 1.5, ease: "easeInOut" }
     });
 
-    // Set timeout for the mind-blow transformation
     holdTimeoutRef.current = setTimeout(() => {
       setIsHolding(false);
       setIsWowed(false);
@@ -73,8 +70,8 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     }, 1500);
   };
 
-  // Handle mouse up to cancel the hold animation
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
     if (hasMindBlown) return;
     
     if (holdTimeoutRef.current) {
@@ -89,7 +86,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     }
   };
 
-  // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (holdTimeoutRef.current) {
@@ -98,7 +94,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     };
   }, []);
 
-  // Handle click outside overlay to close it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (overlayRef.current && !overlayRef.current.contains(event.target as Node) && 
@@ -113,12 +108,11 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     };
   }, []);
 
-  // Handle key press events for the textarea
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter' && !event.shiftKey && textareaRef.current?.contains(event.target as Node)) {
-        event.preventDefault(); // Prevent line breaks
-        handleSubmit(); // Submit the form
+        event.preventDefault();
+        handleSubmit();
       }
     };
 
@@ -133,7 +127,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     let finalReason = reason.trim();
     
-    // Add selected tags to the reason
     if (selectedTags.length > 0) {
       const tagsText = selectedTags.join(", ");
       finalReason = finalReason ? `${finalReason} (${tagsText})` : tagsText;
@@ -162,7 +155,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     );
   };
 
-  // Get the appropriate emoji based on state
   const getEmoji = () => {
     if (hasMindBlown) return "🤯";
     if (isWowed) return "😮";
@@ -175,8 +167,10 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         animate={controls}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleMouseDown}
+        onTouchEnd={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className="touch-none"
+        className="touch-none select-none"
       >
         <Button 
           variant={variant}
@@ -240,7 +234,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
               </Button>
             </div>
             
-            {/* Quick tags selection */}
             <div className="mb-3 flex flex-wrap gap-2">
               {QUICK_TAGS.map((tag, index) => (
                 <button
