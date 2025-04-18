@@ -2,7 +2,7 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { Circle, CircleDot } from "lucide-react"
+import { ArrowLeft, ArrowRight, Circle, CircleDot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -151,45 +151,49 @@ Carousel.displayName = "Carousel"
 const CarouselContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { carouselRef, orientation } = useCarousel()
+>(
+  ({ className, ...props }, ref) => {
+    const { carouselRef, orientation } = useCarousel()
 
-  return (
-    <div ref={carouselRef} className="overflow-hidden">
-      <div
-        ref={ref}
-        className={cn(
-          "flex",
-          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
-          className
-        )}
-        {...props}
-      />
-    </div>
-  )
-})
+    return (
+      <div ref={carouselRef} className="overflow-hidden">
+        <div
+          ref={ref}
+          className={cn(
+            "flex",
+            orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+            className
+          )}
+          {...props}
+        />
+      </div>
+    )
+  }
+)
 CarouselContent.displayName = "CarouselContent"
 
 const CarouselItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { orientation } = useCarousel()
+>(
+  ({ className, ...props }, ref) => {
+    const { orientation } = useCarousel()
 
-  return (
-    <div
-      ref={ref}
-      role="group"
-      aria-roledescription="slide"
-      className={cn(
-        "min-w-0 shrink-0 grow-0 basis-full",
-        orientation === "horizontal" ? "pl-4" : "pt-4",
-        className
-      )}
-      {...props}
-    />
-  )
-})
+    return (
+      <div
+        ref={ref}
+        role="group"
+        aria-roledescription="slide"
+        className={cn(
+          "min-w-0 shrink-0 grow-0 basis-full",
+          orientation === "horizontal" ? "pl-4" : "pt-4",
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
 CarouselItem.displayName = "CarouselItem"
 
 const CarouselPrevious = React.forwardRef<
@@ -253,47 +257,49 @@ CarouselNext.displayName = "CarouselNext";
 const CarouselDots = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const { api } = useCarousel();
-  const [selectedIndex, setSelectedIndex] = React.useState(0);
+>(
+  ({ className, ...props }, ref) => {
+    const { api } = useCarousel();
+    const [selectedIndex, setSelectedIndex] = React.useState(0);
 
-  React.useEffect(() => {
-    if (!api) return;
+    React.useEffect(() => {
+      if (!api) return;
 
-    const onSelect = () => {
-      setSelectedIndex(api.selectedScrollSnap());
-    };
+      const onSelect = () => {
+        setSelectedIndex(api.selectedScrollSnap());
+      };
 
-    api.on('select', onSelect);
-    return () => {
-      api.off('select', onSelect);
-    };
-  }, [api]);
+      api.on('select', onSelect);
+      return () => {
+        api.off('select', onSelect);
+      };
+    }, [api]);
 
-  if (!api) return null;
+    if (!api) return null;
 
-  return (
-    <div 
-      ref={ref} 
-      className={cn("flex items-center justify-center space-x-2", className)} 
-      {...props}
-    >
-      {Array.from({ length: api.scrollSnapList().length }).map((_, index) => (
-        <button
-          key={index}
-          onClick={() => api.scrollTo(index)}
-          className="focus:outline-none"
-        >
-          {index === selectedIndex ? (
-            <CircleDot className="h-3 w-3 text-primary" />
-          ) : (
-            <Circle className="h-2 w-2 text-gray-300" />
-          )}
-        </button>
-      ))}
-    </div>
-  );
-});
+    return (
+      <div 
+        ref={ref} 
+        className={cn("flex items-center justify-center space-x-2", className)} 
+        {...props}
+      >
+        {Array.from({ length: api.scrollSnapList().length }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => api.scrollTo(index)}
+            className="focus:outline-none"
+          >
+            {index === selectedIndex ? (
+              <CircleDot className="h-3 w-3 text-primary" />
+            ) : (
+              <Circle className="h-2 w-2 text-gray-300" />
+            )}
+          </button>
+        ))}
+      </div>
+    );
+  }
+);
 CarouselDots.displayName = "CarouselDots";
 
 export {
