@@ -14,6 +14,7 @@ import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
 import MindBlowButton from './MindBlowButton';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import RegenerateImageButton from './RegenerateImageButton';
 
 interface FeedItemProps {
   paper: Paper;
@@ -53,6 +54,16 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
+      {/* Regenerate Image Button */}
+      <div className="absolute top-4 right-4 z-50">
+        <RegenerateImageButton
+          paper={paper}
+          variant="ghost"
+          size="icon"
+          className="bg-black/40 text-white hover:bg-black/60 backdrop-blur-sm"
+        />
+      </div>
+
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         <img
           src={imageSrc}
