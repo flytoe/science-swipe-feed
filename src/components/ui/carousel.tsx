@@ -2,7 +2,7 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { ArrowLeft, ArrowRight, Circle, CircleDot } from "lucide-react"
+import { Circle, CircleDot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"

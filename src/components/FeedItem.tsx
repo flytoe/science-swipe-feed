@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -9,8 +8,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   CarouselDots
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
@@ -66,66 +63,70 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
-      <Carousel className="w-full" setApi={handleCarouselChange}>
-        <CarouselContent>
-          {/* Hero Slide */}
-          <CarouselItem className="min-h-[280px]">
-            <HeroSlide
-              title={displayTitle}
-              imageSrc={imageSrc}
-              formattedDate={formattedDate}
-              creator={paper.creator}
-              mindBlowCount={count}
-            />
-          </CarouselItem>
-          
-          {/* Individual Takeaway Slides */}
-          {formattedTakeaways && formattedTakeaways.length > 0 ? (
-            formattedTakeaways.map((takeaway, idx) => (
-              <CarouselItem key={`takeaway-${idx}`} className="min-h-[280px]">
-                <TakeawaysSlide takeaways={[takeaway]} />
-              </CarouselItem>
-            ))
-          ) : (
-            <CarouselItem className="min-h-[280px]">
-              <TakeawaysSlide takeaways={[]} />
-            </CarouselItem>
-          )}
-          
-          {/* Detail Slide */}
-          <CarouselItem className="min-h-[280px]">
-            <DetailSlide
-              title={displayTitle}
-              title_org={paper.title_org}
-              abstract_org={paper.abstract_org}
-              doi={paper.doi}
-            />
-          </CarouselItem>
-        </CarouselContent>
-        
-        <CarouselPrevious className="left-2 z-10" />
-        <CarouselNext className="right-2 z-10" />
-        
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
-          <CarouselDots className="flex gap-1" />
-        </div>
-      </Carousel>
-
-      {/* Mind Blow button - Fixed position relative to item */}
-      <div className="absolute bottom-16 right-6 z-40">
-        <MindBlowButton 
-          hasMindBlown={hasMindBlown}
-          count={count}
-          isTopPaper={isTopPaper}
-          isLoading={isLoading}
-          onClick={toggleMindBlow}
-          size="lg"
-          showCount={true}
-          className="shadow-md"
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src={imageSrc}
+          alt={displayTitle}
+          className="w-full h-full object-cover opacity-20"
+          style={{ filter: 'blur(10px)' }}
         />
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-md" />
       </div>
 
-      {/* Regenerate button - Always visible */}
+      <div className="relative z-10">
+        <Carousel className="w-full" setApi={handleCarouselChange}>
+          <CarouselContent>
+            <CarouselItem className="min-h-[280px]">
+              <HeroSlide
+                title={displayTitle}
+                imageSrc={imageSrc}
+                formattedDate={formattedDate}
+                creator={paper.creator}
+                mindBlowCount={count}
+              />
+            </CarouselItem>
+            
+            {formattedTakeaways && formattedTakeaways.length > 0 ? (
+              formattedTakeaways.map((takeaway, idx) => (
+                <CarouselItem key={`takeaway-${idx}`} className="min-h-[280px]">
+                  <TakeawaysSlide takeaways={[takeaway]} />
+                </CarouselItem>
+              ))
+            ) : (
+              <CarouselItem className="min-h-[280px]">
+                <TakeawaysSlide takeaways={[]} />
+              </CarouselItem>
+            )}
+            
+            <CarouselItem className="min-h-[280px]">
+              <DetailSlide
+                title={displayTitle}
+                title_org={paper.title_org}
+                abstract_org={paper.abstract_org}
+                doi={paper.doi}
+              />
+            </CarouselItem>
+          </CarouselContent>
+          
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+            <CarouselDots className="flex gap-1" />
+          </div>
+        </Carousel>
+
+        <div className="flex justify-center py-4 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
+          <MindBlowButton 
+            hasMindBlown={hasMindBlown}
+            count={count}
+            isTopPaper={isTopPaper}
+            isLoading={isLoading}
+            onClick={toggleMindBlow}
+            size="lg"
+            showCount={true}
+            className="shadow-md"
+          />
+        </div>
+      </div>
+
       <div className="absolute top-4 right-4 z-40">
         <RegenerateImageButton 
           paper={paperWithData}
@@ -137,7 +138,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         />
       </div>
       
-      {/* Loading overlay */}
       {isRegenerating && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="text-white text-sm">Regenerating...</div>
