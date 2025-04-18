@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
 import { Sparkles, Zap } from 'lucide-react';
@@ -195,10 +195,9 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           <motion.div
             className="relative"
             style={{ 
-              '--scale': scale,
               transform: `scale(${scale})`,
               transformOrigin: 'center center'
-            } as any}
+            }}
             animate={hasMindBlown ? {
               scale: [1, 1.4, 1],
               rotate: [0, -10, 10, -10, 0]
