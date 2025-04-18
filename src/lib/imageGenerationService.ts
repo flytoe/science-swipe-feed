@@ -1,8 +1,8 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { Paper } from './supabase';
 import { useDatabaseToggle } from '../hooks/use-database-toggle';
 import { toast } from 'sonner';
+import { getPaperId } from '../hooks/use-database-toggle';
 
 // Check if a paper needs an image and generate one if needed
 export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<string | null> => {
@@ -42,16 +42,15 @@ export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<strin
   return generateImageForPaper(paper);
 };
 
-// Generate an image for a paper and store it in the database
 export const generateImageForPaper = async (paper: Paper): Promise<string | null> => {
   const prompt = paper.ai_image_prompt || `Scientific visualization of: ${paper.title_org}`;
   
   try {
     console.log('Starting image generation with prompt:', prompt);
     
-    // Get the current database source
+    // Get the current database source and paper ID
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const paperId = paper.id;
+    const paperId = getPaperId(paper, databaseSource);
     
     // Call the edge function to generate an image
     const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image-v2', {
@@ -107,7 +106,7 @@ export const regenerateImage = async (
   try {
     // Get the current database source
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const paperId = paper.id;
+    const paperId = getPaperId(paper, databaseSource);
     
     // Use the new prompt if provided, otherwise use the existing one
     const promptToUse = newPrompt || paper.ai_image_prompt || `Scientific visualization of: ${paper.title_org}`;

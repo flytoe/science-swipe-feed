@@ -66,13 +66,33 @@ serve(async (req) => {
     if (shouldStorePrompt) {
       console.log(`Updating prompt for ${databaseSource} with ID: ${paperId}`)
       
-      const { error: promptUpdateError } = await supabaseAdmin
-        .from(databaseSource)
-        .update({ ai_image_prompt: prompt })
-        .eq('id', paperId)
+      let updateQuery;
+      
+      if (databaseSource === 'europe_paper') {
+        // For europe_paper, try to match by either id or doi
+        if (/^\d+$/.test(paperId)) {
+          // If paperId is numeric, use it as an ID
+          updateQuery = await supabaseAdmin
+            .from(databaseSource)
+            .update({ ai_image_prompt: prompt })
+            .eq('id', parseInt(paperId, 10))
+        } else {
+          // If not numeric, assume it's a DOI
+          updateQuery = await supabaseAdmin
+            .from(databaseSource)
+            .update({ ai_image_prompt: prompt })
+            .eq('doi', paperId)
+        }
+      } else {
+        // For other tables, use the ID directly
+        updateQuery = await supabaseAdmin
+          .from(databaseSource)
+          .update({ ai_image_prompt: prompt })
+          .eq('id', paperId)
+      }
 
-      if (promptUpdateError) {
-        console.error('Error updating paper with prompt:', promptUpdateError)
+      if (updateQuery.error) {
+        console.error('Error updating paper with prompt:', updateQuery.error)
         // Continue with image generation even if prompt update fails
         console.log('Continuing with image generation despite prompt update failure')
       } else {
@@ -144,14 +164,34 @@ serve(async (req) => {
     }
     
     // Update the database with the new image URL
-    const { error: updateError } = await supabaseAdmin
-      .from(databaseSource)
-      .update(updateData)
-      .eq('id', paperId)
+    let updateImageQuery;
+    
+    if (databaseSource === 'europe_paper') {
+      // For europe_paper, try to match by either id or doi
+      if (/^\d+$/.test(paperId)) {
+        // If paperId is numeric, use it as an ID
+        updateImageQuery = await supabaseAdmin
+          .from(databaseSource)
+          .update(updateData)
+          .eq('id', parseInt(paperId, 10))
+      } else {
+        // If not numeric, assume it's a DOI
+        updateImageQuery = await supabaseAdmin
+          .from(databaseSource)
+          .update(updateData)
+          .eq('doi', paperId)
+      }
+    } else {
+      // For other tables, use the ID directly
+      updateImageQuery = await supabaseAdmin
+        .from(databaseSource)
+        .update(updateData)
+        .eq('id', paperId)
+    }
 
-    if (updateError) {
-      console.error('Error updating paper with image URL:', updateError)
-      throw new Error(`Failed to update database: ${updateError.message}`)
+    if (updateImageQuery.error) {
+      console.error('Error updating paper with image URL:', updateImageQuery.error)
+      throw new Error(`Failed to update database: ${updateImageQuery.error.message}`)
     } else {
       console.log(`Successfully updated ${databaseSource} with image URL for paper ID: ${paperId}`)
     }
