@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
@@ -64,28 +63,20 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
 
   const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    
-    // Check if user has already mind-blown
     if (hasMindBlown) return;
     
-    // Get current time for rate limiting
     const now = Date.now();
-    if (now - lastTapTime.current < 300) return; // Rate limit taps
+    if (now - lastTapTime.current < 300) return;
     lastTapTime.current = now;
     
-    // Play a small animation
     controls.start({
       scale: [1, 1.2, 1],
       transition: { duration: 0.3 }
     });
     
-    // Increment local tap counter
     setTapCount(prev => prev + 1);
-    
-    // Trigger a small explosion animation
     increment();
     
-    // If user taps 3 times, trigger the mind blow
     if (tapCount >= 2) {
       onClick();
       setTapCount(0);
@@ -98,22 +89,13 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     setIsHolding(true);
     controls.start({
-      scale: [1, 4, 4, 4],
-      rotate: [0, -10, 10, -10, 0, -10, 10, -10, 0],
-      transition: { 
-        scale: { duration: 1.5, ease: "easeInOut" },
-        rotate: { duration: 1.5, ease: "easeInOut", repeat: 3 }
-      }
+      scale: [1, 4],
+      transition: { duration: 0.5, ease: "easeOut" }
     });
 
     holdTimeoutRef.current = setTimeout(() => {
-      setIsHolding(false);
-      setTapCount(0);
-      controls.start({ scale: 1, rotate: 0 });
-      onClick();
-      triggerBurst(50); // Trigger 50 mind blow animations
-      setShowOverlay(true);
-    }, 1500);
+      controls.start({ scale: 4 });
+    }, 500);
   };
 
   const handleMouseUp = (e: React.MouseEvent | React.TouchEvent) => {
@@ -125,10 +107,10 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     if (isHolding) {
       setIsHolding(false);
-      controls.start({ scale: 1, rotate: 0 });
-      
-      // If they didn't hold long enough for the burst, 
-      // register it as a single tap
+      controls.start({ scale: 1 });
+      triggerBurst(1); // Only trigger one big explosion
+      onClick();
+    } else {
       handleTap(e);
     }
   };
@@ -150,12 +132,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     setShowOverlay(false);
   };
 
-  const getEmoji = () => {
-    if (hasMindBlown) return "🤯";
-    if (isHolding) return "🤯";
-    return "🤯";
-  };
-
   return (
     <div className="relative inline-block">
       <motion.div
@@ -166,7 +142,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         onTouchEnd={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onClick={handleTap}
-        className="touch-none select-none"
+        className={`touch-none select-none ${isHolding ? 'animate-wiggle' : ''}`}
       >
         <Button 
           variant={variant}
@@ -189,7 +165,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
             }}
           >
             <span className="inline-flex items-center">
-              {getEmoji()}
+              🤯
               {showCount && count > 0 && (
                 <motion.span
                   initial={{ opacity: 0, scale: 0.5, x: -10 }}
@@ -224,26 +200,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           )}
         </Button>
       </motion.div>
-
-      <AnimatePresence>
-        {isHolding && (
-          <motion.div
-            initial={{ scale: 1, opacity: 1 }}
-            animate={{ 
-              scale: [1, 2, 3],
-              opacity: [1, 0.8, 0],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-            style={{ zIndex: 101 }}
-          >
-            <span className="text-4xl">
-              <Sparkles className="text-yellow-500" size={64} />
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {showOverlay && (

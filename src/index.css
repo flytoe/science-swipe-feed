@@ -79,22 +79,21 @@
 /* Add floating animation for mind-blow effects */
 @keyframes float {
   0% {
-    transform: translate(-50%, -50%) scale(0.5);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
   }
   50% {
-    transform: translate(-50%, calc(-50% - 100px)) scale(1.2);
+    transform: translate(-50%, -100px) scale(1.5);
   }
   100% {
-    transform: translate(-50%, calc(-50% - 200px)) scale(0.8);
+    transform: translate(-50%, -150px) scale(1);
+    opacity: 0;
   }
 }
 
 @keyframes fade-out {
   0% {
     opacity: 1;
-  }
-  80% {
-    opacity: 0.8;
   }
   100% {
     opacity: 0;
@@ -104,15 +103,15 @@
 /* Add burst animation for the big mind-blow */
 @keyframes burst {
   0% {
-    transform: translate(-50%, -50%) scale(0.1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
   }
-  20% {
-    transform: translate(-50%, -50%) scale(1.5);
+  50% {
+    transform: translate(-50%, -50%) scale(10);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) scale(0.1);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
   }
 }
@@ -120,20 +119,23 @@
 /* Add wiggle animation for held button */
 @keyframes wiggle {
   0% { transform: rotate(0deg); }
-  25% { transform: rotate(-10deg); }
+  25% { transform: rotate(-5deg); }
   50% { transform: rotate(0deg); }
-  75% { transform: rotate(10deg); }
+  75% { transform: rotate(5deg); }
   100% { transform: rotate(0deg); }
 }
 
 .animate-float {
-  animation: float 2s ease-out forwards, fade-out 2s ease-out forwards;
+  animation: float 1s ease-out forwards, fade-out 1s ease-out forwards;
+  font-size: 2rem;
 }
 
 .animate-burst {
-  animation: burst 1.5s ease-out forwards;
+  animation: burst 1s ease-out forwards;
+  font-size: 4rem;
 }
 
 .animate-wiggle {
-  animation: wiggle 0.5s ease-in-out infinite;
+  animation: wiggle 0.3s ease-in-out infinite;
 }
+
