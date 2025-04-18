@@ -2,7 +2,7 @@ import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react"
-import { ArrowLeft, ArrowRight, Circle, CircleDot } from "lucide-react"
+import { Circle, CircleDot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -280,7 +280,7 @@ const CarouselDots = React.forwardRef<
     return (
       <div 
         ref={ref} 
-        className={cn("flex items-center justify-center space-x-2", className)} 
+        className={cn("flex items-center justify-center gap-2", className)} 
         {...props}
       >
         {Array.from({ length: api.scrollSnapList().length }).map((_, index) => (
@@ -289,11 +289,10 @@ const CarouselDots = React.forwardRef<
             onClick={() => api.scrollTo(index)}
             className="focus:outline-none"
           >
-            {index === selectedIndex ? (
-              <CircleDot className="h-3 w-3 text-primary" />
-            ) : (
-              <Circle className="h-2 w-2 text-gray-300" />
-            )}
+            <div className={cn(
+              "w-2 h-2 rounded-full transition-colors",
+              index === selectedIndex ? "bg-black" : "bg-gray-300"
+            )} />
           </button>
         ))}
       </div>

@@ -10,8 +10,8 @@ interface TakeawaysSlideProps {
 const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
   if (!takeaways || takeaways.length === 0) {
     return (
-      <div className="flex items-center justify-center p-6 bg-gray-50 min-h-[280px] h-full">
-        <p className="text-gray-500 text-center">No key insights available for this paper.</p>
+      <div className="flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">
+        <p className="text-white/80 text-center">No key insights available for this paper.</p>
       </div>
     );
   }
@@ -22,7 +22,7 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
     : JSON.stringify(takeaway.text);
 
   return (
-    <div className="flex items-center p-6 bg-white min-h-[280px] h-full">
+    <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">
       <div className="w-full max-w-2xl mx-auto">
         <KeyTakeaway 
           text={takeawayText} 
@@ -35,3 +35,4 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
 };
 
 export default TakeawaysSlide;
+
