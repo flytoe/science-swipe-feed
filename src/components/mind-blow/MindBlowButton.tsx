@@ -69,10 +69,16 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     if (now - lastTapTime.current < 300) return;
     lastTapTime.current = now;
     
-    controls.start({
-      scale: [1, 1.2, 1],
-      transition: { duration: 0.3 }
-    });
+    // Create a single floating mind-blow emoji
+    setParticles([{
+      id: `particle-${Date.now()}`,
+      emoji: '🤯',
+      x: 0,  // Center horizontally
+      y: -100,  // Float upward
+      rotation: Math.random() * 20 - 10  // Slight random rotation
+    }]);
+    
+    setTimeout(() => setParticles([]), 1000);
     
     setTapCount(prev => prev + 1);
     increment();
@@ -99,28 +105,31 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   }, []);
 
   const createParticles = () => {
-    const newParticles = [];
-    const emojis = ['🤯', '✨', '💡'];
-    const particleCount = 12;
+    // Only create explosion particles if scale is large enough (held long enough)
+    if (scale >= 2) {
+      const newParticles = [];
+      const emojis = ['🤯', '✨', '💡'];
+      const particleCount = 24; // Increased for bigger explosion
 
-    for (let i = 0; i < particleCount; i++) {
-      const angle = (i / particleCount) * Math.PI * 2;
-      const distance = 200;
-      const x = Math.cos(angle) * distance;
-      const y = Math.sin(angle) * distance;
-      const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * Math.PI * 2;
+        const distance = 300; // Increased spread
+        const x = Math.cos(angle) * distance;
+        const y = Math.sin(angle) * distance;
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        
+        newParticles.push({
+          id: `particle-${Date.now()}-${i}`,
+          emoji,
+          x,
+          y,
+          rotation: Math.random() * 360
+        });
+      }
       
-      newParticles.push({
-        id: `particle-${Date.now()}-${i}`,
-        emoji,
-        x,
-        y,
-        rotation: Math.random() * 360
-      });
+      setParticles(newParticles);
+      setTimeout(() => setParticles([]), 1000);
     }
-    
-    setParticles(newParticles);
-    setTimeout(() => setParticles([]), 1000);
   };
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
@@ -176,7 +185,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   return (
     <div className="relative inline-block">
       <motion.div
-        animate={controls}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
         onTouchStart={handleMouseDown}
@@ -193,7 +201,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           ref={buttonRef}
         >
           <motion.div
-            className="relative"
+            className={`relative ${isHolding ? 'animate-wiggle' : ''}`}
             style={{ 
               transform: `scale(${scale})`,
               transformOrigin: 'center center'
@@ -222,17 +230,29 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
 
       <AnimatePresence>
         {particles.map(particle => (
-          <div
+          <motion.div
             key={particle.id}
-            className="animate-particle absolute pointer-events-none"
-            style={{
-              '--x-offset': `${particle.x}px`,
-              '--y-offset': `${particle.y}px`,
-              '--rotation': `${particle.rotation}deg`
-            } as any}
+            className="absolute pointer-events-none"
+            initial={{ 
+              x: 0, 
+              y: 0, 
+              opacity: 1, 
+              rotate: 0 
+            }}
+            animate={{ 
+              x: particle.x,
+              y: particle.y,
+              opacity: 0,
+              rotate: particle.rotation 
+            }}
+            exit={{ opacity: 0 }}
+            transition={{ 
+              duration: 1,
+              ease: "easeOut"
+            }}
           >
             {particle.emoji}
-          </div>
+          </motion.div>
         ))}
       </AnimatePresence>
 
