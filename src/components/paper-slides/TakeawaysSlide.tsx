@@ -11,20 +11,19 @@ interface TakeawaysSlideProps {
 const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
   if (!takeaways || takeaways.length === 0) {
     return (
-      <Card className="w-full h-full flex items-center justify-center p-6 bg-gray-50">
+      <div className="flex items-center justify-center p-6 bg-gray-50 min-h-[280px] h-full">
         <p className="text-gray-500 text-center">No key insights available for this paper.</p>
-      </Card>
+      </div>
     );
   }
 
-  // Now we're displaying just one takeaway per slide
   const takeaway = takeaways[0];
   const takeawayText = typeof takeaway.text === 'string' 
     ? takeaway.text 
     : JSON.stringify(takeaway.text);
 
   return (
-    <Card className="w-full h-full flex items-center p-6 bg-white">
+    <div className="flex items-center p-6 bg-white min-h-[280px] h-full">
       <div className="w-full max-w-2xl mx-auto">
         <KeyTakeaway 
           text={takeawayText} 
@@ -32,7 +31,7 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
           type={takeaway.type || 'default'} 
         />
       </div>
-    </Card>
+    </div>
   );
 };
 

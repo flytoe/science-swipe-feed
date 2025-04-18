@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -60,19 +59,13 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 h-[600px]"
+      className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
-      <Carousel className="w-full h-full" setApi={(api) => {
-        // Use the setApi prop instead of onValueChange
-        api?.on("select", () => {
-          const selectedIndex = api.selectedScrollSnap();
-          setActiveIndex(selectedIndex);
-        });
-      }}>
-        <CarouselContent className="h-full">
+      <Carousel className="w-full">
+        <CarouselContent>
           {/* Hero Slide */}
-          <CarouselItem className="h-full min-h-[280px]">
+          <CarouselItem className="min-h-[280px]">
             <HeroSlide
               title={displayTitle}
               imageSrc={imageSrc}
@@ -85,18 +78,18 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           {/* Individual Takeaway Slides */}
           {formattedTakeaways && formattedTakeaways.length > 0 ? (
             formattedTakeaways.map((takeaway, idx) => (
-              <CarouselItem key={`takeaway-${idx}`} className="h-full min-h-[280px]">
+              <CarouselItem key={`takeaway-${idx}`} className="min-h-[280px]">
                 <TakeawaysSlide takeaways={[takeaway]} />
               </CarouselItem>
             ))
           ) : (
-            <CarouselItem className="h-full min-h-[280px]">
+            <CarouselItem className="min-h-[280px]">
               <TakeawaysSlide takeaways={[]} />
             </CarouselItem>
           )}
           
           {/* Detail Slide */}
-          <CarouselItem className="h-full min-h-[280px]">
+          <CarouselItem className="min-h-[280px]">
             <DetailSlide
               title={displayTitle}
               title_org={paper.title_org}
@@ -106,32 +99,30 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           </CarouselItem>
         </CarouselContent>
         
-        <CarouselPrevious className="left-2" />
-        <CarouselNext className="right-2" />
+        <CarouselPrevious className="left-2 z-30" />
+        <CarouselNext className="right-2 z-30" />
         
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
           <CarouselDots className="flex gap-1" />
         </div>
       </Carousel>
 
-      {/* Mind Blow button (visible only on the hero slide) */}
-      {activeIndex === 0 && (
-        <div className="absolute bottom-16 right-6 z-10">
-          <MindBlowButton 
-            hasMindBlown={hasMindBlown}
-            count={count}
-            isTopPaper={isTopPaper}
-            isLoading={isLoading}
-            onClick={toggleMindBlow}
-            size="lg"
-            showCount={true}
-            className="shadow-md"
-          />
-        </div>
-      )}
+      {/* Mind Blow button - Positioned relative to current slide */}
+      <div className="absolute bottom-16 right-6 z-40">
+        <MindBlowButton 
+          hasMindBlown={hasMindBlown}
+          count={count}
+          isTopPaper={isTopPaper}
+          isLoading={isLoading}
+          onClick={toggleMindBlow}
+          size="lg"
+          showCount={true}
+          className="shadow-md"
+        />
+      </div>
 
-      {/* Regenerate button overlay */}
-      <div className="absolute top-2 right-2 z-10">
+      {/* Regenerate button - Always visible */}
+      <div className="absolute top-4 right-4 z-40">
         <RegenerateImageButton 
           paper={paperWithData}
           onRegenerationStart={() => setIsRegenerating(true)}
@@ -144,7 +135,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       
       {/* Loading overlay */}
       {isRegenerating && (
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-20">
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="text-white text-sm">Regenerating...</div>
         </div>
       )}
