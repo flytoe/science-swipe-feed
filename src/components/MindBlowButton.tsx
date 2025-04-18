@@ -176,7 +176,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           variant={variant}
           size={size}
           disabled={isLoading}
-          className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black border-none' : ''}`}
+          className={`relative group ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
           ref={buttonRef}
         >
           <motion.span
@@ -194,9 +194,13 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           >
             {getEmoji()}
             {showCount && count > 0 && (
-              <span className="ml-1 text-sm font-bold">
-                {count}
-              </span>
+              <motion.span
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="ml-1 text-sm font-bold"
+              >
+                +{count}
+              </motion.span>
             )}
           </motion.span>
           

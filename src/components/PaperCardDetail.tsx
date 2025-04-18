@@ -79,12 +79,19 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               mindBlowCount={mindBlowCount}
               creator={creator}
               isFirstSlide={currentSlide === 0}
+              activeIndex={currentSlide}
             />
           </CarouselItem>
           
-          <CarouselItem className="h-full">
-            <TakeawaysSlide takeaways={takeaways} />
-          </CarouselItem>
+          {takeaways.map((takeaway, index) => (
+            <CarouselItem key={index} className="h-full">
+              <TakeawaysSlide 
+                takeaways={[takeaway]} 
+                currentIndex={index}
+                totalTakeaways={takeaways.length}
+              />
+            </CarouselItem>
+          ))}
           
           <CarouselItem className="h-full">
             <DetailSlide

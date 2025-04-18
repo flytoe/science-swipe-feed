@@ -6,9 +6,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 
 interface AbstractSectionProps {
   abstract_org?: string;
+  isWhiteText?: boolean;
 }
 
-const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
+const AbstractSection: React.FC<AbstractSectionProps> = ({ 
+  abstract_org,
+  isWhiteText = false
+}) => {
   const [isAbstractOpen, setIsAbstractOpen] = React.useState(false);
   
   // Process abstract_org to remove "arXiv:..." prefix
@@ -39,9 +43,13 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
 
   if (!abstract_org) return null;
 
+  const textColorClass = isWhiteText ? 'text-white' : 'text-gray-700';
+  const textColorClassSecondary = isWhiteText ? 'text-white/80' : 'text-gray-600';
+  const buttonColorClass = isWhiteText ? 'text-white/80 hover:text-white' : 'text-blue-600 hover:text-blue-800';
+
   return (
-    <div className="mt-4 border-t border-gray-200 pt-4">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">Abstract</h3>
+    <div className={`mt-4 border-t border-white/20 pt-4`}>
+      <h3 className={`text-sm font-medium ${textColorClass} mb-2`}>Abstract</h3>
       <Collapsible 
         open={isAbstractOpen} 
         onOpenChange={setIsAbstractOpen}
@@ -49,14 +57,14 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
       >
         {!isAbstractOpen ? (
           <div className="flex flex-col space-y-1">
-            <p className="text-sm text-gray-600">{shortAbstract}</p>
+            <p className={`text-sm ${textColorClassSecondary}`}>{shortAbstract}</p>
             
             {cleanAbstract.length > 120 && (
               <CollapsibleTrigger asChild onClick={handleReadMore}>
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="self-start -ml-2 text-blue-600 hover:text-blue-800"
+                  className={`self-start -ml-2 ${buttonColorClass}`}
                 >
                   <span className="flex items-center gap-1">Read more <ChevronRight size={14} /></span>
                 </Button>
@@ -66,13 +74,13 @@ const AbstractSection: React.FC<AbstractSectionProps> = ({ abstract_org }) => {
         ) : null}
         
         <CollapsibleContent>
-          <p className="text-sm text-gray-600">{cleanAbstract}</p>
+          <p className={`text-sm ${textColorClassSecondary}`}>{cleanAbstract}</p>
           {cleanAbstract.length > 120 && (
             <CollapsibleTrigger asChild onClick={handleReadLess}>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="self-start -ml-2 mt-2 text-blue-600 hover:text-blue-800"
+                className={`self-start -ml-2 mt-2 ${buttonColorClass}`}
               >
                 <span className="flex items-center gap-1">Read less <ChevronDown size={14} /></span>
               </Button>

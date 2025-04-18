@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { ExternalLink } from 'lucide-react';
 import AbstractSection from '../paper-content/AbstractSection';
 import OriginalTitleSection from '../paper-content/OriginalTitleSection';
+import { Badge } from '../ui/badge';
 
 interface DetailSlideProps {
   title: string;
@@ -45,8 +46,14 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
           </div>
         )}
         
+        <div className="mb-4">
+          <Badge variant="outline" className="bg-white/10 text-white border-white/20">
+            Details
+          </Badge>
+        </div>
+
         <OriginalTitleSection title={title} title_org={title_org} />
-        <AbstractSection abstract_org={abstract_org} />
+        <AbstractSection abstract_org={abstract_org} isWhiteText />
         
         {doi && (
           <div className="pt-4">
