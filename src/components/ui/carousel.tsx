@@ -280,7 +280,7 @@ const CarouselDots = React.forwardRef<
     return (
       <div 
         ref={ref} 
-        className={cn("flex gap-2", className)} 
+        className={cn("flex gap-3", className)} 
         {...props}
       >
         {Array.from({ length: api.scrollSnapList().length }).map((_, index) => (
@@ -291,7 +291,7 @@ const CarouselDots = React.forwardRef<
             aria-label={`Go to slide ${index + 1}`}
           >
             <div className={cn(
-              "w-2 h-2 rounded-full transition-colors",
+              "w-1.5 h-1.5 rounded-full transition-colors",
               index === selectedIndex 
                 ? "bg-white" 
                 : "bg-white/40 hover:bg-white/60"

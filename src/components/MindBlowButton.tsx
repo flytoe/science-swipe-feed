@@ -56,7 +56,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     setIsHolding(true);
     controls.start({
-      scale: [1, 1.5],
+      scale: [1, 2],
       transition: { duration: 1.5, ease: "easeInOut" }
     });
 
@@ -158,7 +158,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const getEmoji = () => {
     if (hasMindBlown) return "🤯";
     if (isWowed) return "😮";
-    return "😐";
+    return "😮";
   };
 
   return (
@@ -171,6 +171,13 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         onTouchEnd={handleMouseUp}
         onMouseLeave={handleMouseUp}
         className="touch-none select-none"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: isHolding ? 100 : 1
+        }}
       >
         <Button 
           variant={variant}

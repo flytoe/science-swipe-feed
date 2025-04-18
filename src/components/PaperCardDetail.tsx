@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormattedTakeaway } from '../utils/takeawayParser';
@@ -46,14 +47,13 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       transition={{ duration: 0.3 }}
     >
       <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className={`absolute inset-0 transition-all duration-500 ${
-            isTransitioning ? 'blur-lg' : 'blur-none'
-          }`}
+        <div
+          className="absolute inset-0 transition-[filter] duration-300"
           style={{
             backgroundImage: `url(${imageSrc})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
+            filter: isTransitioning ? 'blur(8px)' : 'none'
           }}
         />
       </div>

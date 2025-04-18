@@ -42,16 +42,9 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
         </div>
       )}
       
-      {/* Image source indicator */}
-      {imageSourceType === 'generated' || imageSourceType === 'runware' ? (
-        <div className="absolute bottom-2 right-2 bg-black/50 text-xs text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">
-          AI Generated
-        </div>
-      ) : null}
-      
-      {/* Regenerate button - now using our enhanced RegenerateImageButton */}
+      {/* Regenerate button - positioned at the top */}
       {paper && (
-        <div className="absolute top-2 right-2 z-40">
+        <div className="absolute top-3 right-3 z-50">
           <RegenerateImageButton 
             paper={paper}
             onRegenerationComplete={onRegenerateComplete}
@@ -61,6 +54,13 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
           />
         </div>
       )}
+      
+      {/* Image source indicator */}
+      {imageSourceType === 'generated' || imageSourceType === 'runware' ? (
+        <div className="absolute bottom-2 right-2 bg-black/50 text-xs text-white/70 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          AI Generated
+        </div>
+      ) : null}
     </div>
   );
 };

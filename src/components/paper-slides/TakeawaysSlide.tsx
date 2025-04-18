@@ -31,7 +31,7 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
   return (
     <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">
       <div className="w-full max-w-2xl mx-auto">
-        <div className="mb-4">
+        <div className="mb-6">
           <Badge variant="outline" className="bg-white/10 text-white border-white/20">
             Key Insight {currentIndex + 1}/{totalTakeaways}
           </Badge>
