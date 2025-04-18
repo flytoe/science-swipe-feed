@@ -13,6 +13,8 @@ import {
 import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
+import MindBlowButton from './MindBlowButton';
+import { useMindBlow } from '../hooks/use-mind-blow';
 
 interface FeedItemProps {
   paper: Paper;
@@ -33,6 +35,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     formattedTakeaways,
     paper: paperWithData
   } = usePaperData(paper);
+
+  const { isLoading, hasMindBlown, count, toggle } = useMindBlow(paper.doi);
 
   const handleCarouselChange = (api: any) => {
     if (api) {
@@ -56,7 +60,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           alt={displayTitle}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
       </div>
 
       <div className="relative z-10">
@@ -89,12 +92,23 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 title_org={paper.title_org}
                 abstract_org={paper.abstract_org}
                 doi={paper.doi}
+                creator={paper.creator}
               />
             </CarouselItem>
           </CarouselContent>
           
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+          <div className="absolute bottom-4 w-full flex justify-between items-center px-6">
             <CarouselDots className="flex gap-1" />
+            <MindBlowButton
+              hasMindBlown={hasMindBlown}
+              count={count}
+              isTopPaper={false}
+              isLoading={isLoading}
+              onClick={toggle}
+              size="sm"
+              variant="ghost"
+              className="text-white bg-black/40 hover:bg-black/60 backdrop-blur-sm"
+            />
           </div>
         </Carousel>
       </div>
