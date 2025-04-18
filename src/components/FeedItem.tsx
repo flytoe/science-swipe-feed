@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -62,7 +63,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
-      <Carousel className="w-full">
+      <Carousel className="w-full" onValueChange={handleCarouselChange}>
         <CarouselContent>
           {/* Hero Slide */}
           <CarouselItem className="min-h-[280px]">
@@ -99,15 +100,15 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           </CarouselItem>
         </CarouselContent>
         
-        <CarouselPrevious className="left-2 z-30" />
-        <CarouselNext className="right-2 z-30" />
+        <CarouselPrevious className="left-2 z-10" />
+        <CarouselNext className="right-2 z-10" />
         
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
           <CarouselDots className="flex gap-1" />
         </div>
       </Carousel>
 
-      {/* Mind Blow button - Positioned relative to current slide */}
+      {/* Mind Blow button - Fixed position relative to item */}
       <div className="absolute bottom-16 right-6 z-40">
         <MindBlowButton 
           hasMindBlown={hasMindBlown}

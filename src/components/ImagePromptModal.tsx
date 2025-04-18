@@ -52,7 +52,7 @@ const ImagePromptModal: React.FC<ImagePromptModalProps> = ({
       setIsLoading(true);
       onRegenerationStart?.();
       
-      // Call the regenerateImage function from imageGenerationService
+      // Call the regenerateImage function with the new prompt
       const imageUrl = await regenerateImage(paper, prompt);
       
       if (!imageUrl) {

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Card } from '../ui/card';
 import { FormattedTakeaway } from '../../utils/takeawayParser';
 import KeyTakeaway from '../KeyTakeaway';
 

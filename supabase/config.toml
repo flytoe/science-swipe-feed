@@ -4,3 +4,5 @@ project_id = "kwtwhgfcfqgpfjimioiy"
 [functions.generate-image]
 verify_jwt = false
 
+[functions.generate-image-v2]
+verify_jwt = false

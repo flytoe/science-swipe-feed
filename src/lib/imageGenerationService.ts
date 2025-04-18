@@ -54,7 +54,7 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     const paperId = paper.id;
     
     // Call the edge function to generate an image
-    const response = await fetch('/api/generate-image', {
+    const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image-v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,10 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
       body: JSON.stringify({
         prompt: prompt,
         paperId: paperId,
-        databaseSource
+        databaseSource,
+        width: 1024,
+        height: 768,
+        shouldStorePrompt: true
       }),
     });
     
@@ -112,11 +115,8 @@ export const regenerateImage = async (
     console.log('Regenerating image for paper:', paperId);
     console.log('Using prompt:', promptToUse);
     
-    // The edge function will handle storing the prompt in the database,
-    // so we don't need a separate database call here
-    
-    // Call the edge function to generate the new image
-    const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image', {
+    // Call the new edge function to generate the new image
+    const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image-v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -126,7 +126,8 @@ export const regenerateImage = async (
         paperId: paperId,
         databaseSource,
         width: 1024,
-        height: 768
+        height: 768,
+        shouldStorePrompt: !!newPrompt // Only store prompt if it's a new one
       }),
     });
     

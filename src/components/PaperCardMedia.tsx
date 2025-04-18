@@ -51,7 +51,7 @@ const PaperCardMedia: React.FC<PaperCardMediaProps> = ({
       
       {/* Regenerate button - now using our enhanced RegenerateImageButton */}
       {paper && (
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 z-40">
           <RegenerateImageButton 
             paper={paper}
             onRegenerationComplete={onRegenerateComplete}
