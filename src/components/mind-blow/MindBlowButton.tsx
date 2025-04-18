@@ -202,7 +202,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
               scale: [1, 1.4, 1],
               rotate: [0, -10, 10, -10, 0]
             } : {}}
-            className={isHolding ? 'animate-wiggle' : ''}
+            transition={{ duration: 0.3 }}
           >
             <span className="inline-flex items-center">
               🤯
