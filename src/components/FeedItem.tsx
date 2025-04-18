@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -36,7 +35,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     paper: paperWithData
   } = usePaperData(paper);
 
-  const { isLoading, hasMindBlown, count, toggle } = useMindBlow(paper.doi);
+  const { isLoading, hasMindBlown, count, toggleMindBlow: toggle } = useMindBlow(paper.doi);
 
   const handleCarouselChange = (api: any) => {
     if (api) {
@@ -64,8 +63,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
 
       <div className="relative z-10">
         <Carousel className="w-full" setApi={handleCarouselChange}>
-          <CarouselContent>
-            <CarouselItem>
+          <CarouselContent className="-ml-0">
+            <CarouselItem className="pl-0">
               <HeroSlide
                 title={displayTitle}
                 imageSrc={imageSrc}
@@ -76,17 +75,17 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
             
             {formattedTakeaways && formattedTakeaways.length > 0 ? (
               formattedTakeaways.map((takeaway, idx) => (
-                <CarouselItem key={`takeaway-${idx}`}>
+                <CarouselItem key={`takeaway-${idx}`} className="pl-0">
                   <TakeawaysSlide takeaways={[takeaway]} />
                 </CarouselItem>
               ))
             ) : (
-              <CarouselItem>
+              <CarouselItem className="pl-0">
                 <TakeawaysSlide takeaways={[]} />
               </CarouselItem>
             )}
             
-            <CarouselItem>
+            <CarouselItem className="pl-0">
               <DetailSlide
                 title={displayTitle}
                 title_org={paper.title_org}

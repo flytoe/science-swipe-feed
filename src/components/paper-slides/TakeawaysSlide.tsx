@@ -35,4 +35,3 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({ takeaways }) => {
 };
 
 export default TakeawaysSlide;
-
