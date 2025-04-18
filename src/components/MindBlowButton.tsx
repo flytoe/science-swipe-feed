@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { Textarea } from './ui/textarea';
 import { X } from 'lucide-react';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
@@ -12,7 +11,7 @@ interface MindBlowButtonProps {
   isTopPaper: boolean;
   isLoading: boolean;
   onClick: (reason?: string) => void;
-  size?: 'sm' | 'default' | 'lg' | 'icon';
+  size?: 'sm' | 'default' | 'lg | 'icon';
   showCount?: boolean;
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
@@ -41,13 +40,62 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const [showOverlay, setShowOverlay] = useState(false);
   const [reason, setReason] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isHolding, setIsHolding] = useState(false);
+  const [isWowed, setIsWowed] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const holdTimeoutRef = useRef<NodeJS.Timeout>();
+  const controls = useAnimation();
   
-  // Use the mind blow tracker
   const { increment } = useMindBlowTracker();
+
+  // Handle mousedown to start the hold animation
+  const handleMouseDown = () => {
+    if (hasMindBlown) return; // Prevent animation if already mind-blown
+    
+    setIsHolding(true);
+    controls.start({
+      scale: [1, 1.5],
+      transition: { duration: 1.5, ease: "easeInOut" }
+    });
+
+    // Set timeout for the mind-blow transformation
+    holdTimeoutRef.current = setTimeout(() => {
+      setIsHolding(false);
+      setIsWowed(false);
+      onClick();
+      increment();
+      setShowOverlay(true);
+      controls.start({ scale: 1 });
+    }, 1500);
+  };
+
+  // Handle mouse up to cancel the hold animation
+  const handleMouseUp = () => {
+    if (hasMindBlown) return;
+    
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current);
+    }
+    
+    if (isHolding) {
+      setIsHolding(false);
+      setIsWowed(true);
+      controls.start({ scale: 1 });
+      onClick(); // Trigger normal wow reaction
+    }
+  };
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (holdTimeoutRef.current) {
+        clearTimeout(holdTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle click outside overlay to close it
   useEffect(() => {
@@ -78,20 +126,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [reason, selectedTags]);
-
-  const handleClick = () => {
-    if (!hasMindBlown) {
-      // If not mind-blown yet, trigger mind-blown immediately
-      onClick();
-      // Track the mind-blow
-      increment();
-      // Then show overlay for notes
-      setShowOverlay(true);
-    } else {
-      // If already mind-blown, just show the overlay for potential note addition
-      setShowOverlay(true);
-    }
-  };
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -126,35 +160,44 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         : [...prev, tag]
     );
   };
-  
+
+  // Get the appropriate emoji based on state
+  const getEmoji = () => {
+    if (hasMindBlown) return "🤯";
+    if (isWowed) return "😮";
+    return "😐";
+  };
+
   return (
     <div className="relative">
       <motion.div
-        whileTap={{ scale: 0.95 }}
+        animate={controls}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="touch-none"
       >
         <Button 
           variant={variant}
           size={size}
-          onClick={handleClick}
           disabled={isLoading}
           className={`relative group ${className} ${hasMindBlown ? 'bg-yellow-500 hover:bg-yellow-600 text-black border-none' : ''}`}
           ref={buttonRef}
         >
           <motion.span
-            initial={{ scale: 1 }}
-            animate={{ 
-              scale: hasMindBlown ? [1, 1.4, 1] : 1,
-              rotate: hasMindBlown ? [0, -10, 10, -10, 0] : 0
-            }}
+            animate={hasMindBlown ? {
+              scale: [1, 1.4, 1],
+              rotate: [0, -10, 10, -10, 0]
+            } : {}}
             transition={{ 
-              duration: hasMindBlown ? 0.5 : 0,
+              duration: 0.5,
               repeat: hasMindBlown ? Infinity : 0,
               repeatType: "reverse",
               repeatDelay: 2
             }}
             className="inline-flex items-center"
           >
-            🤯
+            {getEmoji()}
             {showCount && count > 0 && (
               <span className="ml-1 text-sm font-bold">
                 {count}
