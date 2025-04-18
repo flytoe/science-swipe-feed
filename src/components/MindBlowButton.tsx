@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from './ui/button';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
@@ -11,7 +12,7 @@ interface MindBlowButtonProps {
   isTopPaper: boolean;
   isLoading: boolean;
   onClick: (reason?: string) => void;
-  size?: 'sm' | 'default' | 'lg | 'icon';
+  size?: 'sm' | 'default' | 'lg' | 'icon';
   showCount?: boolean;
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
