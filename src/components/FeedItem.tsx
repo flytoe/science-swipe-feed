@@ -51,8 +51,9 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
-  const handleCarouselChange = (value: string) => {
-    setActiveIndex(parseInt(value));
+  const handleCarouselChange = (api: any) => {
+    const selectedIndex = api?.selectedScrollSnap() || 0;
+    setActiveIndex(selectedIndex);
   };
 
   return (
@@ -63,7 +64,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
-      <Carousel className="w-full" onValueChange={handleCarouselChange}>
+      <Carousel className="w-full" setApi={handleCarouselChange}>
         <CarouselContent>
           {/* Hero Slide */}
           <CarouselItem className="min-h-[280px]">
