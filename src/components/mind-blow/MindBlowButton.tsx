@@ -1,9 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+
+import React, { useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
-import { Sparkles, Zap } from 'lucide-react';
+import MindBlowCore from './MindBlowCore';
+import ParticleSystem from './ParticleSystem';
+import { useMindBlowAnimation } from '@/hooks/use-mind-blow-animation';
 
 interface MindBlowButtonProps {
   hasMindBlown: boolean;
@@ -31,15 +33,19 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const [showOverlay, setShowOverlay] = useState(false);
   const [reason, setReason] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isHolding, setIsHolding] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const holdTimeoutRef = useRef<NodeJS.Timeout>();
-  const controls = useAnimation();
-  const lastTapTime = useRef<number>(0);
+  const { increment } = useMindBlowTracker();
   
-  const { increment, triggerBurst } = useMindBlowTracker();
+  const {
+    particles,
+    scale,
+    isHolding,
+    handleTap,
+    startHolding,
+    stopHolding
+  } = useMindBlowAnimation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,115 +59,34 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (holdTimeoutRef.current) {
-        clearTimeout(holdTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
     
-    const now = Date.now();
-    if (now - lastTapTime.current < 300) return;
-    lastTapTime.current = now;
-    
-    // Create a single floating mind-blow emoji
-    setParticles([{
-      id: `particle-${Date.now()}`,
-      emoji: '🤯',
-      x: 0,  // Center horizontally
-      y: -100,  // Float upward
-      rotation: Math.random() * 20 - 10  // Slight random rotation
-    }]);
-    
-    setTimeout(() => setParticles([]), 1000);
-    
-    setTapCount(prev => prev + 1);
-    increment();
-    
-    if (tapCount >= 2) {
-      onClick();
-      setTapCount(0);
-    }
-  };
-
-  const [scale, setScale] = useState(1);
-  const [particles, setParticles] = useState<Array<{ id: string, emoji: string, x: number, y: number, rotation: number }>>([]);
-  const scaleInterval = useRef<NodeJS.Timeout>();
-  
-  useEffect(() => {
-    return () => {
-      if (holdTimeoutRef.current) {
-        clearTimeout(holdTimeoutRef.current);
-      }
-      if (scaleInterval.current) {
-        clearInterval(scaleInterval.current);
-      }
-    };
-  }, []);
-
-  const createParticles = () => {
-    // Only create explosion particles if scale is large enough (held long enough)
-    if (scale >= 2) {
-      const newParticles = [];
-      const emojis = ['🤯', '✨', '💡'];
-      const particleCount = 24; // Increased for bigger explosion
-
-      for (let i = 0; i < particleCount; i++) {
-        const angle = (i / particleCount) * Math.PI * 2;
-        const distance = 300; // Increased spread
-        const x = Math.cos(angle) * distance;
-        const y = Math.sin(angle) * distance;
-        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
-        
-        newParticles.push({
-          id: `particle-${Date.now()}-${i}`,
-          emoji,
-          x,
-          y,
-          rotation: Math.random() * 360
-        });
-      }
+    if (handleTap()) {
+      setTapCount(prev => prev + 1);
+      increment();
       
-      setParticles(newParticles);
-      setTimeout(() => setParticles([]), 1000);
+      if (tapCount >= 2) {
+        onClick();
+        setTapCount(0);
+      }
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
-    
-    setIsHolding(true);
-    setScale(1);
-    
-    // Start growing while holding
-    scaleInterval.current = setInterval(() => {
-      setScale(prev => Math.min(prev + 0.5, 4));
-    }, 100);
+    startHolding();
   };
 
   const handleMouseUp = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     
-    if (holdTimeoutRef.current) {
-      clearTimeout(holdTimeoutRef.current);
-    }
-    if (scaleInterval.current) {
-      clearInterval(scaleInterval.current);
-    }
-    
-    if (isHolding) {
-      setIsHolding(false);
-      setScale(1);
-      createParticles();
+    if (stopHolding()) {
       onClick();
     } else {
-      handleTap(e);
+      handleInteraction(e);
     }
   };
 
@@ -190,71 +115,24 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         onTouchStart={handleMouseDown}
         onTouchEnd={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onClick={handleTap}
+        onClick={handleInteraction}
         className="touch-none select-none"
       >
-        <Button 
+        <MindBlowCore
+          hasMindBlown={hasMindBlown}
+          count={count}
+          showCount={showCount}
+          scale={scale}
+          isHolding={isHolding}
+          isLoading={isLoading}
+          className={className}
           variant={variant}
           size={size}
-          disabled={isLoading}
-          className={`relative group ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
-          ref={buttonRef}
-        >
-          <motion.div
-            className={`relative ${isHolding ? 'animate-wiggle' : ''}`}
-            style={{ 
-              transform: `scale(${scale})`,
-              transformOrigin: 'center center'
-            }}
-            animate={hasMindBlown ? {
-              scale: [1, 1.4, 1],
-              rotate: [0, -10, 10, -10, 0]
-            } : {}}
-            transition={{ duration: 0.3 }}
-          >
-            <span className="inline-flex items-center">
-              🤯
-              {showCount && count > 0 && (
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.5, x: -10 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  className="ml-1 text-sm font-bold"
-                >
-                  +{count}
-                </motion.span>
-              )}
-            </span>
-          </motion.div>
-        </Button>
+          buttonRef={buttonRef}
+        />
       </motion.div>
 
-      <AnimatePresence>
-        {particles.map(particle => (
-          <motion.div
-            key={particle.id}
-            className="absolute pointer-events-none"
-            initial={{ 
-              x: 0, 
-              y: 0, 
-              opacity: 1, 
-              rotate: 0 
-            }}
-            animate={{ 
-              x: particle.x,
-              y: particle.y,
-              opacity: 0,
-              rotate: particle.rotation 
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ 
-              duration: 1,
-              ease: "easeOut"
-            }}
-          >
-            {particle.emoji}
-          </motion.div>
-        ))}
-      </AnimatePresence>
+      <ParticleSystem particles={particles} />
 
       <AnimatePresence>
         {showOverlay && (
