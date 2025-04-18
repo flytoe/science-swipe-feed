@@ -3,6 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import MindBlowBadge from '../MindBlowBadge';
 import { Badge } from '../ui/badge';
+import RegenerateImageButton from '../RegenerateImageButton';
+import { Paper } from '../../lib/supabase';
 
 interface HeroSlideProps {
   title: string;
@@ -12,6 +14,7 @@ interface HeroSlideProps {
   creator?: string[] | string | null;
   isFirstSlide?: boolean;
   activeIndex?: number;
+  paper?: Paper | null;
 }
 
 const HeroSlide: React.FC<HeroSlideProps> = ({
@@ -21,7 +24,8 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
   mindBlowCount,
   creator,
   isFirstSlide = false,
-  activeIndex = 0
+  activeIndex = 0,
+  paper
 }) => {
   const creatorDisplay = React.useMemo(() => {
     if (!creator || isFirstSlide || activeIndex === 0) return null;
@@ -41,10 +45,18 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
       </div>
 
-      <div className="absolute top-4 left-4 z-10">
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
           {formattedDate}
         </Badge>
+        {paper && (
+          <RegenerateImageButton 
+            paper={paper}
+            variant="outline"
+            size="icon"
+            className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200 hover:bg-white/80"
+          />
+        )}
       </div>
 
       {mindBlowCount && mindBlowCount > 0 && (
