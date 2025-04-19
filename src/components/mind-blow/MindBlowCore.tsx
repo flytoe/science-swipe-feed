@@ -40,7 +40,8 @@ const MindBlowCore = ({
         className={`relative ${isHolding ? 'animate-wiggle' : ''}`}
         style={{ 
           transform: `scale(${scale})`,
-          transformOrigin: 'center center'
+          transformOrigin: 'center center',
+          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.2})` : 'none'
         }}
         animate={hasMindBlown ? {
           scale: [1, 1.4, 1],
