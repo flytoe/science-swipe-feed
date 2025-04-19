@@ -72,6 +72,7 @@ export const useMindBlowAnimation = () => {
     isHolding,
     handleTap,
     startHolding,
-    stopHolding
+    stopHolding,
+    getHoldDuration // Expose the getHoldDuration function
   };
 };

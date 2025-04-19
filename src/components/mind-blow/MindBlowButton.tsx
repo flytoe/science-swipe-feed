@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
@@ -6,6 +5,7 @@ import ReasonOverlay from './ReasonOverlay';
 import MindBlowCore from './MindBlowCore';
 import ParticleSystem from './ParticleSystem';
 import { useMindBlowAnimation } from '@/hooks/use-mind-blow-animation';
+import { useHapticFeedback } from '@/hooks/mind-blow/use-haptic-feedback';
 
 interface MindBlowButtonProps {
   hasMindBlown: boolean;
@@ -45,9 +45,12 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     isHolding,
     handleTap,
     startHolding,
-    stopHolding
+    stopHolding,
+    getHoldDuration
   } = useMindBlowAnimation();
 
+  const { tapVibration, startHoldVibration, explosionVibration } = useHapticFeedback();
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (overlayRef.current && !overlayRef.current.contains(event.target as Node) && 
@@ -65,6 +68,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     if (hasMindBlown) return;
     
     if (handleTap()) {
+      tapVibration();
       setTapCount(prev => prev + 1);
       increment();
       
@@ -78,6 +82,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
+    startHoldVibration();
     startHolding();
   };
 
@@ -85,6 +90,8 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     e.preventDefault();
     
     if (stopHolding()) {
+      const holdDuration = getHoldDuration();
+      explosionVibration(holdDuration);
       onClick();
     } else {
       handleInteraction(e);
