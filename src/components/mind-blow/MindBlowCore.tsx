@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MindBlowCoreProps {
   hasMindBlown: boolean;
   count: number;
   showCount: boolean;
   scale: number;
+  translateY: number;
   isHolding: boolean;
   isLoading: boolean;
   className?: string;
@@ -20,6 +23,7 @@ const MindBlowCore = ({
   count,
   showCount,
   scale,
+  translateY,
   isHolding,
   isLoading,
   className = '',
@@ -27,14 +31,22 @@ const MindBlowCore = ({
   size = 'default',
   buttonRef
 }: MindBlowCoreProps) => {
+  const isMobile = useIsMobile();
+  
   // Enhanced wiggle animation based on scale
   const wiggleAnimation = isHolding ? {
-    rotate: [0, -5 * scale, 5 * scale, -3 * scale, 3 * scale, 0],
+    rotate: [0, -8 * scale, 8 * scale, -5 * scale, 5 * scale, 0],
     transition: {
-      duration: 0.3,
+      duration: 0.4,
       repeat: Infinity,
       repeatType: "reverse" as const
     }
+  } : {};
+
+  // Single tap animation
+  const tapAnimation = !isHolding ? {
+    scale: [1, 1.4, 1],
+    transition: { duration: 0.3 }
   } : {};
   
   return (
@@ -42,21 +54,17 @@ const MindBlowCore = ({
       variant={variant}
       size={size}
       disabled={isLoading}
-      className={`relative group ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
+      className={`relative group touch-none ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
       ref={buttonRef}
     >
       <motion.div
         className="relative z-50"
         style={{ 
-          transform: `scale(${scale})`,
+          transform: `scale(${scale}) translateY(${translateY}px)`,
           transformOrigin: 'center center',
           filter: isHolding ? `brightness(${1 + (scale - 1) * 0.4}) drop-shadow(0 0 ${scale * 3}px rgba(255,255,255,0.8))` : 'none'
         }}
-        animate={hasMindBlown ? {
-          scale: [1, 1.4, 1],
-          rotate: [0, -10, 10, -10, 0]
-        } : wiggleAnimation}
-        transition={{ duration: 0.3 }}
+        animate={hasMindBlown ? tapAnimation : wiggleAnimation}
       >
         <span className="inline-flex items-center">
           🤯

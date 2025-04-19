@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link2 } from 'lucide-react';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from './ui/tooltip';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from './ui/popover';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface KeyTakeawayProps {
   text: string;
@@ -20,6 +20,8 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
   type = 'default',
 }) => {
   const isWhyItMatters = type === 'why_it_matters';
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className={`rounded-lg p-4 w-full ${
@@ -33,16 +35,22 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
           <p className="text-base leading-relaxed">
             {text}
             {citation && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger className="inline-flex text-white/60 hover:text-white ml-1">
+              <Popover open={isOpen} onOpenChange={setIsOpen}>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="inline-flex text-white/60 hover:text-white ml-1 focus:outline-none"
+                    onClick={() => isMobile && setIsOpen(true)}
+                  >
                     <Link2 size={14} />
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[280px] z-50">
-                    <p className="text-sm">{citation}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="top" 
+                  className="max-w-[280px] z-50 bg-gray-800 text-white border-gray-700"
+                >
+                  <p className="text-sm">{citation}</p>
+                </PopoverContent>
+              </Popover>
             )}
           </p>
         </div>
