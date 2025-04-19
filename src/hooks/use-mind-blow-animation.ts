@@ -8,7 +8,7 @@ export const useMindBlowAnimation = () => {
   const isLongPress = useRef(false);
   const longPressTimeout = useRef<NodeJS.Timeout>();
   const { particles, createParticles } = useParticleSystem();
-  const { scale, isHolding, startScaling, stopScaling, getHoldDuration } = useScaleAnimation();
+  const { scale, translateY, isHolding, startScaling, stopScaling, getHoldDuration } = useScaleAnimation();
 
   useEffect(() => {
     return () => {
@@ -68,6 +68,7 @@ export const useMindBlowAnimation = () => {
   return {
     particles,
     scale,
+    translateY,
     isHolding,
     handleTap,
     startHolding,

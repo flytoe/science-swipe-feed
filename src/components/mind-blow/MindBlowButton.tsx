@@ -41,6 +41,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const {
     particles,
     scale,
+    translateY,
     isHolding,
     handleTap,
     startHolding,
@@ -123,6 +124,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
           count={count}
           showCount={showCount}
           scale={scale}
+          translateY={translateY}
           isHolding={isHolding}
           isLoading={isLoading}
           className={className}

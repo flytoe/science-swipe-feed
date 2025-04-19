@@ -23,6 +23,12 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleCitationClick = () => {
+    if (isMobile) {
+      setIsOpen(!isOpen);
+    }
+  };
+
   return (
     <div className={`rounded-lg p-4 w-full ${
       isWhyItMatters 
@@ -39,7 +45,7 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
                 <PopoverTrigger asChild>
                   <button 
                     className="inline-flex text-white/60 hover:text-white ml-1 focus:outline-none"
-                    onClick={() => isMobile && setIsOpen(true)}
+                    onClick={handleCitationClick}
                   >
                     <Link2 size={14} />
                   </button>
