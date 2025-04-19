@@ -19,9 +19,12 @@ export const useScaleAnimation = () => {
       if (holdDuration >= maxHoldTime) {
         clearInterval(scaleInterval.current);
       } else {
-        setScale(prev => Math.min(prev + 0.15, 4));
+        // More dynamic scale increase based on hold duration
+        const baseScale = 1 + (holdDuration / 1000) * 0.6; // Slower initial growth
+        const pulseAmount = Math.sin(holdDuration / 100) * 0.1; // Add subtle pulse
+        setScale(prev => Math.min(baseScale + pulseAmount, 2.5));
       }
-    }, 50);
+    }, 16); // Smoother 60fps animation
   };
 
   const stopScaling = () => {
@@ -40,3 +43,4 @@ export const useScaleAnimation = () => {
     getHoldDuration: () => Math.min(Date.now() - holdStartTime.current, 5000),
   };
 };
+
