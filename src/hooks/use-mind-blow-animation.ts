@@ -25,13 +25,16 @@ export const useMindBlowAnimation = () => {
       const x = Math.cos(angle) * distance;
       const y = Math.sin(angle) * distance;
       const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+      const rotation = Math.random() * 360;
+      const size = 1 + Math.random() * 1.5; // varying sizes
       
       newParticles.push({
         id: `particle-${Date.now()}-${i}`,
         emoji,
         x,
         y,
-        rotation: Math.random() * 360
+        rotation,
+        size
       });
     }
     
@@ -40,10 +43,15 @@ export const useMindBlowAnimation = () => {
   };
 
   const createExplosion = () => {
-    const scaleLevel = Math.floor(scale);
-    const particleCount = Math.min(12 + (scaleLevel * 8), 48);
-    const distance = 200 + (scaleLevel * 50);
-    const emojis = ['🤯', '✨', '💡', '🔥', '⚡️', '💫'].slice(0, 2 + scaleLevel);
+    const scaleLevel = Math.max(1, Math.floor(scale));
+    const particleCount = Math.min(16 + (scaleLevel * 12), 64); // More particles based on scale
+    const distance = 200 + (scaleLevel * 80); // Larger burst distance based on scale
+    
+    // More emoji variety with higher scale levels
+    const baseEmojis = ['🤯', '✨', '💡'];
+    const extraEmojis = ['🔥', '⚡️', '💫', '🌟', '🚀', '💥'];
+    const selectedExtraEmojis = extraEmojis.slice(0, Math.min(scaleLevel, extraEmojis.length));
+    const emojis = [...baseEmojis, ...selectedExtraEmojis];
     
     createParticles(particleCount, distance, emojis);
   };
@@ -53,7 +61,7 @@ export const useMindBlowAnimation = () => {
     if (now - lastTapTime.current < 300) return false;
     lastTapTime.current = now;
     
-    createParticles(3, 100, ['🤯']);
+    createParticles(5, 120, ['🤯', '✨']); // Slightly more impressive tap effect
     return true;
   };
 
@@ -61,9 +69,10 @@ export const useMindBlowAnimation = () => {
     setIsHolding(true);
     setScale(1);
     
+    // Faster scaling rate for more immediate feedback
     scaleInterval.current = setInterval(() => {
-      setScale(prev => Math.min(prev + 0.8, 4));
-    }, 100);
+      setScale(prev => Math.min(prev + 0.12, 4));
+    }, 50); // Shorter interval for faster scaling
   };
 
   const stopHolding = () => {
@@ -73,8 +82,9 @@ export const useMindBlowAnimation = () => {
     
     if (isHolding) {
       setIsHolding(false);
-      setScale(1);
       createExplosion();
+      // Reset scale after a slight delay to make the explosion more visible
+      setTimeout(() => setScale(1), 100);
       return true;
     }
     return false;

@@ -8,6 +8,7 @@ export interface Particle {
   x: number;
   y: number;
   rotation: number;
+  size?: number;
 }
 
 interface ParticleSystemProps {
@@ -25,7 +26,8 @@ const ParticleSystem = ({ particles }: ParticleSystemProps) => {
             x: 0, 
             y: 0, 
             opacity: 1, 
-            rotate: 0 
+            rotate: 0,
+            scale: particle.size || 1
           }}
           animate={{ 
             x: particle.x,

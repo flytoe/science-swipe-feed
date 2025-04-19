@@ -30,12 +30,12 @@ const KeyTakeaway: React.FC<KeyTakeawayProps> = ({
     >
       <div className="flex gap-3">
         <div className="flex-1">
-          <p className="text-base leading-relaxed inline-flex items-center gap-2">
+          <p className="text-base leading-relaxed">
             {text}
             {citation && (
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger className="inline-flex text-white/60 hover:text-white">
+                  <TooltipTrigger className="inline-flex text-white/60 hover:text-white ml-1">
                     <Link2 size={14} />
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-[280px] z-50">

@@ -1,6 +1,6 @@
 
-import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
 import MindBlowCore from './MindBlowCore';

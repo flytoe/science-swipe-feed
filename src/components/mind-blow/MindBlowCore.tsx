@@ -28,6 +28,16 @@ const MindBlowCore = ({
   size = 'default',
   buttonRef
 }: MindBlowCoreProps) => {
+  // Create a more pronounced wiggle animation
+  const wiggleAnimation = isHolding ? {
+    rotate: [0, -3, 3, -2, 2, 0],
+    transition: {
+      duration: 0.5,
+      repeat: Infinity,
+      repeatType: "reverse" as const
+    }
+  } : {};
+  
   return (
     <Button 
       variant={variant}
@@ -37,16 +47,16 @@ const MindBlowCore = ({
       ref={buttonRef}
     >
       <motion.div
-        className={`relative ${isHolding ? 'animate-wiggle' : ''}`}
+        className="relative"
         style={{ 
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
-          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.2})` : 'none'
+          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.4}) drop-shadow(0 0 ${scale * 2}px rgba(255,255,255,0.8))` : 'none'
         }}
         animate={hasMindBlown ? {
           scale: [1, 1.4, 1],
           rotate: [0, -10, 10, -10, 0]
-        } : {}}
+        } : wiggleAnimation}
         transition={{ duration: 0.3 }}
       >
         <span className="inline-flex items-center">
