@@ -35,9 +35,9 @@ const MindBlowCore = ({
   
   // Enhanced wiggle animation based on scale
   const wiggleAnimation = isHolding ? {
-    rotate: [0, -8 * scale, 8 * scale, -5 * scale, 5 * scale, 0],
+    rotate: [0, -10 * scale, 10 * scale, -6 * scale, 6 * scale, 0],
     transition: {
-      duration: 0.4,
+      duration: 0.5,
       repeat: Infinity,
       repeatType: "reverse" as const
     }
@@ -45,7 +45,7 @@ const MindBlowCore = ({
 
   // Single tap animation
   const tapAnimation = !isHolding ? {
-    scale: [1, 1.4, 1],
+    scale: [1, 1.6, 1],
     transition: { duration: 0.3 }
   } : {};
   
@@ -61,8 +61,8 @@ const MindBlowCore = ({
         className="relative z-50"
         style={{ 
           transform: `scale(${scale}) translateY(${translateY}px)`,
-          transformOrigin: 'center center',
-          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.4}) drop-shadow(0 0 ${scale * 3}px rgba(255,255,255,0.8))` : 'none'
+          transformOrigin: 'center 60%', // Adjusted origin for more natural growth
+          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.5}) drop-shadow(0 0 ${scale * 4}px rgba(255,255,255,0.9))` : 'none'
         }}
         animate={hasMindBlown ? tapAnimation : wiggleAnimation}
       >

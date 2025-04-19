@@ -21,14 +21,14 @@ export const useScaleAnimation = () => {
       if (holdDuration >= maxHoldTime) {
         clearInterval(scaleInterval.current);
       } else {
-        // More dynamic scale increase based on hold duration
-        const baseScale = 1 + (holdDuration / 1000) * 1.2; // Faster growth
-        const pulseAmount = Math.sin(holdDuration / 100) * 0.15; // Stronger pulse
-        setScale(prev => Math.min(baseScale + pulseAmount, 3.5));
+        // Enhanced growth rate with more dramatic scaling
+        const baseScale = 1 + (holdDuration / 1000) * 1.8; // Faster initial growth
+        const pulseAmount = Math.sin(holdDuration / 80) * 0.2; // Stronger and faster pulse
+        setScale(prev => Math.min(baseScale + pulseAmount, 4)); // Increased max scale
         
-        // Move emoji upward as it grows
-        const baseTranslate = -30 * (baseScale - 1); // Move up more as it scales
-        setTranslateY(baseTranslate);
+        // More pronounced upward movement
+        const baseTranslate = -50 * (baseScale - 1); // Move up more dramatically as it scales
+        setTranslateY(baseTranslate + Math.sin(holdDuration / 100) * 10); // Add subtle floating effect
       }
     }, 16); // Smooth 60fps animation
   };
@@ -39,7 +39,7 @@ export const useScaleAnimation = () => {
     }
     setIsHolding(false);
     setTranslateY(0); // Reset position
-    setTimeout(() => setScale(1), 100);
+    setTimeout(() => setScale(1), 100); // Slight delay before resetting scale for smoother animation
   };
 
   return {
