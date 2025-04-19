@@ -28,11 +28,11 @@ const MindBlowCore = ({
   size = 'default',
   buttonRef
 }: MindBlowCoreProps) => {
-  // Create a more pronounced wiggle animation
+  // Enhanced wiggle animation based on scale
   const wiggleAnimation = isHolding ? {
-    rotate: [0, -3, 3, -2, 2, 0],
+    rotate: [0, -5 * scale, 5 * scale, -3 * scale, 3 * scale, 0],
     transition: {
-      duration: 0.5,
+      duration: 0.3,
       repeat: Infinity,
       repeatType: "reverse" as const
     }
@@ -47,11 +47,11 @@ const MindBlowCore = ({
       ref={buttonRef}
     >
       <motion.div
-        className="relative"
+        className="relative z-50"
         style={{ 
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
-          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.4}) drop-shadow(0 0 ${scale * 2}px rgba(255,255,255,0.8))` : 'none'
+          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.4}) drop-shadow(0 0 ${scale * 3}px rgba(255,255,255,0.8))` : 'none'
         }}
         animate={hasMindBlown ? {
           scale: [1, 1.4, 1],
