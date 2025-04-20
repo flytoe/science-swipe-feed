@@ -2,22 +2,37 @@
 import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
 import { useHapticFeedback } from '@/hooks/mind-blow/use-haptic-feedback';
 
 const HapticFeedbackTester = () => {
-  const { tapVibration, startHoldVibration, explosionVibration } = useHapticFeedback();
+  const { tapVibration, startHoldVibration, explosionVibration, testHapticFeedback } = useHapticFeedback();
   const [isEnabled, setIsEnabled] = useState(true);
 
   const handleTapTest = () => {
-    if (isEnabled) tapVibration();
+    if (isEnabled) {
+      console.log('Triggering tap vibration');
+      tapVibration();
+    }
   };
 
   const handleHoldTest = () => {
-    if (isEnabled) startHoldVibration();
+    if (isEnabled) {
+      console.log('Triggering hold vibration');
+      startHoldVibration();
+    }
   };
 
   const handleExplosionTest = () => {
-    if (isEnabled) explosionVibration(2000); // Simulate a 2-second hold
+    if (isEnabled) {
+      console.log('Triggering explosion vibration');
+      explosionVibration(2000); // Simulate a 2-second hold
+    }
+  };
+
+  const handleToggle = (checked: boolean) => {
+    setIsEnabled(checked);
+    console.log('Haptic feedback enabled:', checked);
   };
 
   return (
@@ -32,43 +47,44 @@ const HapticFeedbackTester = () => {
           <Switch
             id="haptic-enabled"
             checked={isEnabled}
-            onCheckedChange={setIsEnabled}
-            className="ios-switch"
+            onCheckedChange={handleToggle}
           />
         </div>
 
         {isEnabled && (
-          <>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="tap-test" className="text-sm">Test Tap Feedback</Label>
-              <Switch
-                id="tap-test"
-                onCheckedChange={handleTapTest}
-                checked={false}
-                className="ios-switch"
-              />
-            </div>
+          <div className="space-y-3 mt-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left font-normal" 
+              onClick={handleTapTest}
+            >
+              Test Tap Feedback
+            </Button>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="hold-test" className="text-sm">Test Hold Feedback</Label>
-              <Switch
-                id="hold-test"
-                onCheckedChange={handleHoldTest}
-                checked={false}
-                className="ios-switch"
-              />
-            </div>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left font-normal" 
+              onClick={handleHoldTest}
+            >
+              Test Hold Feedback
+            </Button>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="explosion-test" className="text-sm">Test Explosion Feedback</Label>
-              <Switch
-                id="explosion-test"
-                onCheckedChange={handleExplosionTest}
-                checked={false}
-                className="ios-switch"
-              />
-            </div>
-          </>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left font-normal" 
+              onClick={handleExplosionTest}
+            >
+              Test Explosion Feedback
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="w-full justify-start text-left font-normal" 
+              onClick={testHapticFeedback}
+            >
+              Test All Feedback
+            </Button>
+          </div>
         )}
       </div>
     </div>
