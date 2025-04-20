@@ -1,5 +1,5 @@
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 export const useHapticFeedback = () => {
   const switchesRef = useRef<HTMLDivElement | null>(null);
@@ -11,13 +11,14 @@ export const useHapticFeedback = () => {
     const container = document.createElement('div');
     container.style.cssText = `
       position: fixed;
-      opacity: 0;
-      pointer-events: none;
-      visibility: hidden;
-      z-index: -1;
+      top: 0;
+      left: -200px;
       width: 0;
       height: 0;
+      pointer-events: none;
+      opacity: 0;
       overflow: hidden;
+      z-index: -1000;
     `;
     document.body.appendChild(container);
     switchesRef.current = container;
@@ -27,12 +28,13 @@ export const useHapticFeedback = () => {
     const switches = Array.from({ length: poolSize }, () => {
       const input = document.createElement('input');
       input.type = 'checkbox';
+      input.className = 'haptic-switch';
       input.setAttribute('role', 'switch');
       input.setAttribute('aria-checked', 'false');
       input.setAttribute('aria-label', 'Haptic feedback switch');
       input.style.cssText = `
-        appearance: none;
         -webkit-appearance: none;
+        appearance: none;
         margin: 0;
         outline: none;
         border: none;
@@ -40,7 +42,6 @@ export const useHapticFeedback = () => {
         height: 31px;
         border-radius: 16px;
         background-color: rgba(120,120,128,0.16);
-        transition: background-color 0.2s;
         position: relative;
       `;
       container.appendChild(input);
@@ -57,14 +58,39 @@ export const useHapticFeedback = () => {
 
   const toggleSwitch = async (switchEl: HTMLInputElement, duration: number = 20) => {
     return new Promise<void>(resolve => {
+      if (!switchEl) {
+        console.warn('Switch element is null or undefined');
+        resolve();
+        return;
+      }
+      
       switchEl.checked = true;
       switchEl.setAttribute('aria-checked', 'true');
+      
       setTimeout(() => {
         switchEl.checked = false;
         switchEl.setAttribute('aria-checked', 'false');
         resolve();
       }, duration);
     });
+  };
+  
+  // Function to manually test haptic feedback
+  const testHapticFeedback = async () => {
+    console.log('Testing haptic feedback...');
+    
+    if (isVibrationSupported) {
+      console.log('Using vibration API');
+      navigator.vibrate([20, 40, 20]);
+    } else if (switchPoolRef.current.length > 0) {
+      console.log('Using switch pool fallback');
+      for (let i = 0; i < Math.min(3, switchPoolRef.current.length); i++) {
+        await toggleSwitch(switchPoolRef.current[i], 30);
+        await new Promise(resolve => setTimeout(resolve, 40));
+      }
+    } else {
+      console.log('No haptic feedback method available');
+    }
   };
 
   const tapVibration = async () => {
@@ -106,5 +132,6 @@ export const useHapticFeedback = () => {
     tapVibration,
     startHoldVibration,
     explosionVibration,
+    testHapticFeedback
   };
 };

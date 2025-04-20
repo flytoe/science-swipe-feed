@@ -29,18 +29,19 @@ export const useScaleAnimation = () => {
         clearInterval(scaleInterval.current);
       } else {
         const progress = Math.min(holdDuration / maxHoldTime, 1);
-        // Smoother growth curve
-        const baseScale = 1.1 + (progress * 0.9); // More gradual scaling
-        const pulseAmount = Math.sin(holdDuration / 150) * 0.05; // Gentler pulse
+        
+        // Enhanced growth curve - more noticeable but still smooth
+        const baseScale = 1.1 + (progress * 1.4); // More dramatic scaling
+        const pulseAmount = Math.sin(holdDuration / 150) * 0.08; // Stronger pulse
         
         setScale(baseScale + pulseAmount);
         
-        // Smoother floating movement
-        const baseTranslate = -10 * progress;
-        const floatAmount = Math.sin(holdDuration / 200) * 3;
+        // Enhanced floating movement
+        const baseTranslate = -15 * progress;
+        const floatAmount = Math.sin(holdDuration / 200) * 4;
         setTranslateY(baseTranslate + floatAmount);
       }
-    }, 33); // ~30fps for better performance
+    }, 16); // ~60fps for smoother animation
   };
 
   const stopScaling = () => {

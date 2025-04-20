@@ -33,7 +33,7 @@ const MindBlowCore = ({
 }: MindBlowCoreProps) => {
   const isMobile = useIsMobile();
   
-  // Simpler wiggle animation with scale consideration
+  // Define animation configurations based on state
   const wiggleAnimation = isHolding ? {
     rotate: [-2, 2, -1, 1, 0],
     transition: {

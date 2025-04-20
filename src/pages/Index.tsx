@@ -23,6 +23,7 @@ import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatabaseToggle from '@/components/DatabaseToggle';
+import HapticFeedbackTester from '@/components/HapticFeedbackTester';
 import { useDatabaseToggle, getIdFieldName } from '@/hooks/use-database-toggle';
 
 const Index: React.FC = () => {
@@ -258,6 +259,7 @@ const Index: React.FC = () => {
             </DialogHeader>
             <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
               <DatabaseToggle />
+              <HapticFeedbackTester />
             </div>
             <div className="p-4 border-t border-gray-200">
               <Button 
