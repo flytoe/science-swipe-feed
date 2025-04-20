@@ -15,10 +15,12 @@ const NativeSwitch = React.forwardRef<HTMLInputElement, NativeSwitchProps>(
     
     // Forward the ref
     useEffect(() => {
-      if (ref && typeof ref === 'function') {
-        if (inputRef.current) ref(inputRef.current);
-      } else if (ref) {
-        ref.current = inputRef.current;
+      if (ref) {
+        if (typeof ref === 'function') {
+          if (inputRef.current) ref(inputRef.current);
+        } else if ('current' in ref) {
+          ref.current = inputRef.current;
+        }
       }
     }, [ref]);
 
