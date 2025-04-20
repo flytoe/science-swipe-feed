@@ -35,7 +35,7 @@ const MindBlowCore = ({
   
   // Enhanced wiggle animation based on scale
   const wiggleAnimation = isHolding ? {
-    rotate: [0, -10 * scale, 10 * scale, -6 * scale, 6 * scale, 0],
+    rotate: [-3 * scale, 3 * scale, -2 * scale, 2 * scale, 0],
     transition: {
       duration: 0.5,
       repeat: Infinity,
@@ -45,7 +45,7 @@ const MindBlowCore = ({
 
   // Single tap animation
   const tapAnimation = !isHolding ? {
-    scale: [1, 1.6, 1],
+    scale: [1, 1.2, 1],
     transition: { duration: 0.3 }
   } : {};
   
@@ -54,15 +54,16 @@ const MindBlowCore = ({
       variant={variant}
       size={size}
       disabled={isLoading}
-      className={`relative group touch-none ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
+      className={`relative group touch-none select-none ${className} ${hasMindBlown ? 'bg-white hover:bg-white/90 text-black border-none' : ''}`}
       ref={buttonRef}
     >
       <motion.div
         className="relative z-50"
         style={{ 
           transform: `scale(${scale}) translateY(${translateY}px)`,
-          transformOrigin: 'center 60%', // Adjusted origin for more natural growth
-          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.5}) drop-shadow(0 0 ${scale * 4}px rgba(255,255,255,0.9))` : 'none'
+          transformOrigin: 'center 60%',
+          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.3}) drop-shadow(0 0 ${scale * 5}px rgba(255,255,255,0.8))` : 'none',
+          transition: 'transform 0.1s ease-out, filter 0.2s ease-out'
         }}
         animate={hasMindBlown ? tapAnimation : wiggleAnimation}
       >

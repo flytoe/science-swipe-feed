@@ -7,12 +7,19 @@ export const useScaleAnimation = () => {
   const [isHolding, setIsHolding] = useState(false);
   const scaleInterval = useRef<NodeJS.Timeout>();
   const holdStartTime = useRef<number>(0);
-
+  
   const startScaling = () => {
     setIsHolding(true);
     holdStartTime.current = Date.now();
-    setScale(1);
-    setTranslateY(0);
+    
+    // Clear any existing interval
+    if (scaleInterval.current) {
+      clearInterval(scaleInterval.current);
+    }
+    
+    // Start with initial scale bump
+    setScale(1.2);
+    setTranslateY(-5);
     
     scaleInterval.current = setInterval(() => {
       const holdDuration = Date.now() - holdStartTime.current;
@@ -21,14 +28,20 @@ export const useScaleAnimation = () => {
       if (holdDuration >= maxHoldTime) {
         clearInterval(scaleInterval.current);
       } else {
+        const progress = Math.min(holdDuration / maxHoldTime, 1);
         // Enhanced growth rate with more dramatic scaling
-        const baseScale = 1 + (holdDuration / 1000) * 1.8; // Faster initial growth
-        const pulseAmount = Math.sin(holdDuration / 80) * 0.2; // Stronger and faster pulse
-        setScale(prev => Math.min(baseScale + pulseAmount, 4)); // Increased max scale
+        const baseScale = 1.2 + (progress * 1.8); // Faster initial growth
+        const pulseAmount = Math.sin(holdDuration / 80) * 0.15; // Stronger and faster pulse
         
-        // More pronounced upward movement
-        const baseTranslate = -50 * (baseScale - 1); // Move up more dramatically as it scales
-        setTranslateY(baseTranslate + Math.sin(holdDuration / 100) * 10); // Add subtle floating effect
+        setScale(prev => {
+          const newScale = Math.min(baseScale + pulseAmount, 3);
+          return newScale;
+        });
+        
+        // More pronounced floating movement
+        const baseTranslate = -20 * progress;
+        const floatAmount = Math.sin(holdDuration / 100) * 5;
+        setTranslateY(baseTranslate + floatAmount);
       }
     }, 16); // Smooth 60fps animation
   };
@@ -38,8 +51,16 @@ export const useScaleAnimation = () => {
       clearInterval(scaleInterval.current);
     }
     setIsHolding(false);
-    setTranslateY(0); // Reset position
-    setTimeout(() => setScale(1), 100); // Slight delay before resetting scale for smoother animation
+    
+    // Animate back to normal with a slight bounce
+    setScale(1.1);
+    setTranslateY(-2);
+    
+    // Reset to normal after a short delay
+    setTimeout(() => {
+      setScale(1);
+      setTranslateY(0);
+    }, 100);
   };
 
   return {
@@ -48,6 +69,6 @@ export const useScaleAnimation = () => {
     isHolding,
     startScaling,
     stopScaling,
-    getHoldDuration: () => Math.min(Date.now() - holdStartTime.current, 5000),
+    getHoldDuration: () => Date.now() - holdStartTime.current,
   };
 };
