@@ -46,10 +46,20 @@ const HapticFeedbackTester = () => {
     console.log('Haptic feedback enabled:', checked);
   };
 
+  // Direct vibration test bypassing React events
+  const directVibrationTest = () => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      console.log('Direct vibration test');
+      navigator.vibrate(100);
+    } else {
+      console.warn('Vibration not supported on this device');
+    }
+  };
+
   const testAllFeedback = () => {
     if (!isEnabled) return;
     
-    // Execute all vibration patterns in sequence
+    // Execute all vibration patterns in sequence with delays
     setTimeout(() => {
       console.log('Testing tap vibration');
       tapVibration();
@@ -124,6 +134,18 @@ const HapticFeedbackTester = () => {
               >
                 Test All Feedback
               </Button>
+              
+              <Button 
+                onClick={directVibrationTest} 
+                className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Direct Vibration Test (100ms)
+              </Button>
+              
+              <div className="text-xs text-gray-500 mt-2">
+                <p>Note: Haptic feedback may only work on mobile devices with physical vibration motors.</p>
+                <p>For iOS devices, you may need to use Safari and be in PWA mode.</p>
+              </div>
             </div>
           </>
         )}

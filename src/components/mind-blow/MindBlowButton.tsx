@@ -52,6 +52,14 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
 
   const { tapVibration, startHoldVibration, explosionVibration } = useHapticFeedback();
   
+  // Direct vibration trigger for native interactions
+  const triggerDirectVibration = (pattern: number | number[]) => {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      console.log('MindBlowButton: Direct vibration triggered with pattern:', pattern);
+      navigator.vibrate(pattern);
+    }
+  };
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (overlayRef.current && !overlayRef.current.contains(event.target as Node) && 
@@ -69,9 +77,9 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     if (hasMindBlown) return;
     
     if (handleTap()) {
-      // Trigger haptic feedback on tap
-      console.log('Mind Blow Button: Triggering tap vibration');
-      tapVibration();
+      // Trigger direct haptic feedback on tap
+      console.log('Mind Blow Button: Triggering direct tap vibration');
+      triggerDirectVibration(15);
       
       setTapCount(prev => prev + 1);
       increment();
@@ -81,29 +89,34 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         setTapCount(0);
       }
     }
-  }, [hasMindBlown, handleTap, tapVibration, increment, tapCount, onClick]);
+  }, [hasMindBlown, handleTap, increment, tapCount, onClick]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
     
-    console.log('Mind Blow Button: Start holding, triggering hold vibration');
-    startHoldVibration();
+    console.log('Mind Blow Button: Start holding, triggering direct hold vibration');
+    triggerDirectVibration([20, 30, 20]);
     startHolding();
-  }, [hasMindBlown, startHoldVibration, startHolding]);
+  }, [hasMindBlown, startHolding]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     
     if (stopHolding()) {
       const holdDuration = getHoldDuration();
-      console.log('Mind Blow Button: Stop holding, triggering explosion vibration', holdDuration);
-      explosionVibration(holdDuration);
+      console.log('Mind Blow Button: Stop holding, triggering direct explosion vibration', holdDuration);
+      
+      // Calculate a vibration pattern based on hold duration
+      const intensity = Math.min(holdDuration / 1000, 1);
+      const baseVibration = Math.floor(50 * intensity) || 50;
+      triggerDirectVibration([baseVibration, 20, Math.floor(baseVibration * 0.7), 10]);
+      
       onClick();
     } else {
       handleInteraction(e);
     }
-  }, [stopHolding, getHoldDuration, explosionVibration, onClick, handleInteraction]);
+  }, [stopHolding, getHoldDuration, onClick, handleInteraction]);
 
   const handleSubmit = () => {
     let finalReason = reason.trim();

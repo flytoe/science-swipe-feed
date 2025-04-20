@@ -24,17 +24,38 @@ const NativeSwitch = React.forwardRef<HTMLInputElement, NativeSwitchProps>(
       }
     }, [ref]);
 
+    // Setup direct vibration on click
+    useEffect(() => {
+      const input = inputRef.current;
+      if (!input || !enableHaptics) return;
+      
+      const triggerHaptic = () => {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          console.log('Native switch triggering vibration');
+          navigator.vibrate(15); // Short vibration on toggle
+        }
+      };
+      
+      input.addEventListener('click', triggerHaptic);
+      
+      return () => {
+        input.removeEventListener('click', triggerHaptic);
+      };
+    }, [enableHaptics]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onCheckedChange) {
+        onCheckedChange(e.target.checked);
+      }
+    };
+
     return (
       <input
         type="checkbox"
         role="switch"
         ref={inputRef}
         checked={checked}
-        onChange={(e) => {
-          if (onCheckedChange) {
-            onCheckedChange(e.target.checked);
-          }
-        }}
+        onChange={handleChange}
         className={cn(
           "relative w-[51px] h-[31px] bg-gray-200 checked:bg-primary rounded-full appearance-none cursor-pointer",
           "before:content-[''] before:absolute before:top-[2px] before:left-[2px]",
