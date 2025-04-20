@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
@@ -63,12 +64,15 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
     
     if (handleTap()) {
+      // Trigger haptic feedback on tap
+      console.log('Mind Blow Button: Triggering tap vibration');
       tapVibration();
+      
       setTapCount(prev => prev + 1);
       increment();
       
@@ -77,26 +81,29 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
         setTapCount(0);
       }
     }
-  };
+  }, [hasMindBlown, handleTap, tapVibration, increment, tapCount, onClick]);
 
-  const handleMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
+    
+    console.log('Mind Blow Button: Start holding, triggering hold vibration');
     startHoldVibration();
     startHolding();
-  };
+  }, [hasMindBlown, startHoldVibration, startHolding]);
 
-  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleMouseUp = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     
     if (stopHolding()) {
       const holdDuration = getHoldDuration();
+      console.log('Mind Blow Button: Stop holding, triggering explosion vibration', holdDuration);
       explosionVibration(holdDuration);
       onClick();
     } else {
       handleInteraction(e);
     }
-  };
+  }, [stopHolding, getHoldDuration, explosionVibration, onClick, handleInteraction]);
 
   const handleSubmit = () => {
     let finalReason = reason.trim();

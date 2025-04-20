@@ -5,18 +5,21 @@ export const useHapticFeedback = () => {
   const isVibrationSupported = typeof navigator !== 'undefined' && 'vibrate' in navigator;
 
   const tapVibration = useCallback(() => {
+    console.log('Executing tap vibration');
     if (isVibrationSupported) {
       navigator.vibrate(10);
     }
   }, [isVibrationSupported]);
 
   const startHoldVibration = useCallback(() => {
+    console.log('Executing hold vibration');
     if (isVibrationSupported) {
       navigator.vibrate([20, 30, 10]);
     }
   }, [isVibrationSupported]);
 
   const explosionVibration = useCallback((holdDuration: number) => {
+    console.log('Executing explosion vibration with duration:', holdDuration);
     if (isVibrationSupported) {
       const intensity = Math.min(holdDuration / 1000, 1);
       const baseVibration = Math.floor(50 * intensity);
@@ -27,6 +30,7 @@ export const useHapticFeedback = () => {
   return {
     tapVibration,
     startHoldVibration,
-    explosionVibration
+    explosionVibration,
+    isVibrationSupported
   };
 };
