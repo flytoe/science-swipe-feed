@@ -12,38 +12,35 @@ export const useScaleAnimation = () => {
     setIsHolding(true);
     holdStartTime.current = Date.now();
     
-    // Clear any existing interval
     if (scaleInterval.current) {
       clearInterval(scaleInterval.current);
     }
     
-    // Start with initial scale bump
-    setScale(1.2);
-    setTranslateY(-5);
+    // Initial scale animation
+    setScale(1.1);
+    setTranslateY(-2);
     
+    // Slower interval for smoother growth
     scaleInterval.current = setInterval(() => {
       const holdDuration = Date.now() - holdStartTime.current;
-      const maxHoldTime = 5000; // 5 seconds max
+      const maxHoldTime = 3000; // 3 seconds max for faster feedback
       
       if (holdDuration >= maxHoldTime) {
         clearInterval(scaleInterval.current);
       } else {
         const progress = Math.min(holdDuration / maxHoldTime, 1);
-        // Enhanced growth rate with more dramatic scaling
-        const baseScale = 1.2 + (progress * 1.8); // Faster initial growth
-        const pulseAmount = Math.sin(holdDuration / 80) * 0.15; // Stronger and faster pulse
+        // Smoother growth curve
+        const baseScale = 1.1 + (progress * 0.9); // More gradual scaling
+        const pulseAmount = Math.sin(holdDuration / 150) * 0.05; // Gentler pulse
         
-        setScale(prev => {
-          const newScale = Math.min(baseScale + pulseAmount, 3);
-          return newScale;
-        });
+        setScale(baseScale + pulseAmount);
         
-        // More pronounced floating movement
-        const baseTranslate = -20 * progress;
-        const floatAmount = Math.sin(holdDuration / 100) * 5;
+        // Smoother floating movement
+        const baseTranslate = -10 * progress;
+        const floatAmount = Math.sin(holdDuration / 200) * 3;
         setTranslateY(baseTranslate + floatAmount);
       }
-    }, 16); // Smooth 60fps animation
+    }, 33); // ~30fps for better performance
   };
 
   const stopScaling = () => {
@@ -52,15 +49,9 @@ export const useScaleAnimation = () => {
     }
     setIsHolding(false);
     
-    // Animate back to normal with a slight bounce
-    setScale(1.1);
-    setTranslateY(-2);
-    
-    // Reset to normal after a short delay
-    setTimeout(() => {
-      setScale(1);
-      setTranslateY(0);
-    }, 100);
+    // Quick reset animation
+    setScale(1);
+    setTranslateY(0);
   };
 
   return {

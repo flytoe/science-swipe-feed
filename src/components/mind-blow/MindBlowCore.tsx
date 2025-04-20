@@ -33,11 +33,11 @@ const MindBlowCore = ({
 }: MindBlowCoreProps) => {
   const isMobile = useIsMobile();
   
-  // Enhanced wiggle animation based on scale
+  // Simpler wiggle animation with scale consideration
   const wiggleAnimation = isHolding ? {
-    rotate: [-3 * scale, 3 * scale, -2 * scale, 2 * scale, 0],
+    rotate: [-2, 2, -1, 1, 0],
     transition: {
-      duration: 0.5,
+      duration: 0.3,
       repeat: Infinity,
       repeatType: "reverse" as const
     }
@@ -45,8 +45,8 @@ const MindBlowCore = ({
 
   // Single tap animation
   const tapAnimation = !isHolding ? {
-    scale: [1, 1.2, 1],
-    transition: { duration: 0.3 }
+    scale: [1, 1.1, 1],
+    transition: { duration: 0.2 }
   } : {};
   
   return (
@@ -59,26 +59,28 @@ const MindBlowCore = ({
     >
       <motion.div
         className="relative z-50"
-        style={{ 
-          transform: `scale(${scale}) translateY(${translateY}px)`,
-          transformOrigin: 'center 60%',
-          filter: isHolding ? `brightness(${1 + (scale - 1) * 0.3}) drop-shadow(0 0 ${scale * 5}px rgba(255,255,255,0.8))` : 'none',
-          transition: 'transform 0.1s ease-out, filter 0.2s ease-out'
-        }}
         animate={hasMindBlown ? tapAnimation : wiggleAnimation}
       >
-        <span className="inline-flex items-center">
-          🤯
-          {showCount && count > 0 && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.5, x: -10 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              className="ml-1 text-sm font-bold"
-            >
-              +{count}
-            </motion.span>
-          )}
-        </span>
+        <div
+          style={{ 
+            transform: `scale(${scale}) translateY(${translateY}px)`,
+            transition: 'transform 0.15s ease-out',
+            transformOrigin: 'center bottom',
+          }}
+        >
+          <span className="inline-flex items-center">
+            🤯
+            {showCount && count > 0 && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.5, x: -10 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                className="ml-1 text-sm font-bold"
+              >
+                +{count}
+              </motion.span>
+            )}
+          </span>
+        </div>
       </motion.div>
     </Button>
   );
