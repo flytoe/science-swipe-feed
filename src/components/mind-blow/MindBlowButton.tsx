@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ReasonOverlay from './ReasonOverlay';
@@ -50,13 +50,19 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     getHoldDuration
   } = useMindBlowAnimation();
 
-  const { tapVibration, startHoldVibration, explosionVibration } = useHapticFeedback();
+  const { vibrate } = useHapticFeedback();
   
-  // Direct vibration trigger for native interactions
+  // Direct vibration trigger without going through the hook
   const triggerDirectVibration = (pattern: number | number[]) => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       console.log('MindBlowButton: Direct vibration triggered with pattern:', pattern);
-      navigator.vibrate(pattern);
+      try {
+        navigator.vibrate(pattern);
+      } catch (error) {
+        console.error('Error triggering vibration:', error);
+      }
+    } else {
+      console.warn('Vibration API not supported');
     }
   };
   

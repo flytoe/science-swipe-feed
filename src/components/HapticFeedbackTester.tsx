@@ -6,7 +6,7 @@ import { useHapticFeedback } from '@/hooks/mind-blow/use-haptic-feedback';
 import { Button } from '@/components/ui/button';
 
 const HapticFeedbackTester = () => {
-  const { tapVibration, startHoldVibration, explosionVibration, isVibrationSupported } = useHapticFeedback();
+  const { vibrate, tapVibration, startHoldVibration, explosionVibration, isVibrationSupported } = useHapticFeedback();
   const [isEnabled, setIsEnabled] = useState(true);
   const [tapTest, setTapTest] = useState(false);
   const [holdTest, setHoldTest] = useState(false);
@@ -46,14 +46,15 @@ const HapticFeedbackTester = () => {
     console.log('Haptic feedback enabled:', checked);
   };
 
-  // Direct vibration test bypassing React events
-  const directVibrationTest = () => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      console.log('Direct vibration test');
-      navigator.vibrate(100);
-    } else {
-      console.warn('Vibration not supported on this device');
-    }
+  // Direct vibration test - these are added to mimic the CodePen example
+  const directVibrationTest = (duration: number) => {
+    console.log(`Testing direct vibration for ${duration}ms`);
+    vibrate(duration);
+  };
+
+  const patternVibrationTest = () => {
+    console.log('Testing pattern vibration [100, 50, 200, 50, 100]');
+    vibrate([100, 50, 200, 50, 100]);
   };
 
   const testAllFeedback = () => {
@@ -135,16 +136,38 @@ const HapticFeedbackTester = () => {
                 Test All Feedback
               </Button>
               
-              <Button 
-                onClick={directVibrationTest} 
-                className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Direct Vibration Test (100ms)
-              </Button>
+              {/* Simple Direct Vibration Buttons - Similar to the CodePen example */}
+              <div className="grid grid-cols-2 gap-2 mt-4">
+                <Button 
+                  onClick={() => directVibrationTest(100)} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Vibrate 100ms
+                </Button>
+                <Button 
+                  onClick={() => directVibrationTest(200)} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Vibrate 200ms
+                </Button>
+                <Button 
+                  onClick={() => directVibrationTest(500)} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Vibrate 500ms
+                </Button>
+                <Button 
+                  onClick={patternVibrationTest} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Pattern Vibration
+                </Button>
+              </div>
               
               <div className="text-xs text-gray-500 mt-2">
                 <p>Note: Haptic feedback may only work on mobile devices with physical vibration motors.</p>
                 <p>For iOS devices, you may need to use Safari and be in PWA mode.</p>
+                <p className="font-semibold mt-1">Android Chrome/Safari: Should work directly in browser.</p>
               </div>
             </div>
           </>

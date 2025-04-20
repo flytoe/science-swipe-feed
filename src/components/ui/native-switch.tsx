@@ -18,7 +18,7 @@ const NativeSwitch = React.forwardRef<HTMLInputElement, NativeSwitchProps>(
       if (ref) {
         if (typeof ref === 'function') {
           if (inputRef.current) ref(inputRef.current);
-        } else if ('current' in ref) {
+        } else {
           ref.current = inputRef.current;
         }
       }
@@ -32,7 +32,12 @@ const NativeSwitch = React.forwardRef<HTMLInputElement, NativeSwitchProps>(
       const triggerHaptic = () => {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
           console.log('Native switch triggering vibration');
-          navigator.vibrate(15); // Short vibration on toggle
+          try {
+            // Direct call to the Vibration API
+            navigator.vibrate(15);
+          } catch (error) {
+            console.error('Error triggering vibration:', error);
+          }
         }
       };
       
