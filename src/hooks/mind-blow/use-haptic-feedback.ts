@@ -11,8 +11,8 @@ export const useHapticFeedback = () => {
     const container = document.createElement('div');
     container.style.cssText = `
       position: fixed;
-      top: 0;
-      left: -200px;
+      top: -100vh;
+      left: -100vw;
       width: 0;
       height: 0;
       pointer-events: none;
@@ -56,7 +56,7 @@ export const useHapticFeedback = () => {
     };
   }, []);
 
-  const toggleSwitch = async (switchEl: HTMLInputElement, duration: number = 20) => {
+  const toggleSwitch = async (switchEl: HTMLInputElement) => {
     return new Promise<void>(resolve => {
       if (!switchEl) {
         console.warn('Switch element is null or undefined');
@@ -67,37 +67,21 @@ export const useHapticFeedback = () => {
       switchEl.checked = true;
       switchEl.setAttribute('aria-checked', 'true');
       
+      // Trigger a quick toggle for haptic feedback
       setTimeout(() => {
         switchEl.checked = false;
         switchEl.setAttribute('aria-checked', 'false');
         resolve();
-      }, duration);
+      }, 10);
     });
-  };
-  
-  // Function to manually test haptic feedback
-  const testHapticFeedback = async () => {
-    console.log('Testing haptic feedback...');
-    
-    if (isVibrationSupported) {
-      console.log('Using vibration API');
-      navigator.vibrate([20, 40, 20]);
-    } else if (switchPoolRef.current.length > 0) {
-      console.log('Using switch pool fallback');
-      for (let i = 0; i < Math.min(3, switchPoolRef.current.length); i++) {
-        await toggleSwitch(switchPoolRef.current[i], 30);
-        await new Promise(resolve => setTimeout(resolve, 40));
-      }
-    } else {
-      console.log('No haptic feedback method available');
-    }
   };
 
   const tapVibration = async () => {
     if (isVibrationSupported) {
       navigator.vibrate(10);
     } else if (switchPoolRef.current.length > 0) {
-      await toggleSwitch(switchPoolRef.current[0], 15);
+      const switchEl = switchPoolRef.current[0];
+      await toggleSwitch(switchEl);
     }
   };
 
@@ -105,10 +89,11 @@ export const useHapticFeedback = () => {
     if (isVibrationSupported) {
       navigator.vibrate([20, 30, 10]);
     } else if (switchPoolRef.current.length >= 2) {
-      const [switch1, switch2] = switchPoolRef.current;
-      await toggleSwitch(switch1, 20);
-      await new Promise(resolve => setTimeout(resolve, 30));
-      await toggleSwitch(switch2, 20);
+      const switches = switchPoolRef.current.slice(0, 2);
+      for (const switchEl of switches) {
+        await toggleSwitch(switchEl);
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
     }
   };
 
@@ -122,9 +107,26 @@ export const useHapticFeedback = () => {
       const switches = switchPoolRef.current.slice(0, switchCount);
       
       for (const switchEl of switches) {
-        await toggleSwitch(switchEl, 25);
+        await toggleSwitch(switchEl);
+        await new Promise(resolve => setTimeout(resolve, 15));
+      }
+    }
+  };
+
+  const testHapticFeedback = async () => {
+    console.log('Testing haptic feedback...');
+    
+    if (isVibrationSupported) {
+      console.log('Using vibration API');
+      navigator.vibrate([20, 40, 20]);
+    } else if (switchPoolRef.current.length > 0) {
+      console.log('Using switch pool fallback');
+      for (let i = 0; i < Math.min(3, switchPoolRef.current.length); i++) {
+        await toggleSwitch(switchPoolRef.current[i]);
         await new Promise(resolve => setTimeout(resolve, 20));
       }
+    } else {
+      console.log('No haptic feedback method available');
     }
   };
 
