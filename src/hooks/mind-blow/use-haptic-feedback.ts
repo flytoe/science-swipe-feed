@@ -1,8 +1,19 @@
 
 import { useCallback } from 'react';
 
+/**
+ * IMPORTANT: iOS 18 Haptic Feedback Requirements:
+ * - Only works with real <input type="checkbox"> elements
+ * - Element must be visible (not display:none or visibility:hidden)
+ * - Element cannot be disabled
+ * - Must be triggered by direct user interaction (not JavaScript)
+ * 
+ * Direct programmatic vibration no longer works in iOS Safari.
+ * See MindBlowButton.tsx for implementation of iOS 18 compatible haptics.
+ */
 export const useHapticFeedback = () => {
   // Simple function that directly calls the Vibration API
+  // NOTE: This will not work on iOS 18+ Safari!
   const vibrate = useCallback((pattern: number | number[]) => {
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
       try {

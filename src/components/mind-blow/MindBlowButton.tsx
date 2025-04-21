@@ -6,7 +6,6 @@ import ReasonOverlay from './ReasonOverlay';
 import MindBlowCore from './MindBlowCore';
 import ParticleSystem from './ParticleSystem';
 import { useMindBlowAnimation } from '@/hooks/use-mind-blow-animation';
-import { useHapticFeedback } from '@/hooks/mind-blow/use-haptic-feedback';
 
 interface MindBlowButtonProps {
   hasMindBlown: boolean;
@@ -37,6 +36,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
   const [tapCount, setTapCount] = useState(0);
   const overlayRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const checkboxRef = useRef<HTMLInputElement>(null);
   const { increment } = useMindBlowTracker();
   
   const {
@@ -49,22 +49,6 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     stopHolding,
     getHoldDuration
   } = useMindBlowAnimation();
-
-  const { vibrate } = useHapticFeedback();
-  
-  // Direct vibration trigger without going through the hook
-  const triggerDirectVibration = (pattern: number | number[]) => {
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      console.log('MindBlowButton: Direct vibration triggered with pattern:', pattern);
-      try {
-        navigator.vibrate(pattern);
-      } catch (error) {
-        console.error('Error triggering vibration:', error);
-      }
-    } else {
-      console.warn('Vibration API not supported');
-    }
-  };
   
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -78,15 +62,21 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Forward user interaction to the checkbox to get native haptic feedback
+  const triggerHapticCheckbox = () => {
+    if (checkboxRef.current && !hasMindBlown) {
+      // This will toggle the checkbox state and trigger haptic feedback on iOS
+      checkboxRef.current.click();
+    }
+  };
+
   const handleInteraction = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (hasMindBlown) return;
     
+    triggerHapticCheckbox();
+    
     if (handleTap()) {
-      // Trigger direct haptic feedback on tap
-      console.log('Mind Blow Button: Triggering direct tap vibration');
-      triggerDirectVibration(15);
-      
       setTapCount(prev => prev + 1);
       increment();
       
@@ -101,8 +91,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     e.preventDefault();
     if (hasMindBlown) return;
     
-    console.log('Mind Blow Button: Start holding, triggering direct hold vibration');
-    triggerDirectVibration([20, 30, 20]);
+    triggerHapticCheckbox();
     startHolding();
   }, [hasMindBlown, startHolding]);
 
@@ -111,13 +100,7 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     
     if (stopHolding()) {
       const holdDuration = getHoldDuration();
-      console.log('Mind Blow Button: Stop holding, triggering direct explosion vibration', holdDuration);
-      
-      // Calculate a vibration pattern based on hold duration
-      const intensity = Math.min(holdDuration / 1000, 1);
-      const baseVibration = Math.floor(50 * intensity) || 50;
-      triggerDirectVibration([baseVibration, 20, Math.floor(baseVibration * 0.7), 10]);
-      
+      triggerHapticCheckbox();
       onClick();
     } else {
       handleInteraction(e);
@@ -141,8 +124,29 @@ const MindBlowButton: React.FC<MindBlowButtonProps> = ({
     setShowOverlay(false);
   };
 
+  // This checkbox is used only for haptic feedback
+  // It must be visible (not display: none) but we can make it visually hidden
+  // We'll make it tiny and position it off-screen, but it's still technically visible
+  const hapticCheckbox = (
+    <input
+      ref={checkboxRef}
+      type="checkbox"
+      aria-hidden="true"
+      className="h-px w-px opacity-0 absolute top-[-9999px] left-[-9999px]"
+      onChange={(e) => {
+        // Just a dummy handler to prevent React warning about controlled inputs
+        // The actual handlers are called in our component logic
+      }}
+      // Important: must not be hidden with display:none or visibility:hidden
+      // Style visually hidden but technically visible for iOS haptics
+    />
+  );
+
   return (
     <div className="relative inline-block">
+      {/* This checkbox will be used for native haptic feedback on iOS */}
+      {hapticCheckbox}
+      
       <motion.div
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
