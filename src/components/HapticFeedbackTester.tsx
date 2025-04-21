@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { NativeSwitch } from '@/components/ui/native-switch';
 import { Button } from '@/components/ui/button';
+import { HapticSwitch } from '@/components/ui/haptic-switch';
 
 const HapticFeedbackTester = () => {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -32,10 +32,11 @@ const HapticFeedbackTester = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label htmlFor="haptic-enabled" className="text-sm">Enable Haptics</Label>
-          <NativeSwitch
+          <HapticSwitch
             id="haptic-enabled"
             checked={isEnabled}
             onCheckedChange={handleToggle}
+            enableHaptics={true}
           />
         </div>
 
@@ -44,22 +45,25 @@ const HapticFeedbackTester = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label htmlFor="tap-test" className="text-sm">Test Tap Feedback</Label>
-                <NativeSwitch
+                <HapticSwitch
                   id="tap-test"
+                  enableHaptics={true}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <Label htmlFor="hold-test" className="text-sm">Test Hold Feedback</Label>
-                <NativeSwitch
+                <HapticSwitch
                   id="hold-test"
+                  enableHaptics={true}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <Label htmlFor="explosion-test" className="text-sm">Test Explosion Feedback</Label>
-                <NativeSwitch
+                <HapticSwitch
                   id="explosion-test"
+                  enableHaptics={true}
                 />
               </div>
               
