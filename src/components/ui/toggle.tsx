@@ -117,5 +117,3 @@ export const Toggle = React.forwardRef<HTMLInputElement, ToggleProps>(
     );
   }
 );
-Toggle.displayName = "Toggle";
-export { toggleVariants };
