@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FilterX, SearchIcon, Settings } from 'lucide-react';
+import { FilterX, SearchIcon, Settings, Info, Gift } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,15 @@ const Index: React.FC = () => {
   const [isSubscriptionModal, setIsSubscriptionModal] = useState(false);
   const { shouldShowDonationPrompt, markDonationPromptSeen, resetPromptTimestamp } = useMindBlowTracker();
   
+  const handleShowOnboarding = () => {
+    setShowOnboarding(true);
+  };
+
+  const handleShowDonation = () => {
+    setIsSubscriptionModal(false);
+    setShowDonationModal(true);
+  };
+
   useEffect(() => {
     if (!completedOnboarding && !showOnboarding) {
       setShowOnboarding(true);
@@ -122,7 +131,7 @@ const Index: React.FC = () => {
   const addSamplePaper = async () => {
     try {
       const samplePaper = {
-        id: `sample-${Date.now()}`, // Changed from doi to id
+        id: `sample-${Date.now()}`,
         title_org: 'Sample Paper: Machine Learning in Healthcare',
         abstract_org: 'This sample paper explores the applications of machine learning in modern healthcare, including predictive diagnostics, personalized treatment plans, and medical imaging analysis.',
         score: 4.7,
@@ -204,6 +213,22 @@ const Index: React.FC = () => {
                 variant="ghost" 
                 size="icon" 
                 className="text-gray-600"
+                onClick={handleShowOnboarding}
+              >
+                <Info className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600"
+                onClick={handleShowDonation}
+              >
+                <Gift className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-gray-600"
                 onClick={() => setIsSettingsOpen(true)}
               >
                 <Settings className="h-5 w-5" />
@@ -280,6 +305,12 @@ const Index: React.FC = () => {
         onClose={() => setShowOnboarding(false)} 
       />
 
+      <DonationModal
+        isOpen={showDonationModal}
+        onClose={() => setShowDonationModal(false)}
+        isSubscription={isSubscriptionModal}
+      />
+
       {isLoading ? (
         <div className="max-w-md mx-auto mt-6 px-4 flex justify-center">
           <div className="loading-spinner border-gray-200 border-t-blue-500" />
@@ -320,12 +351,6 @@ const Index: React.FC = () => {
         onClose={handleCloseDonationPrompt}
         onDonate={handleDonate}
         onSubscribe={handleSubscribe}
-      />
-      
-      <DonationModal
-        isOpen={showDonationModal}
-        onClose={handleCloseDonationModal}
-        isSubscription={isSubscriptionModal}
       />
     </motion.div>
   );
