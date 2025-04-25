@@ -103,6 +103,7 @@ export type Database = {
           ai_search_queries: string | null
           ai_summary_done: boolean | null
           category: Json | null
+          claude_refined: boolean
           created_at: string | null
           creator: Json | null
           doi: string | null
@@ -129,6 +130,7 @@ export type Database = {
           ai_search_queries?: string | null
           ai_summary_done?: boolean | null
           category?: Json | null
+          claude_refined?: boolean
           created_at?: string | null
           creator?: Json | null
           doi?: string | null
@@ -155,6 +157,7 @@ export type Database = {
           ai_search_queries?: string | null
           ai_summary_done?: boolean | null
           category?: Json | null
+          claude_refined?: boolean
           created_at?: string | null
           creator?: Json | null
           doi?: string | null

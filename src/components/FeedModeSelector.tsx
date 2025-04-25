@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { useFeedModeStore } from '@/hooks/use-feed-mode';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Label } from '@/components/ui/label';
-import { HapticSwitch } from '@/components/ui/haptic-switch';
+import { Button } from '@/components/ui/button';
 
 const FeedModeSelector: React.FC = () => {
   const { currentMode, setMode } = useFeedModeStore();
@@ -20,23 +18,16 @@ const FeedModeSelector: React.FC = () => {
 
   return (
     <div className="flex flex-col space-y-3 px-1">
-      <div className="flex items-center justify-between space-x-8">
+      <div className="flex items-center justify-between space-x-2">
         {modes.map((mode) => (
-          <div key={mode.value} className="flex flex-col items-center gap-1.5">
-            <Label htmlFor={`mode-${mode.value}`} className="text-xs font-medium cursor-pointer">
-              {mode.label}
-            </Label>
-            <HapticSwitch
-              id={`mode-${mode.value}`}
-              checked={currentMode === mode.value}
-              onCheckedChange={(checked) => {
-                if (checked) handleModeChange(mode.value);
-              }}
-              enableHaptics={true}
-              className="mx-auto"
-              aria-label={`Switch to ${mode.label} mode`}
-            />
-          </div>
+          <Button
+            key={mode.value}
+            variant={currentMode === mode.value ? "default" : "outline"}
+            onClick={() => handleModeChange(mode.value)}
+            className="flex-1 text-sm py-2 h-9"
+          >
+            {mode.label}
+          </Button>
         ))}
       </div>
     </div>
