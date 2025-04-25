@@ -1,19 +1,40 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { type Paper } from '../lib/supabase';
 import FeedItem from './FeedItem';
 import { motion, AnimatePresence } from 'framer-motion';
+import InfiniteScrollTrigger from './InfiniteScrollTrigger';
 
 interface ScrollableFeedProps {
   papers: Paper[];
   isLoading?: boolean;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 const ScrollableFeed: React.FC<ScrollableFeedProps> = ({ 
   papers, 
   isLoading = false
 }) => {
-  if (isLoading) {
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Get only the papers we want to display
+  const visiblePapers = papers.slice(0, displayCount);
+  const hasMore = displayCount < papers.length;
+
+  const loadMore = () => {
+    if (!hasMore || loadingMore) return;
+    
+    setLoadingMore(true);
+    // Simulate network delay for smooth UX
+    setTimeout(() => {
+      setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, papers.length));
+      setLoadingMore(false);
+    }, 500);
+  };
+
+  if (isLoading && papers.length === 0) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-12rem)]">
         <div className="loading-spinner border-gray-200 border-t-blue-500" />
@@ -38,9 +59,18 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
       layout
     >
       <div className="max-w-md mx-auto">
-        {papers.map((paper, index) => (
-          <FeedItem key={paper.doi} paper={paper} index={index} />
-        ))}
+        <AnimatePresence mode="popLayout">
+          {visiblePapers.map((paper, index) => (
+            <FeedItem key={paper.doi} paper={paper} index={index} />
+          ))}
+        </AnimatePresence>
+        
+        {hasMore && (
+          <InfiniteScrollTrigger 
+            onIntersect={loadMore}
+            isLoading={loadingMore}
+          />
+        )}
       </div>
     </motion.div>
   );
