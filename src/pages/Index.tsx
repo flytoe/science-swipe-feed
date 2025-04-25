@@ -55,6 +55,10 @@ const Index: React.FC = () => {
     setShowDonationModal(true);
   };
 
+  const handleToggleDonationPrompt = () => {
+    setShowDonationPrompt(prev => !prev);
+  };
+
   useEffect(() => {
     if (!completedOnboarding && !showOnboarding) {
       setShowOnboarding(true);
@@ -285,6 +289,14 @@ const Index: React.FC = () => {
             <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
               <DatabaseToggle />
               <HapticFeedbackTester />
+              <div className="p-4">
+                <button 
+                  onClick={handleToggleDonationPrompt}
+                  className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+                >
+                  {showDonationPrompt ? 'Hide' : 'Show'} Donation Prompt
+                </button>
+              </div>
             </div>
             <div className="p-4 border-t border-gray-200">
               <Button 
@@ -351,6 +363,7 @@ const Index: React.FC = () => {
         onClose={handleCloseDonationPrompt}
         onDonate={handleDonate}
         onSubscribe={handleSubscribe}
+        delayMs={3000}
       />
     </motion.div>
   );

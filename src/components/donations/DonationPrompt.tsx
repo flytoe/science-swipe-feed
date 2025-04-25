@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 
@@ -8,14 +7,32 @@ interface DonationPromptProps {
   onClose: () => void;
   onDonate: () => void;
   onSubscribe: () => void;
+  delayMs?: number;
 }
 
 const DonationPrompt: React.FC<DonationPromptProps> = ({
   isVisible,
   onClose,
   onDonate,
-  onSubscribe
+  onSubscribe,
+  delayMs = 30000 // 30 seconds default delay
 }) => {
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    if (isVisible) {
+      timeoutId = setTimeout(() => {
+        // The modal will be shown after the delay
+      }, delayMs);
+    }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isVisible, delayMs]);
+
   return (
     <AnimatePresence>
       {isVisible && (
