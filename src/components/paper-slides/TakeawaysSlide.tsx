@@ -33,9 +33,21 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
   return (
     <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">
       <div className="w-full max-w-2xl mx-auto">
-        <div className="mb-6 flex gap-2">
-          <Badge variant="outline" className={`${isWhyItMatters ? 'bg-indigo-500/20 border-indigo-400/30' : 'bg-white/10 border-white/20'} text-white`}>
-            {isWhyItMatters ? 'Why It Matters' : `Research Finding ${currentIndex + 1} of ${totalTakeaways}`}
+        <div className="mb-6">
+          <Badge 
+            variant="outline" 
+            className={`
+              ${isWhyItMatters 
+                ? 'bg-indigo-500/20 border-indigo-400/30' 
+                : 'bg-purple-500/20 border-purple-400/30'
+              } 
+              text-white
+            `}
+          >
+            {isWhyItMatters 
+              ? 'Why It Matters' 
+              : `Research Finding ${currentIndex + 1} of ${totalTakeaways}`
+            }
           </Badge>
         </div>
         <KeyTakeaway 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '../ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -40,7 +41,7 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
     <div className="w-full h-full overflow-y-auto p-6 bg-black/60 backdrop-blur-md">
       <div className="space-y-6">
         <div className="mb-4">
-          <Badge variant="outline" className="bg-indigo-500/20 text-white border-indigo-400/30">
+          <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-800 border-gray-200">
             Matter Overview
           </Badge>
         </div>

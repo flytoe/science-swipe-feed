@@ -9,8 +9,8 @@ import {
   CarouselItem,
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
-import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
+import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -37,6 +37,16 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   const { count: mindBlowCount } = useMindBlow(doi || '');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Filter research findings and why it matters separately
+  const researchFindings = takeaways.filter(t => t.type !== 'why_it_matters');
+  const whyItMatters = takeaways.find(t => t.type === 'why_it_matters');
+  
+  // Reorder takeaways to put why_it_matters at the end
+  const orderedTakeaways = [
+    ...researchFindings,
+    ...(whyItMatters ? [whyItMatters] : [])
+  ];
   
   return (
     <motion.div
@@ -71,6 +81,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
         }}
       >
         <CarouselContent className="h-full">
+          {/* Hero Slide */}
           <CarouselItem className="h-full">
             <HeroSlide
               title={displayTitle}
@@ -83,24 +94,27 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
             />
           </CarouselItem>
           
-          {takeaways.map((takeaway, index) => (
-            <CarouselItem key={index} className="h-full">
-              <TakeawaysSlide 
-                takeaways={[takeaway]} 
-                currentIndex={index}
-                totalTakeaways={takeaways.length}
-              />
-            </CarouselItem>
-          ))}
-          
+          {/* Matter Overview Slide */}
           <CarouselItem className="h-full">
             <DetailSlide
               title={displayTitle}
               title_org={title_org}
               abstract_org={abstract_org}
               doi={doi}
+              creator={creator}
             />
           </CarouselItem>
+          
+          {/* Research Findings and Why It Matters Slides */}
+          {orderedTakeaways.map((takeaway, index) => (
+            <CarouselItem key={index} className="h-full">
+              <TakeawaysSlide 
+                takeaways={[takeaway]} 
+                currentIndex={takeaway.type === 'why_it_matters' ? undefined : index}
+                totalTakeaways={researchFindings.length}
+              />
+            </CarouselItem>
+          ))}
         </CarouselContent>
       </Carousel>
     </motion.div>
