@@ -41,7 +41,7 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
                 ? 'bg-indigo-500/20 border-indigo-400/30' 
                 : 'bg-purple-500/20 border-purple-400/30'
               } 
-              text-white
+              text-white text-base px-3 py-1
             `}
           >
             {isWhyItMatters 

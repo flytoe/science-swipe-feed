@@ -7,6 +7,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselDots
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
 import DetailSlide from './paper-slides/DetailSlide';
@@ -38,16 +39,19 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // Filter research findings and why it matters separately
+  // Separate research findings from why it matters
   const researchFindings = takeaways.filter(t => t.type !== 'why_it_matters');
   const whyItMatters = takeaways.find(t => t.type === 'why_it_matters');
   
-  // Reorder takeaways to put why_it_matters at the end
+  // Create final ordered takeaways array
   const orderedTakeaways = [
     ...researchFindings,
     ...(whyItMatters ? [whyItMatters] : [])
   ];
-  
+
+  // Calculate total slides for dots
+  const totalSlides = 2 + orderedTakeaways.length; // Hero + Matter Overview + Takeaways
+
   return (
     <motion.div
       className="h-full flex flex-col relative"
@@ -69,7 +73,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
       </div>
 
       <Carousel 
-        className="w-full h-full"
+        className="w-full h-full relative"
         setApi={(api) => {
           if (api) {
             api.on('select', () => {
@@ -106,16 +110,27 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           </CarouselItem>
           
           {/* Research Findings and Why It Matters Slides */}
-          {orderedTakeaways.map((takeaway, index) => (
-            <CarouselItem key={index} className="h-full">
-              <TakeawaysSlide 
-                takeaways={[takeaway]} 
-                currentIndex={takeaway.type === 'why_it_matters' ? undefined : index}
-                totalTakeaways={researchFindings.length}
-              />
-            </CarouselItem>
-          ))}
+          {orderedTakeaways.map((takeaway, index) => {
+            const isResearchFinding = takeaway.type !== 'why_it_matters';
+            const findingIndex = isResearchFinding 
+              ? researchFindings.findIndex(t => t === takeaway)
+              : undefined;
+            
+            return (
+              <CarouselItem key={index} className="h-full">
+                <TakeawaysSlide 
+                  takeaways={[takeaway]} 
+                  currentIndex={findingIndex}
+                  totalTakeaways={researchFindings.length}
+                />
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
+
+        <div className="absolute bottom-6 w-full flex justify-center">
+          <CarouselDots className="z-50" />
+        </div>
       </Carousel>
     </motion.div>
   );
