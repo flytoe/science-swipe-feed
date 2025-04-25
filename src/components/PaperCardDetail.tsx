@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import { useDatabaseToggle } from '../hooks/use-database-toggle';
@@ -23,7 +23,7 @@ interface PaperCardDetailProps {
   takeaways: FormattedTakeaway[];
   creator?: string[] | string | null;
   imageSrc: string;
-  onClose: (e?: React.MouseEvent) => void;
+  ai_matter?: string;
 }
 
 const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
@@ -35,24 +35,15 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   takeaways,
   creator,
   imageSrc,
+  ai_matter,
 }) => {
   const { count: mindBlowCount } = useMindBlow(doi || '');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { databaseSource } = useDatabaseToggle();
   
-  // Separate research findings from why it matters
-  const researchFindings = takeaways.filter(t => t.type !== 'why_it_matters');
-  const whyItMatters = takeaways.find(t => t.type === 'why_it_matters');
-  
-  // Create final ordered takeaways array
-  const orderedTakeaways = [
-    ...researchFindings,
-    ...(whyItMatters ? [whyItMatters] : [])
-  ];
-
-  // Calculate total slides for dots
-  const totalSlides = 2 + orderedTakeaways.length; // Hero + Matter Overview + Takeaways
+  // For europe_paper, use takeaways directly as they're already formatted
+  const orderedTakeaways = takeaways;
 
   return (
     <motion.div
@@ -105,10 +96,11 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
             <DetailSlide
               title={displayTitle}
               title_org={title_org}
-              abstract_org={abstract_org}
               doi={doi}
               creator={creator}
-              matter={databaseSource === 'europe_paper' ? abstract_org : undefined}
+              matter={databaseSource === 'europe_paper' ? ai_matter : undefined}
+              showAbstract={databaseSource !== 'europe_paper'}
+              abstract_org={abstract_org}
             />
           </CarouselItem>
           
@@ -116,7 +108,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           {orderedTakeaways.map((takeaway, index) => {
             const isResearchFinding = takeaway.type !== 'why_it_matters';
             const findingIndex = isResearchFinding 
-              ? researchFindings.findIndex(t => t === takeaway)
+              ? orderedTakeaways.filter(t => t.type !== 'why_it_matters').findIndex(t => t === takeaway)
               : undefined;
             
             return (
@@ -124,7 +116,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
                 <TakeawaysSlide 
                   takeaways={[takeaway]} 
                   currentIndex={findingIndex}
-                  totalTakeaways={researchFindings.length}
+                  totalTakeaways={orderedTakeaways.filter(t => t.type !== 'why_it_matters').length}
                 />
               </CarouselItem>
             );

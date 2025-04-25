@@ -13,6 +13,7 @@ interface DetailSlideProps {
   doi?: string;
   creator?: string[] | string | null;
   matter?: string;
+  showAbstract?: boolean;
 }
 
 const DetailSlide: React.FC<DetailSlideProps> = ({
@@ -21,7 +22,8 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
   abstract_org,
   doi,
   creator,
-  matter
+  matter,
+  showAbstract = true,
 }) => {
   // Format the creators for display
   const creatorDisplay = React.useMemo(() => {
@@ -51,6 +53,7 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
           </Badge>
         </div>
 
+        {/* Matter content takes precedence */}
         {matter && (
           <div className="text-white text-lg font-medium mb-6">
             {matter}
@@ -64,7 +67,9 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
         )}
         
         <OriginalTitleSection title={title} title_org={title_org} />
-        <AbstractSection abstract_org={abstract_org} isWhiteText />
+        
+        {/* Only show AbstractSection if showAbstract is true */}
+        {showAbstract && <AbstractSection abstract_org={abstract_org} isWhiteText />}
         
         {doi && (
           <div className="pt-4">
