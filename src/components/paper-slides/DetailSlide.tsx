@@ -40,18 +40,21 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
   return (
     <div className="w-full h-full overflow-y-auto p-6 bg-black/60 backdrop-blur-md">
       <div className="space-y-6">
+        <div className="flex gap-2 mb-4">
+          <Badge variant="outline" className="bg-white/10 text-white border-white/20">
+            Matter Details
+          </Badge>
+          <Badge variant="outline" className="bg-purple-500/20 text-white border-purple-400/30">
+            Original Research
+          </Badge>
+        </div>
+
         {creatorDisplay && (
           <div className="text-white/80 text-sm">
             By {creatorDisplay}
           </div>
         )}
         
-        <div className="mb-4">
-          <Badge variant="outline" className="bg-white/10 text-white border-white/20">
-            Details
-          </Badge>
-        </div>
-
         <OriginalTitleSection title={title} title_org={title_org} />
         <AbstractSection abstract_org={abstract_org} isWhiteText />
         
