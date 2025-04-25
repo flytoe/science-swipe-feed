@@ -146,7 +146,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                     takeaways={formattedTakeaways}
                     creator={paper?.creator}
                     imageSrc={imageSrc}
-                    onClose={handleClose}
+                    ai_matter={paper?.ai_matter}
                   />
                   
                   <div className="mt-4">
@@ -229,7 +229,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
                   takeaways={formattedTakeaways}
                   creator={paper?.creator}
                   imageSrc={imageSrc}
-                  onClose={handleClose}
+                  ai_matter={paper?.ai_matter}
                 />
                 
                 <div className="mt-4">
