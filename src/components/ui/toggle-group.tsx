@@ -69,11 +69,14 @@ const useToggleGroupContext = () => {
   return context
 }
 
+interface ToggleGroupItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  value: string
+  className?: string
+}
+
 const ToggleGroupItem = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentPropsWithoutRef<typeof toggleVariants> & {
-    value: string
-  }
+  ToggleGroupItemProps
 >(({ children, className, value, ...props }, ref) => {
   const { type, value: groupValue, onValueChange } = useToggleGroupContext()
 
