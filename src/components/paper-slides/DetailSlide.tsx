@@ -12,6 +12,7 @@ interface DetailSlideProps {
   abstract_org?: string;
   doi?: string;
   creator?: string[] | string | null;
+  matter?: string;
 }
 
 const DetailSlide: React.FC<DetailSlideProps> = ({
@@ -19,7 +20,8 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
   title_org,
   abstract_org,
   doi,
-  creator
+  creator,
+  matter
 }) => {
   // Format the creators for display
   const creatorDisplay = React.useMemo(() => {
@@ -48,6 +50,12 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
             Matter Overview
           </Badge>
         </div>
+
+        {matter && (
+          <div className="text-white text-lg font-medium mb-6">
+            {matter}
+          </div>
+        )}
 
         {creatorDisplay && (
           <div className="text-white/80 text-sm">

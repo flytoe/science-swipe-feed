@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FormattedTakeaway } from '../utils/takeawayParser';
 import { useMindBlow } from '../hooks/use-mind-blow';
+import { useDatabaseToggle } from '../hooks/use-database-toggle';
 import {
   Carousel,
   CarouselContent,
@@ -38,6 +39,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   const { count: mindBlowCount } = useMindBlow(doi || '');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const { databaseSource } = useDatabaseToggle();
   
   // Separate research findings from why it matters
   const researchFindings = takeaways.filter(t => t.type !== 'why_it_matters');
@@ -84,9 +86,9 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           }
         }}
       >
-        <CarouselContent className="h-full">
+        <CarouselContent className="-ml-0">
           {/* Hero Slide */}
-          <CarouselItem className="h-full">
+          <CarouselItem className="pl-0">
             <HeroSlide
               title={displayTitle}
               imageSrc={imageSrc}
@@ -99,13 +101,14 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
           </CarouselItem>
           
           {/* Matter Overview Slide */}
-          <CarouselItem className="h-full">
+          <CarouselItem className="pl-0">
             <DetailSlide
               title={displayTitle}
               title_org={title_org}
               abstract_org={abstract_org}
               doi={doi}
               creator={creator}
+              matter={databaseSource === 'europe_paper' ? abstract_org : undefined}
             />
           </CarouselItem>
           
@@ -117,7 +120,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               : undefined;
             
             return (
-              <CarouselItem key={index} className="h-full">
+              <CarouselItem key={index} className="pl-0">
                 <TakeawaysSlide 
                   takeaways={[takeaway]} 
                   currentIndex={findingIndex}
