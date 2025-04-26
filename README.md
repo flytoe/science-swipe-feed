@@ -1,69 +1,37 @@
-# Welcome to your Lovable project
 
-## Project info
+# Research Insights
 
-**URL**: https://lovable.dev/projects/3116c334-ab68-4e53-9013-165b994be209
+## About Our Platform
 
-## How can I edit this code?
+Research Insights is a revolutionary platform designed to make scientific research more accessible, engaging, and understandable for everyone. Our mission is to bridge the gap between complex academic papers and curious minds across the globe.
 
-There are several ways of editing your application.
+### What We Do
 
-**Use Lovable**
+🔬 **Intelligent Research Curation**
+- Handpicked scientific papers from diverse fields
+- AI-powered summaries that distill complex research into clear, digestible insights
+- Personalized recommendations based on your interests
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3116c334-ab68-4e53-9013-165b994be209) and start prompting.
+🧠 **Transforming Research Accessibility**
+- Break down complex scientific concepts
+- Provide context and real-world implications of groundbreaking studies
+- Make learning about cutting-edge research effortless and enjoyable
 
-Changes made via Lovable will be committed automatically to this repo.
+### Key Features
 
-**Use your preferred IDE**
+- **AI-Enhanced Summaries**: Instant, easy-to-understand paper overviews
+- **Personalized Feed**: Tailored research recommendations
+- **Cross-Disciplinary Exploration**: Discover papers beyond your primary field of interest
+- **Engaging Visualizations**: Intuitive graphics and key takeaways
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Our Vision
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+We believe that scientific knowledge should be a shared resource, not locked behind complex academic language. Research Insights empowers curious minds to stay informed, inspired, and connected to the latest developments across science and technology.
 
-Follow these steps:
+### Join Our Community
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Whether you're a student, professional, or lifelong learner, Research Insights is your gateway to understanding the world through the lens of scientific discovery.
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Getting Started
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/3116c334-ab68-4e53-9013-165b994be209) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+[Existing getting started instructions from previous README]
