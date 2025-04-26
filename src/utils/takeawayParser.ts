@@ -1,4 +1,3 @@
-
 import { Json } from "../integrations/supabase/types";
 
 export interface FormattedTakeaway {
@@ -11,55 +10,52 @@ export interface FormattedTakeaway {
 export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): FormattedTakeaway[] => {
   const formattedTakeaways: FormattedTakeaway[] = [];
 
-  // Add ai_matter as "why it matters" takeaway if present
+  // Handle standard takeaways first
+  if (takeaways) {
+    try {
+      // If takeaways is already an array of formatted objects, use them
+      if (Array.isArray(takeaways) && takeaways.length > 0) {
+        if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
+          formattedTakeaways.push(...takeaways);
+        } else if (typeof takeaways[0] === 'string') {
+          // Convert string array to FormattedTakeaway objects
+          formattedTakeaways.push(...takeaways.map(text => ({ 
+            text, 
+            type: 'default' as const 
+          })));
+        }
+      } 
+      // Handle object format
+      else if (typeof takeaways === 'object' && takeaways !== null && !Array.isArray(takeaways)) {
+        Object.entries(takeaways).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            formattedTakeaways.push({
+              text: value,
+              type: 'default' as const
+            });
+          }
+        });
+      }
+      // Handle string format
+      else if (typeof takeaways === 'string') {
+        try {
+          const parsed = JSON.parse(takeaways);
+          formattedTakeaways.push(...parseKeyTakeaways(parsed));
+        } catch (e) {
+          formattedTakeaways.push({ text: takeaways, type: 'default' as const });
+        }
+      }
+    } catch (e) {
+      console.warn('Error parsing takeaways:', e);
+    }
+  }
+
+  // Add ai_matter as the last takeaway if it exists
   if (ai_matter) {
     formattedTakeaways.push({
       text: ai_matter,
       type: 'why_it_matters' as const
     });
-  }
-
-  if (!takeaways) return formattedTakeaways;
-
-  // If takeaways is already an array of formatted objects, append them
-  if (Array.isArray(takeaways) && takeaways.length > 0) {
-    // Check if this is an array of objects with text property (already formatted)
-    if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
-      return [...formattedTakeaways, ...takeaways];
-    }
-    
-    // If it's an array of strings, convert to formatted takeaways
-    if (typeof takeaways[0] === 'string') {
-      const defaultTakeaways: FormattedTakeaway[] = takeaways.map(text => ({ 
-        text, 
-        type: 'default' as const 
-      }));
-      return [...formattedTakeaways, ...defaultTakeaways];
-    }
-  }
-
-  // Handle object format (used by Europe papers)
-  if (typeof takeaways === 'object' && takeaways !== null && !Array.isArray(takeaways)) {
-    Object.entries(takeaways).forEach(([key, value]) => {
-      if (typeof value === 'string') {
-        formattedTakeaways.push({
-          text: value,
-          type: 'default' as const
-        });
-      }
-    });
-    
-    return formattedTakeaways;
-  }
-
-  // Try to parse if it's a string
-  if (typeof takeaways === 'string') {
-    try {
-      const parsed = JSON.parse(takeaways);
-      return parseKeyTakeaways(parsed, ai_matter);
-    } catch (e) {
-      return [...formattedTakeaways, { text: takeaways, type: 'default' as const }];
-    }
   }
 
   return formattedTakeaways;

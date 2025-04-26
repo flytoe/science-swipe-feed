@@ -24,11 +24,8 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
   }
 
   const takeaway = takeaways[0];
-  const takeawayText = typeof takeaway.text === 'string' 
-    ? takeaway.text 
-    : JSON.stringify(takeaway.text);
-
   const isWhyItMatters = takeaway.type === 'why_it_matters';
+  const takeawayText = typeof takeaway.text === 'string' ? takeaway.text : JSON.stringify(takeaway.text);
   
   return (
     <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">

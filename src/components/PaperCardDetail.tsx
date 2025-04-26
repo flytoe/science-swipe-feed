@@ -1,9 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FormattedTakeaway } from '../utils/takeawayParser';
-import { useMindBlow } from '../hooks/use-mind-blow';
-import { useDatabaseToggle } from '../hooks/use-database-toggle';
 import {
   Carousel,
   CarouselContent,
@@ -37,11 +35,11 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   imageSrc,
   ai_matter,
 }) => {
-  // Separate takeaways into "Why It Matters" and research findings
-  const whyItMattersTakeaway = takeaways.find(t => t.type === 'why_it_matters');
+  // Separate takeaways into research findings and "Why It Matters"
   const researchTakeaways = takeaways.filter(t => t.type !== 'why_it_matters');
+  const whyItMattersTakeaway = takeaways.find(t => t.type === 'why_it_matters');
   
-  // Order takeaways with research findings first, then "Why It Matters"
+  // Create ordered takeaways array with research findings first
   const orderedTakeaways = [...researchTakeaways];
   if (whyItMattersTakeaway) {
     orderedTakeaways.push(whyItMattersTakeaway);
@@ -78,23 +76,16 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
             />
           </CarouselItem>
           
-          {/* Research Findings and Why It Matters Slides */}
-          {orderedTakeaways.map((takeaway, index) => {
-            const isResearchFinding = takeaway.type !== 'why_it_matters';
-            const findingIndex = isResearchFinding ? 
-              researchTakeaways.findIndex(t => t === takeaway) : 
-              undefined;
-            
-            return (
-              <CarouselItem key={index} className="pl-0">
-                <TakeawaysSlide 
-                  takeaways={[takeaway]}
-                  currentIndex={findingIndex}
-                  totalTakeaways={researchTakeaways.length}
-                />
-              </CarouselItem>
-            );
-          })}
+          {/* Takeaway Slides */}
+          {orderedTakeaways.map((takeaway, index) => (
+            <CarouselItem key={index} className="pl-0">
+              <TakeawaysSlide 
+                takeaways={[takeaway]}
+                currentIndex={takeaway.type !== 'why_it_matters' ? researchTakeaways.indexOf(takeaway) : undefined}
+                totalTakeaways={researchTakeaways.length}
+              />
+            </CarouselItem>
+          ))}
           
           {/* Detail Slide */}
           <CarouselItem className="pl-0">
