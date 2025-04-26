@@ -1,5 +1,5 @@
-
 import { Json } from "../integrations/supabase/types";
+import { DatabaseSource } from "../hooks/use-database-toggle";
 
 export interface FormattedTakeaway {
   text: string | Record<string, string>;
@@ -8,16 +8,25 @@ export interface FormattedTakeaway {
   tag?: string;
 }
 
-export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): FormattedTakeaway[] => {
+export const parseKeyTakeaways = (
+  takeaways: any, 
+  ai_matter?: string | null,
+  databaseSource?: DatabaseSource
+): FormattedTakeaway[] => {
   const formattedTakeaways: FormattedTakeaway[] = [];
+  const isEuropePaper = databaseSource === 'europe_paper';
 
-  // Handle standard takeaways first
   if (takeaways) {
     try {
-      // If takeaways is already an array of formatted objects, use them
+      // Handle array of formatted objects
       if (Array.isArray(takeaways) && takeaways.length > 0) {
         if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
-          formattedTakeaways.push(...takeaways.filter(t => t.type !== 'why_it_matters'));
+          // For Europe papers, use all takeaways as research findings
+          // For other sources, filter out any why_it_matters entries
+          const filtered = isEuropePaper 
+            ? takeaways 
+            : takeaways.filter(t => t.type !== 'why_it_matters');
+          formattedTakeaways.push(...filtered);
         } else if (typeof takeaways[0] === 'string') {
           // Convert string array to FormattedTakeaway objects
           formattedTakeaways.push(...takeaways.map(text => ({ 
@@ -51,12 +60,14 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
     }
   }
 
-  // Add ai_matter as the last takeaway if it exists and isn't empty
+  // Only add ai_matter for Europe papers or if there's no why_it_matters type already
   if (ai_matter && typeof ai_matter === 'string' && ai_matter.trim() !== '') {
-    formattedTakeaways.push({
-      text: ai_matter,
-      type: 'why_it_matters' as const
-    });
+    if (isEuropePaper || !formattedTakeaways.some(t => t.type === 'why_it_matters')) {
+      formattedTakeaways.push({
+        text: ai_matter,
+        type: 'why_it_matters' as const
+      });
+    }
   }
 
   return formattedTakeaways;

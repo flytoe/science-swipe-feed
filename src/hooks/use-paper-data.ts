@@ -128,7 +128,11 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           imageSourceType = 'generated';
         }
         
-        const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways, paper.ai_matter);
+        const formattedTakeaways = parseKeyTakeaways(
+          paper.ai_key_takeaways, 
+          paper.ai_matter,
+          databaseSource
+        );
         
         const displayTitle = paper.ai_headline || paper.title_org || 'Untitled Paper';
         
