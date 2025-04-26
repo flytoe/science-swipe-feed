@@ -17,6 +17,7 @@ export type Paper = {
   category: string[] | null;
   image_url: string | null;
   creator: string[] | string | null;
+  ai_matter?: string | null;
   // For backward compatibility, add doi getter
   doi: string;
   oai?: string; // Optional field for core_paper
