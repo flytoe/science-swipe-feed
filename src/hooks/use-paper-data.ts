@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
 import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../utils/categoryUtils';
@@ -22,7 +21,6 @@ interface UsePaperDataResult {
   paper: Paper | null;
 }
 
-// Create default values for when paper is null
 const defaultPaperData: UsePaperDataResult = {
   categories: [],
   formattedCategoryNames: [],
@@ -38,7 +36,6 @@ const defaultPaperData: UsePaperDataResult = {
 };
 
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
-  // Always initialize state, even if paper is null
   const [formattedData, setFormattedData] = useState<UsePaperDataResult>({
     ...defaultPaperData, 
     paper
@@ -46,12 +43,10 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   const [isGenerating, setIsGenerating] = useState(false);
   const { databaseSource } = useDatabaseToggle();
   
-  // Effect to generate image if needed
   useEffect(() => {
     const generateImageIfNeeded = async () => {
       if (!paper) return;
       
-      // Skip if the paper already has an image or we're already generating
       if (paper.image_url || isGenerating) return;
       
       try {
@@ -61,18 +56,15 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           isGeneratingImage: true
         }));
         
-        // If no prompt exists, checkAndGenerateImageIfNeeded will create one
         const imageUrl = await checkAndGenerateImageIfNeeded(paper);
         
         if (imageUrl) {
-          // Update the state with the new image URL
           setFormattedData(prev => ({
             ...prev,
             imageSrc: imageUrl,
             imageSourceType: 'runware',
             isGeneratingImage: false
           }));
-          
           console.log(`Successfully generated image for paper: ${paper.id}`);
         } else {
           console.warn(`Failed to generate image for paper: ${paper.id}`);
@@ -100,11 +92,9 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
       }
       
       try {
-        // Format the date
         let createdAt = new Date(paper.created_at);
-        // Check if date is valid
         if (isNaN(createdAt.getTime())) {
-          createdAt = new Date(); // Use current date as fallback
+          createdAt = new Date();
         }
         
         const formattedDate = new Intl.DateTimeFormat('en-US', {
@@ -113,28 +103,22 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           day: 'numeric',
         }).format(createdAt);
         
-        // Handle categories
         const paperCategories = Array.isArray(paper.category) ? 
           paper.category : 
           (paper.category ? [paper.category] : []);
           
-        // Get category map for displaying full names
         const categoryMap = await fetchCategoryMap();
         
-        // Format all category names using the utility function
         const formattedCategoryNames = paperCategories.map(cat => 
           formatCategoryName(cat, categoryMap)
         );
         
-        // Parse takeaways
         const takeaways = Array.isArray(paper.ai_key_takeaways) ? 
           paper.ai_key_takeaways : 
           (paper.ai_key_takeaways ? [paper.ai_key_takeaways] : []);
           
-        // Image source handling - use a placeholder if empty
         const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973';
         
-        // Determine image source type
         let imageSourceType: 'default' | 'database' | 'generated' | 'runware' = 'database';
         if (!paper.image_url) {
           imageSourceType = 'default';
@@ -144,10 +128,8 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           imageSourceType = 'generated';
         }
         
-        // Format takeaways
-        const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways);
+        const formattedTakeaways = parseKeyTakeaways(paper.ai_key_takeaways, paper.ai_matter);
         
-        // Use either the AI headline or original title, with fallback
         const displayTitle = paper.ai_headline || paper.title_org || 'Untitled Paper';
         
         setFormattedData({
