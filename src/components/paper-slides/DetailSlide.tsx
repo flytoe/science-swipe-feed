@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -53,7 +52,6 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
           </Badge>
         </div>
 
-        {/* Matter content takes precedence */}
         {matter && (
           <div className="text-white text-lg font-medium mb-6">
             {matter}
@@ -68,7 +66,6 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
         
         <OriginalTitleSection title={title} title_org={title_org} />
         
-        {/* Only show AbstractSection if showAbstract is true */}
         {showAbstract && <AbstractSection abstract_org={abstract_org} isWhiteText />}
         
         {doi && (

@@ -37,13 +37,15 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   imageSrc,
   ai_matter,
 }) => {
-  const { count: mindBlowCount } = useMindBlow(doi || '');
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const { databaseSource } = useDatabaseToggle();
+  // Separate takeaways into "Why It Matters" and research findings
+  const whyItMattersTakeaway = takeaways.find(t => t.type === 'why_it_matters');
+  const researchTakeaways = takeaways.filter(t => t.type !== 'why_it_matters');
   
-  // For europe_paper, use takeaways directly as they're already formatted
-  const orderedTakeaways = takeaways;
+  // Order takeaways with research findings first, then "Why It Matters"
+  const orderedTakeaways = [...researchTakeaways];
+  if (whyItMattersTakeaway) {
+    orderedTakeaways.push(whyItMattersTakeaway);
+  }
 
   return (
     <motion.div
@@ -55,28 +57,16 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
     >
       <div className="absolute inset-0 overflow-hidden">
         <div
-          className="absolute inset-0 transition-[filter] duration-300"
+          className="absolute inset-0"
           style={{
             backgroundImage: `url(${imageSrc})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            filter: isTransitioning ? 'blur(8px)' : 'none'
           }}
         />
       </div>
 
-      <Carousel 
-        className="w-full h-full relative"
-        setApi={(api) => {
-          if (api) {
-            api.on('select', () => {
-              setIsTransitioning(true);
-              setTimeout(() => setIsTransitioning(false), 300);
-              setCurrentSlide(api.selectedScrollSnap());
-            });
-          }
-        }}
-      >
+      <Carousel className="w-full h-full relative">
         <CarouselContent className="-ml-0">
           {/* Hero Slide */}
           <CarouselItem className="pl-0">
@@ -84,43 +74,39 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               title={displayTitle}
               imageSrc={imageSrc}
               formattedDate={formattedDate}
-              mindBlowCount={mindBlowCount}
               creator={creator}
-              isFirstSlide={currentSlide === 0}
-              activeIndex={currentSlide}
-            />
-          </CarouselItem>
-          
-          {/* Matter Overview Slide */}
-          <CarouselItem className="pl-0">
-            <DetailSlide
-              title={displayTitle}
-              title_org={title_org}
-              doi={doi}
-              creator={creator}
-              matter={databaseSource === 'europe_paper' ? ai_matter : undefined}
-              showAbstract={databaseSource !== 'europe_paper'}
-              abstract_org={abstract_org}
             />
           </CarouselItem>
           
           {/* Research Findings and Why It Matters Slides */}
           {orderedTakeaways.map((takeaway, index) => {
             const isResearchFinding = takeaway.type !== 'why_it_matters';
-            const findingIndex = isResearchFinding 
-              ? orderedTakeaways.filter(t => t.type !== 'why_it_matters').findIndex(t => t === takeaway)
-              : undefined;
+            const findingIndex = isResearchFinding ? 
+              researchTakeaways.findIndex(t => t === takeaway) : 
+              undefined;
             
             return (
               <CarouselItem key={index} className="pl-0">
                 <TakeawaysSlide 
-                  takeaways={[takeaway]} 
+                  takeaways={[takeaway]}
                   currentIndex={findingIndex}
-                  totalTakeaways={orderedTakeaways.filter(t => t.type !== 'why_it_matters').length}
+                  totalTakeaways={researchTakeaways.length}
                 />
               </CarouselItem>
             );
           })}
+          
+          {/* Detail Slide */}
+          <CarouselItem className="pl-0">
+            <DetailSlide
+              title={displayTitle}
+              title_org={title_org}
+              abstract_org={abstract_org}
+              doi={doi}
+              creator={creator}
+              matter={whyItMattersTakeaway?.text as string}
+            />
+          </CarouselItem>
         </CarouselContent>
 
         <div className="absolute bottom-6 w-full flex justify-center">
