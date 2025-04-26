@@ -1,3 +1,4 @@
+
 import { Json } from "../integrations/supabase/types";
 
 export interface FormattedTakeaway {
@@ -14,7 +15,7 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
   if (ai_matter) {
     formattedTakeaways.push({
       text: ai_matter,
-      type: 'why_it_matters'
+      type: 'why_it_matters' as const
     });
   }
 
@@ -29,7 +30,10 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
     
     // If it's an array of strings, convert to formatted takeaways
     if (typeof takeaways[0] === 'string') {
-      const defaultTakeaways = takeaways.map(text => ({ text, type: 'default' }));
+      const defaultTakeaways: FormattedTakeaway[] = takeaways.map(text => ({ 
+        text, 
+        type: 'default' as const 
+      }));
       return [...formattedTakeaways, ...defaultTakeaways];
     }
   }
@@ -40,7 +44,7 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
       if (typeof value === 'string') {
         formattedTakeaways.push({
           text: value,
-          type: 'default'
+          type: 'default' as const
         });
       }
     });
@@ -54,7 +58,7 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
       const parsed = JSON.parse(takeaways);
       return parseKeyTakeaways(parsed, ai_matter);
     } catch (e) {
-      return [...formattedTakeaways, { text: takeaways, type: 'default' }];
+      return [...formattedTakeaways, { text: takeaways, type: 'default' as const }];
     }
   }
 
