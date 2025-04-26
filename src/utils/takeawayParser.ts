@@ -1,3 +1,4 @@
+
 import { Json } from "../integrations/supabase/types";
 
 export interface FormattedTakeaway {
@@ -16,7 +17,7 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
       // If takeaways is already an array of formatted objects, use them
       if (Array.isArray(takeaways) && takeaways.length > 0) {
         if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
-          formattedTakeaways.push(...takeaways);
+          formattedTakeaways.push(...takeaways.filter(t => t.type !== 'why_it_matters'));
         } else if (typeof takeaways[0] === 'string') {
           // Convert string array to FormattedTakeaway objects
           formattedTakeaways.push(...takeaways.map(text => ({ 
@@ -50,8 +51,8 @@ export const parseKeyTakeaways = (takeaways: any, ai_matter?: string | null): Fo
     }
   }
 
-  // Add ai_matter as the last takeaway if it exists
-  if (ai_matter) {
+  // Add ai_matter as the last takeaway if it exists and isn't empty
+  if (ai_matter && typeof ai_matter === 'string' && ai_matter.trim() !== '') {
     formattedTakeaways.push({
       text: ai_matter,
       type: 'why_it_matters' as const

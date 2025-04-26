@@ -26,7 +26,10 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
   const takeaway = takeaways[0];
   const isWhyItMatters = takeaway.type === 'why_it_matters';
   const takeawayText = typeof takeaway.text === 'string' ? takeaway.text : JSON.stringify(takeaway.text);
-  
+  const displayNumber = !isWhyItMatters && currentIndex !== undefined && totalTakeaways 
+    ? `Research Finding ${currentIndex + 1} of ${totalTakeaways}` 
+    : 'Why It Matters';
+
   return (
     <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">
       <div className="w-full max-w-2xl mx-auto">
@@ -41,10 +44,7 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
               text-white text-base px-3 py-1
             `}
           >
-            {isWhyItMatters 
-              ? 'Why It Matters' 
-              : `Research Finding ${currentIndex + 1} of ${totalTakeaways}`
-            }
+            {displayNumber}
           </Badge>
         </div>
         <KeyTakeaway 
