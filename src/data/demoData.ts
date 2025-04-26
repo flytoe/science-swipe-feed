@@ -19,6 +19,7 @@ export const demoData: Paper[] = [
     category: ['physics', 'technology'],
     image_url: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070',
     creator: ['John Doe', 'Jane Smith'],
+    ai_matter: 'This breakthrough could fundamentally change how we approach complex computational problems, enabling solutions to currently unsolvable challenges in medicine and cryptography.',
     get doi() { return this.id; }
   },
   {
@@ -35,6 +36,7 @@ export const demoData: Paper[] = [
     category: ['biology', 'environment'],
     image_url: 'https://images.unsplash.com/photo-1621451066633-97aa60c27376?q=80&w=1974',
     creator: ['Marine Research Institute'],
+    ai_matter: 'The widespread presence of microplastics in deep ocean environments represents an urgent ecological crisis that could disrupt marine food chains and ultimately affect human health through seafood consumption.',
     get doi() { return this.id; }
   },
   {
@@ -51,7 +53,7 @@ export const demoData: Paper[] = [
     category: ['neuroscience', 'psychology'],
     image_url: 'https://images.unsplash.com/photo-1559757175-7cb036edc7b3?q=80&w=2071',
     creator: null,
+    ai_matter: 'Understanding the neural mechanisms of memory formation could lead to breakthrough treatments for dementia and other memory disorders, potentially allowing early intervention before symptoms appear.',
     get doi() { return this.id; }
   }
 ];
-
