@@ -18,6 +18,12 @@ export type Paper = {
   image_url: string | null;
   creator: string[] | string | null;
   ai_matter: string | null;
+  // Claude refined fields
+  claude_refined?: boolean;
+  ai_headline_claude?: string | null;
+  ai_key_takeaways_claude?: any | null;
+  ai_matter_claude?: string | null;
+  show_claude?: boolean;
   // For backward compatibility, add doi getter
   doi: string;
   oai?: string; // Optional field for core_paper

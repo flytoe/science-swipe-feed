@@ -8,6 +8,7 @@ import DetailActions from './DetailActions';
 import PaperCardDetail from '../PaperCardDetail';
 import ImagePromptModal from '../ImagePromptModal';
 import { Paper } from '../../lib/supabase';
+import ClaudeToggle from '../ClaudeToggle';
 
 interface MobileDetailViewProps {
   paper: Paper | null;
@@ -20,6 +21,8 @@ interface MobileDetailViewProps {
   onRegenerationComplete: (imageUrl: string | null) => void;
   isPromptModalOpen: boolean;
   onPromptModalClose: () => void;
+  claudeMode: boolean;
+  toggleClaudeMode: (enabled: boolean) => void;
 }
 
 const MobileDetailView: React.FC<MobileDetailViewProps> = ({
@@ -32,7 +35,9 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
   onRegenerationStart,
   onRegenerationComplete,
   isPromptModalOpen,
-  onPromptModalClose
+  onPromptModalClose,
+  claudeMode,
+  toggleClaudeMode
 }) => {
   return (
     <>
@@ -49,9 +54,19 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
                 {isDirectRoute ? <ArrowLeft className="h-5 w-5" /> : <X className="h-5 w-5" />}
               </Button>
               
-              {paper && (
-                <DetailActions paperId={paper.id} onClose={onClose} />
-              )}
+              <div className="flex items-center gap-2">
+                {paper?.claude_refined && (
+                  <ClaudeToggle
+                    paperId={paper.id}
+                    isEnabled={claudeMode}
+                    onToggle={toggleClaudeMode}
+                  />
+                )}
+                
+                {paper && (
+                  <DetailActions paperId={paper.id} onClose={onClose} />
+                )}
+              </div>
             </div>
             
             <ScrollArea className="flex-1 overflow-y-auto">

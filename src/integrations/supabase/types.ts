@@ -121,6 +121,7 @@ export type Database = {
           rerun: boolean
           score: number | null
           score_raw: string | null
+          show_claude: boolean
           title_org: string | null
           too_long: boolean
         }
@@ -151,6 +152,7 @@ export type Database = {
           rerun?: boolean
           score?: number | null
           score_raw?: string | null
+          show_claude?: boolean
           title_org?: string | null
           too_long?: boolean
         }
@@ -181,6 +183,7 @@ export type Database = {
           rerun?: boolean
           score?: number | null
           score_raw?: string | null
+          show_claude?: boolean
           title_org?: string | null
           too_long?: boolean
         }

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -15,6 +16,7 @@ import DetailSlide from './paper-slides/DetailSlide';
 import MindBlowButton from './MindBlowButton';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import RegenerateImageButton from './RegenerateImageButton';
+import ClaudeToggle from './ClaudeToggle';
 
 interface FeedItemProps {
   paper: Paper;
@@ -33,7 +35,9 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     displayTitle,
     refreshImageData,
     formattedTakeaways,
-    paper: paperWithData
+    paper: paperWithData,
+    claudeMode,
+    toggleClaudeMode
   } = usePaperData(paper);
 
   const { isLoading, hasMindBlown, count, toggleMindBlow: toggle } = useMindBlow(paper.doi);
@@ -54,8 +58,19 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       className="feed-item w-full bg-white rounded-xl overflow-hidden shadow-sm mb-6 border border-gray-100 relative"
       layout
     >
-      {/* Regenerate Image Button */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Top toolbar - Claude Toggle and Regenerate Image Button */}
+      <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+        {paper.claude_refined && (
+          <div className="mr-2">
+            <ClaudeToggle
+              paperId={paper.id}
+              isEnabled={claudeMode}
+              onToggle={toggleClaudeMode}
+              size="sm"
+            />
+          </div>
+        )}
+        
         <RegenerateImageButton
           paper={paper}
           variant="ghost"
@@ -103,6 +118,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 abstract_org={paper.abstract_org}
                 doi={paper.doi}
                 creator={paper.creator}
+                matter={claudeMode && paper.ai_matter_claude ? paper.ai_matter_claude : paper.ai_matter}
               />
             </CarouselItem>
           </CarouselContent>

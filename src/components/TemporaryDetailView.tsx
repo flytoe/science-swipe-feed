@@ -61,6 +61,8 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
     onRegenerationComplete: handleRegenerationComplete,
     isPromptModalOpen,
     onPromptModalClose: () => setIsPromptModalOpen(true),
+    claudeMode: paperData.claudeMode,
+    toggleClaudeMode: paperData.toggleClaudeMode
   };
   
   return isMobile ? (

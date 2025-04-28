@@ -7,6 +7,7 @@ import SwipeControls from './SwipeControls';
 import { useSwipeNavigation } from './useSwipeNavigation';
 import { useIsMobile } from '../../hooks/use-mobile';
 import TemporaryDetailView from '../TemporaryDetailView';
+import ClaudeToggle from '../ClaudeToggle';
 
 interface SwipeFeedProps {
   papers: Paper[];
@@ -151,6 +152,22 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     >
       <div className="min-h-full w-full" ref={contentRef}>
         <div className="h-full w-full relative will-change-transform">
+          {/* Claude toggle (when available) */}
+          {currentPaper?.claude_refined && (
+            <div className="absolute top-4 right-4 z-50">
+              <ClaudeToggle 
+                paperId={currentPaper.id}
+                isEnabled={!!currentPaper.show_claude}
+                onToggle={(enabled) => {
+                  // Need to update the paper directly since we don't have access to toggleClaudeMode here
+                  if (currentPaper) {
+                    currentPaper.show_claude = enabled;
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`card-${currentPaper?.doi || currentIndex}`}

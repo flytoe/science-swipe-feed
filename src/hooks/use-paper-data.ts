@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
 import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../utils/categoryUtils';
@@ -19,6 +20,8 @@ interface UsePaperDataResult {
   imageSourceType: 'default' | 'database' | 'generated' | 'runware';
   refreshImageData: (newImageUrl?: string) => void;
   paper: Paper | null;
+  claudeMode: boolean;
+  toggleClaudeMode: (enabled: boolean) => void;
 }
 
 const defaultPaperData: UsePaperDataResult = {
@@ -33,6 +36,8 @@ const defaultPaperData: UsePaperDataResult = {
   imageSourceType: 'default',
   refreshImageData: () => {},
   paper: null,
+  claudeMode: false,
+  toggleClaudeMode: () => {},
 };
 
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
@@ -41,7 +46,19 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     paper
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [claudeMode, setClaudeMode] = useState(false);
   const { databaseSource } = useDatabaseToggle();
+  
+  // Initialize Claude mode from paper data
+  useEffect(() => {
+    if (paper && 'show_claude' in paper) {
+      setClaudeMode(!!paper.show_claude);
+    }
+  }, [paper]);
+  
+  const toggleClaudeMode = (enabled: boolean) => {
+    setClaudeMode(enabled);
+  };
   
   useEffect(() => {
     const generateImageIfNeeded = async () => {
@@ -87,7 +104,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   useEffect(() => {
     const loadPaperData = async () => {
       if (!paper) {
-        setFormattedData({...defaultPaperData, paper: null});
+        setFormattedData({...defaultPaperData, paper: null, claudeMode, toggleClaudeMode});
         return;
       }
       
@@ -113,9 +130,22 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           formatCategoryName(cat, categoryMap)
         );
         
-        const takeaways = Array.isArray(paper.ai_key_takeaways) ? 
-          paper.ai_key_takeaways : 
-          (paper.ai_key_takeaways ? [paper.ai_key_takeaways] : []);
+        // Choose between default and Claude data based on claude mode
+        const headline = claudeMode && paper.ai_headline_claude 
+          ? paper.ai_headline_claude 
+          : paper.ai_headline;
+          
+        const matter = claudeMode && paper.ai_matter_claude
+          ? paper.ai_matter_claude
+          : paper.ai_matter;
+          
+        const takeaways = claudeMode && paper.ai_key_takeaways_claude
+          ? paper.ai_key_takeaways_claude
+          : paper.ai_key_takeaways;
+          
+        const simpleTakeaways = Array.isArray(takeaways) ? 
+          takeaways : 
+          (takeaways ? [takeaways] : []);
           
         const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973';
         
@@ -129,12 +159,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         }
         
         const formattedTakeaways = parseKeyTakeaways(
-          paper.ai_key_takeaways, 
-          paper.ai_matter,
+          takeaways, 
+          matter,
           databaseSource
         );
         
-        const displayTitle = paper.ai_headline || paper.title_org || 'Untitled Paper';
+        const displayTitle = headline || paper.title_org || 'Untitled Paper';
         
         setFormattedData({
           categories: paperCategories,
@@ -142,11 +172,13 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           formattedDate,
           imageSrc,
           displayTitle,
-          firstTakeaway: takeaways[0] || '',
+          firstTakeaway: simpleTakeaways[0] || '',
           formattedTakeaways,
           isGeneratingImage: isGenerating,
           imageSourceType,
           paper: paper,
+          claudeMode,
+          toggleClaudeMode,
           refreshImageData: (newImageUrl?: string) => {
             if (newImageUrl) {
               setFormattedData(prev => ({
@@ -160,12 +192,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         });
       } catch (error) {
         console.error('Error in usePaperData:', error);
-        setFormattedData({...defaultPaperData, paper});
+        setFormattedData({...defaultPaperData, paper, claudeMode, toggleClaudeMode});
       }
     };
     
     loadPaperData();
-  }, [paper, isGenerating, databaseSource]);
+  }, [paper, isGenerating, databaseSource, claudeMode]);
   
   return formattedData;
 };
