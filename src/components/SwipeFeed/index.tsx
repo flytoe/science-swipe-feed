@@ -1,13 +1,12 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { type Paper } from '../../lib/supabase';
-import PaperCard from '../PaperCard';
-import SwipeControls from './SwipeControls';
 import { useSwipeNavigation } from './useSwipeNavigation';
 import { useIsMobile } from '../../hooks/use-mobile';
 import TemporaryDetailView from '../TemporaryDetailView';
-import ClaudeToggle from '../ClaudeToggle';
+import SwipeControls from './SwipeControls';
+import SwipeableContent from './SwipeableContent';
+import PeekingCards from './PeekingCards';
 
 interface SwipeFeedProps {
   papers: Paper[];
@@ -39,7 +38,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
   
-  // Handle scroll detection for detail view - with improved debounce
+  // Handle scroll detection for detail view
   useEffect(() => {
     let timeoutId: number;
     
@@ -48,13 +47,10 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
       
       const scrollTop = feedRef.current.scrollTop;
       
-      // Clear the previous timeout
       clearTimeout(timeoutId);
-      
-      // Set a new timeout to update the state after the user has stopped scrolling
       timeoutId = window.setTimeout(() => {
         setIsDetailView(scrollTop > 100);
-      }, 100); // Slightly longer debounce for better performance
+      }, 100);
     };
     
     const currentRef = feedRef.current;
@@ -84,8 +80,7 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     papersLength: papers?.length || 0,
     isScrolling: isDetailView
   });
-  
-  // Check for empty papers after hooks are called
+
   if (!papers || papers.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -97,8 +92,8 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const currentPaper = papers[currentIndex];
   const nextIndex = currentIndex < papers.length - 1 ? currentIndex + 1 : 0;
   const prevIndex = currentIndex > 0 ? currentIndex - 1 : papers.length - 1;
-  const nextPaperData = papers[nextIndex];
-  const prevPaperData = papers[prevIndex];
+  const nextPaper = papers[nextIndex];
+  const prevPaper = papers[prevIndex];
   
   // Helper function to turn off detail view
   const scrollToTop = () => {
@@ -120,11 +115,6 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     }
   };
 
-  // Handle opening the temporary detail view
-  const handleOpenTemporaryDetail = () => {
-    setShowTemporaryDetail(true);
-  };
-
   // Enhanced drag constraints with friction
   const dragConstraints = { left: 0, right: 0 };
   
@@ -132,12 +122,11 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
   const handleDragEnd = (event: any, info: any) => {
     if (isDetailView) return;
     
-    const threshold = 50; // Lower threshold for easier swiping
-    const velocityThreshold = 0.3; // Add velocity threshold for more natural swiping
+    const threshold = 50;
+    const velocityThreshold = 0.3;
     const dragX = info.offset.x;
     const velocityX = info.velocity.x;
     
-    // Consider both distance and velocity for more natural swiping
     if (dragX > threshold || velocityX > velocityThreshold) {
       handleNavigate('prev');
     } else if (dragX < -threshold || velocityX < -velocityThreshold) {
@@ -152,125 +141,25 @@ const SwipeFeed: React.FC<SwipeFeedProps> = ({
     >
       <div className="min-h-full w-full" ref={contentRef}>
         <div className="h-full w-full relative will-change-transform">
-          {/* Claude toggle (when available) */}
-          {currentPaper?.claude_refined && (
-            <div className="absolute top-4 right-4 z-50">
-              <ClaudeToggle 
-                paperId={currentPaper.id}
-                isEnabled={!!currentPaper.show_claude}
-                onToggle={(enabled) => {
-                  // Need to update the paper directly since we don't have access to toggleClaudeMode here
-                  if (currentPaper) {
-                    currentPaper.show_claude = enabled;
-                  }
-                }}
-              />
-            </div>
-          )}
-
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={`card-${currentPaper?.doi || currentIndex}`}
-              initial={{ 
-                opacity: 0, 
-                x: swipeDirection === 'left' ? '100%' : '-100%',
-                scale: 0.92
-              }}
-              animate={{ 
-                opacity: 1, 
-                x: 0, 
-                scale: 1,
-                zIndex: 10
-              }}
-              exit={{ 
-                opacity: 0, 
-                x: swipeDirection === 'left' ? '-100%' : '100%',
-                scale: 0.92,
-                zIndex: 0
-              }}
-              transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 1
-              }}
-              className="w-full h-full"
-              drag={isMobile && !isDetailView ? "x" : false}
-              dragConstraints={dragConstraints}
-              dragElastic={0.1}
-              onDragEnd={handleDragEnd}
-              dragDirectionLock
-              onTouchStart={!isDetailView ? handleTouchStart : undefined}
-              onTouchMove={!isDetailView ? handleTouchMove : undefined}
-              onTouchEnd={!isDetailView ? handleTouchEnd : undefined}
-              onWheel={!isDetailView ? handleWheel : undefined}
-              style={{ 
-                touchAction: isDetailView ? 'pan-y' : 'none',
-                position: 'relative',
-                willChange: 'transform',
-                backfaceVisibility: 'hidden'
-              }}
-            >
-              <PaperCard 
-                paper={currentPaper}
-                isActive={true}
-                isGeneratingImage={isGeneratingImage}
-                onDetailClick={handleOpenTemporaryDetail}
-              />
-            </motion.div>
-          </AnimatePresence>
+          <SwipeableContent
+            currentPaper={currentPaper}
+            swipeDirection={swipeDirection}
+            handleTouchStart={handleTouchStart}
+            handleTouchMove={handleTouchMove}
+            handleTouchEnd={handleTouchEnd}
+            handleWheel={handleWheel}
+            isDetailView={isDetailView}
+            dragConstraints={dragConstraints}
+            handleDragEnd={handleDragEnd}
+            isMobile={isMobile}
+          />
           
-          {/* Staggered cards (visible only when not in detail view) */}
+          {/* Peeking cards (visible only when not in detail view) */}
           {!isDetailView && papers.length > 1 && (
-            <>
-              {/* Previous card (peeking from left) */}
-              <motion.div
-                key={`prev-peek-${prevIndex}`}
-                className="absolute inset-0 w-full pointer-events-none"
-                initial={{ x: "-110%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
-                animate={{ x: "-85%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30
-                }}
-                style={{
-                  willChange: 'transform',
-                  backfaceVisibility: 'hidden'
-                }}
-              >
-                <div className="w-full h-full rounded-lg overflow-hidden">
-                  <PaperCard 
-                    paper={prevPaperData}
-                    isActive={false}
-                  />
-                </div>
-              </motion.div>
-              
-              {/* Next card (peeking from right) */}
-              <motion.div
-                key={`next-peek-${nextIndex}`}
-                className="absolute inset-0 w-full pointer-events-none"
-                initial={{ x: "110%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
-                animate={{ x: "85%", scale: 0.85, opacity: 0.7, zIndex: 1 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 30
-                }}
-                style={{
-                  willChange: 'transform',
-                  backfaceVisibility: 'hidden'
-                }}
-              >
-                <div className="w-full h-full rounded-lg overflow-hidden">
-                  <PaperCard 
-                    paper={nextPaperData}
-                    isActive={false}
-                  />
-                </div>
-              </motion.div>
-            </>
+            <PeekingCards
+              prevPaper={prevPaper}
+              nextPaper={nextPaper}
+            />
           )}
         </div>
       </div>
