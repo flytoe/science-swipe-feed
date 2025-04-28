@@ -8,7 +8,7 @@ import MindBlowButton from '../MindBlowButton';
 import { useMindBlow } from '../../hooks/use-mind-blow';
 
 interface DetailActionsProps {
-  paperId: string;
+  paperId: string | number;
   onClose: () => void;
 }
 
@@ -18,7 +18,7 @@ const DetailActions: React.FC<DetailActionsProps> = ({ paperId, onClose }) => {
 
   return (
     <div className="flex space-x-3">
-      <ShareButton paperId={paperId} />
+      <ShareButton paperId={paperId.toString()} />
 
       <MindBlowButton
         hasMindBlown={hasMindBlown}

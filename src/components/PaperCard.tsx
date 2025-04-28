@@ -71,6 +71,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
   };
 
   const isGenerating = isGeneratingImage || localIsGeneratingImage || isGeneratingFromHook;
+  const paperId = typeof paper.id === 'number' ? paper.id.toString() : paper.id;
 
   return (
     <div className="paper-card bg-black text-white min-h-[100vh] w-full">
@@ -96,7 +97,7 @@ const PaperCard: React.FC<PaperCardProps> = ({
           abstract={paper.abstract_org}
           abstract_org={paper.abstract_org}
           formattedDate={formattedDate}
-          doi={paper.id}
+          doi={paperId}
           takeaways={formattedTakeaways}
           creator={paper.creator}
           imageSrc={imageSrc}
