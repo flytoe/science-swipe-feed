@@ -20,7 +20,7 @@ const getOrCreateUserId = (): string => {
   return userId;
 };
 
-export function useMindBlow(paperId: string) {
+export function useMindBlow(paperId: string | number) {
   const [count, setCount] = useState<number>(0);
   const [hasMindBlown, setHasMindBlown] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -30,7 +30,7 @@ export function useMindBlow(paperId: string) {
   const fetchMindBlowData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Convert numeric paperId to string if needed
+      // Convert paperId to string if it's a number
       const id = typeof paperId === 'number' ? paperId.toString() : paperId;
       
       const [mindBlowCount, userHasMindBlown, topPaper] = await Promise.all([
@@ -60,7 +60,7 @@ export function useMindBlow(paperId: string) {
     
     setIsLoading(true);
     try {
-      // Convert numeric paperId to string if needed
+      // Convert paperId to string if it's a number
       const id = typeof paperId === 'number' ? paperId.toString() : paperId;
       
       if (!hasMindBlown) {

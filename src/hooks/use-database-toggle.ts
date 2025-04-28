@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Paper } from '../types/paper';
 
 export type DatabaseSource = 'europe_paper';
 
@@ -27,6 +28,7 @@ export const getIdFieldName = (): string => {
 };
 
 // Helper function to get the unique ID value from a paper
-export const getPaperId = (paper: any): string => {
+export const getPaperId = (paper: Paper): string => {
+  // Ensure ID is returned as a string regardless of its original type
   return paper.id.toString();
 };

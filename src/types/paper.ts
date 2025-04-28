@@ -4,7 +4,7 @@
  */
 
 export type Paper = {
-  id: string;
+  id: string | number;
   title_org: string;
   abstract_org: string;
   score: any;

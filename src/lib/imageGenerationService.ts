@@ -1,8 +1,8 @@
+
 import { supabase } from '../integrations/supabase/client';
-import { Paper } from './supabase';
+import { Paper } from '../types/paper';
 import { useDatabaseToggle } from '../hooks/use-database-toggle';
 import { toast } from 'sonner';
-import { getPaperId } from '../hooks/use-database-toggle';
 
 // Check if a paper needs an image and generate one if needed
 export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<string | null> => {
@@ -20,11 +20,13 @@ export const checkAndGenerateImageIfNeeded = async (paper: Paper): Promise<strin
       // Get the current database source
       const databaseSource = useDatabaseToggle.getState().databaseSource;
       
-      // Update the prompt in the database
+      // Update the prompt in the database - convert id to number for Europe papers
+      const paperId = typeof paper.id === 'string' ? parseInt(paper.id) : paper.id;
+      
       const { error } = await supabase
         .from(databaseSource)
         .update({ ai_image_prompt: defaultPrompt })
-        .eq('id', paper.id);
+        .eq('id', paperId);
       
       if (error) {
         console.error('Error updating paper with default prompt:', error);
@@ -50,7 +52,7 @@ export const generateImageForPaper = async (paper: Paper): Promise<string | null
     
     // Get the current database source and paper ID
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const paperId = getPaperId(paper, databaseSource);
+    const paperId = typeof paper.id === 'string' ? parseInt(paper.id) : paper.id;
     
     // Call the edge function to generate an image
     const response = await fetch('https://kwtwhgfcfqgpfjimioiy.supabase.co/functions/v1/generate-image-v2', {
@@ -106,7 +108,7 @@ export const regenerateImage = async (
   try {
     // Get the current database source
     const databaseSource = useDatabaseToggle.getState().databaseSource;
-    const paperId = getPaperId(paper, databaseSource);
+    const paperId = typeof paper.id === 'string' ? parseInt(paper.id) : paper.id;
     
     // Use the new prompt if provided, otherwise use the existing one
     const promptToUse = newPrompt || paper.ai_image_prompt || `Scientific visualization of: ${paper.title_org}`;
