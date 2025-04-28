@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -51,8 +50,9 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
-  // Extract matter content for the MatterSlide
-  const matter = claudeMode && paper.ai_matter_claude ? paper.ai_matter_claude : paper.ai_matter;
+  // Extract matter content and determine if Claude toggle should be shown
+  const matter = claudeMode ? paper.ai_matter_claude : paper.ai_matter;
+  const showClaudeToggle = paper.claude_refined;
   
   return (
     <motion.div
@@ -64,7 +64,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     >
       {/* Top toolbar - Claude Toggle and Regenerate Image Button */}
       <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-        {paper.claude_refined && (
+        {showClaudeToggle && (
           <div className="mr-2">
             <ClaudeToggle
               paperId={paper.id}
@@ -94,6 +94,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
       <div className="relative z-10">
         <Carousel className="w-full" setApi={handleCarouselChange}>
           <CarouselContent className="-ml-0">
+            {/* Hero Slide */}
             <CarouselItem className="pl-0">
               <HeroSlide
                 title={displayTitle}
@@ -103,13 +104,14 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
               />
             </CarouselItem>
             
-            {/* Matter Slide */}
+            {/* Matter Slide - only render if matter content exists */}
             {matter && (
               <CarouselItem className="pl-0">
                 <MatterSlide matter={matter} />
               </CarouselItem>
             )}
             
+            {/* Research Findings Slides */}
             {formattedTakeaways && formattedTakeaways.length > 0 ? (
               formattedTakeaways
                 .filter(takeaway => takeaway.type !== 'why_it_matters')
@@ -128,6 +130,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
               </CarouselItem>
             )}
             
+            {/* Detail Slide */}
             <CarouselItem className="pl-0">
               <DetailSlide
                 title={displayTitle}
