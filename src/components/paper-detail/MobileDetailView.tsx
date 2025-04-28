@@ -21,7 +21,8 @@ interface MobileDetailViewProps {
   onRegenerationComplete: (imageUrl: string | null) => void;
   isPromptModalOpen: boolean;
   onPromptModalClose: () => void;
-  claudeMode: boolean;
+  showClaudeToggle?: boolean;
+  isClaudeEnabled?: boolean;
   toggleClaudeMode: (enabled: boolean) => void;
 }
 
@@ -36,7 +37,8 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
   onRegenerationComplete,
   isPromptModalOpen,
   onPromptModalClose,
-  claudeMode,
+  showClaudeToggle,
+  isClaudeEnabled,
   toggleClaudeMode
 }) => {
   return (
@@ -55,10 +57,10 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
               </Button>
               
               <div className="flex items-center gap-2">
-                {paper?.claude_refined && (
+                {showClaudeToggle && paper && (
                   <ClaudeToggle
                     paperId={paper.id}
-                    isEnabled={claudeMode}
+                    isEnabled={!!isClaudeEnabled}
                     onToggle={toggleClaudeMode}
                   />
                 )}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -27,6 +28,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const { 
     formattedCategoryNames, 
@@ -53,7 +55,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
 
   // Extract matter content and determine if Claude toggle should be shown
   const matter = hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
-  const showClaudeToggle = paper.claude_refined;
   
   return (
     <motion.div

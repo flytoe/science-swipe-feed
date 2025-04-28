@@ -108,10 +108,13 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         // Toggle handler
         const toggleClaudeMode = async (enabled: boolean) => {
           try {
+            // Convert paperId to number for database comparison
+            const paperId = typeof paper.id === 'string' ? parseInt(paper.id, 10) : paper.id;
+            
             const { error } = await supabase
               .from('europe_paper')
               .update({ show_claude: enabled })
-              .eq('id', paper.id);
+              .eq('id', paperId);
               
             if (error) throw error;
             
