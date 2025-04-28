@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -11,14 +12,14 @@ interface DatabaseToggleState {
 export const useDatabaseToggle = create<DatabaseToggleState>()(
   persist(
     (set) => ({
-      databaseSource: 'n8n_table', // Default to n8n_table
+      databaseSource: 'europe_paper', // Changed default to europe_paper
       toggleDatabase: (source) => set((state) => ({ 
         databaseSource: source || (
-          state.databaseSource === 'n8n_table' 
-            ? 'core_paper' 
-            : state.databaseSource === 'core_paper'
-              ? 'europe_paper'
-              : 'n8n_table'
+          state.databaseSource === 'europe_paper' 
+            ? 'n8n_table' 
+            : state.databaseSource === 'n8n_table'
+              ? 'core_paper'
+              : 'europe_paper'
         ) 
       })),
     }),

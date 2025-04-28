@@ -20,7 +20,7 @@ const InfiniteScrollTrigger: React.FC<InfiniteScrollTriggerProps> = ({
           onIntersect();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.25, rootMargin: '300px 0px' } // Higher threshold and larger rootMargin to trigger earlier
     );
 
     const currentTrigger = triggerRef.current;
@@ -36,7 +36,7 @@ const InfiniteScrollTrigger: React.FC<InfiniteScrollTriggerProps> = ({
   }, [onIntersect, isLoading]);
 
   return (
-    <div ref={triggerRef} className="h-10 flex items-center justify-center">
+    <div ref={triggerRef} className="h-40 flex items-center justify-center">
       {isLoading && (
         <div className="loading-spinner border-gray-200 border-t-blue-500" />
       )}

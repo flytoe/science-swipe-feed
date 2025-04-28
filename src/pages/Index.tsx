@@ -288,7 +288,6 @@ const Index: React.FC = () => {
             </DialogHeader>
             <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
               <DatabaseToggle />
-              <HapticFeedbackTester />
               <div className="p-4">
                 <button 
                   onClick={handleToggleDonationPrompt}

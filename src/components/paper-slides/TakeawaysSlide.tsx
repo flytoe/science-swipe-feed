@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { FormattedTakeaway } from '../../utils/takeawayParser';
 import KeyTakeaway from '../KeyTakeaway';
@@ -26,9 +25,17 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
   const takeaway = takeaways[0];
   const isWhyItMatters = takeaway.type === 'why_it_matters';
   const takeawayText = typeof takeaway.text === 'string' ? takeaway.text : JSON.stringify(takeaway.text);
-  const displayNumber = !isWhyItMatters && currentIndex !== undefined && totalTakeaways 
-    ? `Research Finding ${currentIndex + 1} of ${totalTakeaways}` 
-    : 'Why It Matters';
+  
+  let displayNumber;
+  if (isWhyItMatters) {
+    displayNumber = 'Why It Matters';
+  } else if (takeaway.citation) {
+    displayNumber = takeaway.citation;
+  } else if (currentIndex !== undefined && totalTakeaways) {
+    displayNumber = `Research Finding ${currentIndex + 1} of ${totalTakeaways}`;
+  } else {
+    displayNumber = 'Research Finding';
+  }
 
   return (
     <div className="flex items-center p-6 bg-black/60 backdrop-blur-sm min-h-[280px] h-full">

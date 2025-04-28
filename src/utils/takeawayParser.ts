@@ -1,3 +1,4 @@
+
 import { Json } from "../integrations/supabase/types";
 import { DatabaseSource } from "../hooks/use-database-toggle";
 
@@ -29,9 +30,10 @@ export const parseKeyTakeaways = (
           formattedTakeaways.push(...filtered);
         } else if (typeof takeaways[0] === 'string') {
           // Convert string array to FormattedTakeaway objects
-          formattedTakeaways.push(...takeaways.map(text => ({ 
+          formattedTakeaways.push(...takeaways.map((text, index) => ({ 
             text, 
-            type: 'default' as const 
+            type: 'default' as const,
+            citation: isEuropePaper ? `Finding ${index + 1}` : undefined
           })));
         }
       } 
@@ -41,7 +43,8 @@ export const parseKeyTakeaways = (
           if (typeof value === 'string') {
             formattedTakeaways.push({
               text: value,
-              type: 'default' as const
+              type: 'default' as const,
+              citation: isEuropePaper ? key : undefined
             });
           }
         });
@@ -50,9 +53,13 @@ export const parseKeyTakeaways = (
       else if (typeof takeaways === 'string') {
         try {
           const parsed = JSON.parse(takeaways);
-          formattedTakeaways.push(...parseKeyTakeaways(parsed));
+          formattedTakeaways.push(...parseKeyTakeaways(parsed, null, databaseSource));
         } catch (e) {
-          formattedTakeaways.push({ text: takeaways, type: 'default' as const });
+          formattedTakeaways.push({ 
+            text: takeaways, 
+            type: 'default' as const,
+            citation: isEuropePaper ? 'Finding 1' : undefined
+          });
         }
       }
     } catch (e) {

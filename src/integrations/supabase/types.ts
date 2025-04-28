@@ -97,9 +97,12 @@ export type Database = {
         Row: {
           abstract_org: string | null
           ai_headline: string | null
+          ai_headline_claude: string | null
           ai_image_prompt: string | null
           ai_key_takeaways: Json | null
+          ai_key_takeaways_claude: Json | null
           ai_matter: string | null
+          ai_matter_claude: string | null
           ai_search_queries: string | null
           ai_summary_done: boolean | null
           category: Json | null
@@ -124,9 +127,12 @@ export type Database = {
         Insert: {
           abstract_org?: string | null
           ai_headline?: string | null
+          ai_headline_claude?: string | null
           ai_image_prompt?: string | null
           ai_key_takeaways?: Json | null
+          ai_key_takeaways_claude?: Json | null
           ai_matter?: string | null
+          ai_matter_claude?: string | null
           ai_search_queries?: string | null
           ai_summary_done?: boolean | null
           category?: Json | null
@@ -151,9 +157,12 @@ export type Database = {
         Update: {
           abstract_org?: string | null
           ai_headline?: string | null
+          ai_headline_claude?: string | null
           ai_image_prompt?: string | null
           ai_key_takeaways?: Json | null
+          ai_key_takeaways_claude?: Json | null
           ai_matter?: string | null
+          ai_matter_claude?: string | null
           ai_search_queries?: string | null
           ai_summary_done?: boolean | null
           category?: Json | null

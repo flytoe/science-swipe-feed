@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { type Paper } from '../lib/supabase';
 import FeedItem from './FeedItem';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ interface ScrollableFeedProps {
   isLoading?: boolean;
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10; // Increased from 5 to 10 for better preloading
 
 const ScrollableFeed: React.FC<ScrollableFeedProps> = ({ 
   papers, 
@@ -18,10 +18,22 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
 }) => {
   const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [preloadedCount, setPreloadedCount] = useState(0);
 
   // Get only the papers we want to display
   const visiblePapers = papers.slice(0, displayCount);
   const hasMore = displayCount < papers.length;
+
+  // Preload next batch when we're 3 items away from the end
+  useEffect(() => {
+    if (displayCount - preloadedCount <= 3 && hasMore && !loadingMore) {
+      setPreloadedCount(displayCount);
+      // Start preloading next batch
+      setTimeout(() => {
+        setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, papers.length));
+      }, 100); // Very short timeout to not block UI
+    }
+  }, [displayCount, papers.length, hasMore, loadingMore, preloadedCount]);
 
   const loadMore = () => {
     if (!hasMore || loadingMore) return;
@@ -31,7 +43,7 @@ const ScrollableFeed: React.FC<ScrollableFeedProps> = ({
     setTimeout(() => {
       setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, papers.length));
       setLoadingMore(false);
-    }, 500);
+    }, 300); // Reduced from 500ms to 300ms for faster loading
   };
 
   if (isLoading && papers.length === 0) {
