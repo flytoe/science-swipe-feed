@@ -10,13 +10,15 @@ interface ClaudeToggleProps {
   isEnabled: boolean;
   onToggle: (enabled: boolean) => void;
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 const ClaudeToggle: React.FC<ClaudeToggleProps> = ({ 
   paperId, 
   isEnabled, 
   onToggle, 
-  size = 'sm' 
+  size = 'sm',
+  className = ''
 }) => {
   const handleToggle = async (checked: boolean) => {
     // Update UI state immediately (optimistic update)
@@ -27,7 +29,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
       const { error } = await supabase
         .from('europe_paper')
         .update({ show_claude: checked })
-        .eq('id', Number(paperId)); // Convert to Number to ensure compatibility
+        .eq('id', Number(paperId));
       
       if (error) {
         console.error('Error updating Claude preference:', error);
@@ -44,7 +46,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-2 ${size === 'sm' ? 'scale-90' : ''}`}>
+    <div className={`flex items-center gap-2 ${size === 'sm' ? 'scale-90' : ''} ${className}`}>
       <Switch 
         id={`claude-toggle-${paperId}`}
         checked={isEnabled}
@@ -52,7 +54,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
       />
       <Label 
         htmlFor={`claude-toggle-${paperId}`} 
-        className="text-xs text-gray-500 cursor-pointer"
+        className="text-xs text-gray-500 cursor-pointer select-none"
       >
         {isEnabled ? 'Claude AI' : 'Default AI'}
       </Label>

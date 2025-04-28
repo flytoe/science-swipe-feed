@@ -26,7 +26,7 @@ interface FeedItemProps {
 const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   
   const { 
     formattedCategoryNames, 
@@ -36,7 +36,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     refreshImageData,
     formattedTakeaways,
     paper: paperWithData,
-    claudeMode,
+    hasClaudeContent,
+    showClaudeToggle,
     toggleClaudeMode
   } = usePaperData(paper);
 
@@ -51,7 +52,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   };
 
   // Extract matter content and determine if Claude toggle should be shown
-  const matter = claudeMode ? paper.ai_matter_claude : paper.ai_matter;
+  const matter = hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
   const showClaudeToggle = paper.claude_refined;
   
   return (
@@ -68,7 +69,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           <div className="mr-2">
             <ClaudeToggle
               paperId={paper.id}
-              isEnabled={claudeMode}
+              isEnabled={!!paper.show_claude}
               onToggle={toggleClaudeMode}
               size="sm"
             />

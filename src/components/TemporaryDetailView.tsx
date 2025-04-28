@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Paper } from '../lib/supabase';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -25,10 +24,8 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const paperData = usePaperData(paper);
   
-  // Get from URL if we're in direct route or from props
   const isDirectRoute = location.pathname.startsWith('/paper/');
   
-  // Handle the case where we're at /paper/:id route
   const handleClose = () => {
     if (isDirectRoute) {
       navigate('/');
@@ -61,7 +58,8 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
     onRegenerationComplete: handleRegenerationComplete,
     isPromptModalOpen,
     onPromptModalClose: () => setIsPromptModalOpen(true),
-    claudeMode: paperData.claudeMode,
+    showClaudeToggle: paperData.showClaudeToggle,
+    isClaudeEnabled: !!paper?.show_claude,
     toggleClaudeMode: paperData.toggleClaudeMode
   };
   
