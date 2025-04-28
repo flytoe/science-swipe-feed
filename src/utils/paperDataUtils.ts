@@ -80,15 +80,8 @@ export function formatPaperData(item: any, databaseSource: DatabaseSource): any 
     createdAt = new Date().toISOString();
   }
   
-  // Handle ID field safely for europe_paper
-  let paperId: string;
-  if (databaseSource === 'europe_paper') {
-    // For europe_paper, prefer doi if available
-    // Then convert id to string if it's a number, or use as is if already a string
-    paperId = item.doi || (typeof item.id === 'number' ? item.id.toString() : item.id || '');
-  } else {
-    paperId = item.id || '';
-  }
+  // For Europe paper, convert numeric ID to string for compatibility
+  const paperId = typeof item.id === 'number' ? item.id.toString() : item.id;
   
   // Create the paper object with proper typing
   const paper = {
@@ -105,9 +98,14 @@ export function formatPaperData(item: any, databaseSource: DatabaseSource): any 
     category: parseCategory(item.category),
     image_url: item.image_url || null,
     creator: parseCreator(item.creator),
-    doi: item.doi || paperId, // Set doi to id for compatibility
+    ai_matter: item.ai_matter || null,
+    ai_matter_claude: item.ai_matter_claude || null,
+    ai_headline_claude: item.ai_headline_claude || null,
+    ai_key_takeaways_claude: item.ai_key_takeaways_claude || null,
+    claude_refined: !!item.claude_refined,
+    show_claude: !!item.show_claude,
+    doi: item.doi || '',
   };
   
   return paper;
 }
-

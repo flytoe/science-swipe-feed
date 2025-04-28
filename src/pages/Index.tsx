@@ -21,9 +21,9 @@ import DonationModal from '@/components/donations/DonationModal';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
-import DatabaseToggle from '@/components/DatabaseToggle';
-import { useDatabaseToggle, getIdFieldName } from '@/hooks/use-database-toggle';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
+
+const DATABASE_SOURCE = 'europe_paper';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -36,7 +36,6 @@ const Index: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const { currentMode } = useFeedModeStore();
-  const { databaseSource } = useDatabaseToggle();
   
   const { completedOnboarding, showOnboarding, setShowOnboarding } = useOnboardingStore();
   
@@ -66,7 +65,7 @@ const Index: React.FC = () => {
   
   useEffect(() => {
     fetchPapers();
-  }, [databaseSource]);
+  }, []);
   
   const fetchPapers = async () => {
     try {
@@ -75,11 +74,9 @@ const Index: React.FC = () => {
       const papersData = await getPapers();
       setPapers(papersData);
       
-      const idField = getIdFieldName(databaseSource);
-      
       const { data, error, count } = await supabase
-        .from(databaseSource)
-        .select(idField, { count: 'exact' })
+        .from(DATABASE_SOURCE)
+        .select('id', { count: 'exact' })
         .eq('ai_summary_done', true)
         .limit(1);
       
@@ -94,7 +91,7 @@ const Index: React.FC = () => {
       setHasPapers(count !== null && count > 0);
       
       if (count !== null && count > 0) {
-        toast.success(`Found ${count} papers in the ${databaseSource} database`);
+        toast.success(`Found ${count} papers in the Europe paper database`);
       }
     } catch (error) {
       console.error('Error checking papers:', error);
@@ -134,7 +131,7 @@ const Index: React.FC = () => {
   const addSamplePaper = async () => {
     try {
       const samplePaper = {
-        id: `sample-${Date.now()}`,
+        id: Date.now(),
         title_org: 'Sample Paper: Machine Learning in Healthcare',
         abstract_org: 'This sample paper explores the applications of machine learning in modern healthcare, including predictive diagnostics, personalized treatment plans, and medical imaging analysis.',
         score: 4.7,
@@ -144,11 +141,12 @@ const Index: React.FC = () => {
         ai_key_takeaways: ['Reduced diagnostic time by 60%', 'Increased treatment efficacy by 45%', 'Improved patient outcomes in 78% of cases'],
         created_at: new Date().toISOString(),
         category: ['cs.LG', 'cs.AI', 'q-bio'],
-        image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070'
+        image_url: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070',
+        ai_matter: 'This research is important because it shows how AI can significantly improve healthcare outcomes by reducing diagnostic times and increasing treatment success rates.'
       };
       
       const { error } = await supabase
-        .from(databaseSource)
+        .from(DATABASE_SOURCE)
         .insert(samplePaper);
       
       if (error) {
@@ -202,7 +200,7 @@ const Index: React.FC = () => {
       <header className="fixed top-0 z-30 w-full bg-transparent">
         <div className="container max-w-md mx-auto px-4 py-4">
           <div className="w-full flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-800">Research Feed</h1>
+            <h1 className="text-xl font-semibold text-gray-800">Europe Research Feed</h1>
             <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
@@ -302,7 +300,6 @@ const Index: React.FC = () => {
                   {showDonationPrompt ? 'Hide' : 'Show'} Donation Prompt
                 </button>
               </div>
-              <DatabaseToggle />
             </div>
             <div className="p-4 border-t border-gray-200">
               <Button 
@@ -337,7 +334,7 @@ const Index: React.FC = () => {
         <div className="max-w-md mx-auto mt-2 px-4">
           <div className="flex flex-col items-center gap-2 bg-amber-50 p-4 rounded-md border border-amber-200 text-sm text-amber-800">
             <span>
-              No papers found in your {databaseSource} database. Would you like to add a sample paper?
+              No papers found in your Europe database. Would you like to add a sample paper?
             </span>
             <button 
               onClick={addSamplePaper}

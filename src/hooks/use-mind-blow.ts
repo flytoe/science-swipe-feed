@@ -20,7 +20,7 @@ const getOrCreateUserId = (): string => {
   return userId;
 };
 
-export function useMindBlow(paperDoi: string) {
+export function useMindBlow(paperId: string) {
   const [count, setCount] = useState<number>(0);
   const [hasMindBlown, setHasMindBlown] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -30,10 +30,13 @@ export function useMindBlow(paperDoi: string) {
   const fetchMindBlowData = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Convert numeric paperId to string if needed
+      const id = typeof paperId === 'number' ? paperId.toString() : paperId;
+      
       const [mindBlowCount, userHasMindBlown, topPaper] = await Promise.all([
-        getMindBlowCount(paperDoi),
-        hasUserMindBlown(paperDoi, userId),
-        isTopMindBlownPaper(paperDoi)
+        getMindBlowCount(id),
+        hasUserMindBlown(id, userId),
+        isTopMindBlownPaper(id)
       ]);
       
       setCount(mindBlowCount);
@@ -44,41 +47,44 @@ export function useMindBlow(paperDoi: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [paperDoi, userId]);
+  }, [paperId, userId]);
 
   useEffect(() => {
-    if (paperDoi) {
+    if (paperId) {
       fetchMindBlowData();
     }
-  }, [paperDoi, fetchMindBlowData]);
+  }, [paperId, fetchMindBlowData]);
 
   const toggleMindBlow = useCallback(async (reason?: string) => {
     if (isLoading) return;
     
     setIsLoading(true);
     try {
+      // Convert numeric paperId to string if needed
+      const id = typeof paperId === 'number' ? paperId.toString() : paperId;
+      
       if (!hasMindBlown) {
         // Add a new mind blow
-        const success = await addMindBlow(paperDoi, userId, reason);
+        const success = await addMindBlow(id, userId, reason);
         if (success) {
           setCount(prev => prev + 1);
           setHasMindBlown(true);
           // Check if this addition makes it a top paper
-          const newIsTop = await isTopMindBlownPaper(paperDoi);
+          const newIsTop = await isTopMindBlownPaper(id);
           setIsTopPaper(newIsTop);
         }
       } else if (hasMindBlown && reason) {
         // User is just adding a reason to an existing mind-blow
         // Remove the existing mind-blow and add a new one with the reason
-        await removeMindBlow(paperDoi, userId);
-        const success = await addMindBlow(paperDoi, userId, reason);
+        await removeMindBlow(id, userId);
+        const success = await addMindBlow(id, userId, reason);
         if (success) {
           // Count stays the same since we're just updating the reason
           setHasMindBlown(true);
         }
       } else {
         // Remove mind blow (only if no reason is provided)
-        const success = await removeMindBlow(paperDoi, userId);
+        const success = await removeMindBlow(id, userId);
         if (success) {
           setCount(prev => Math.max(prev - 1, 0));
           setHasMindBlown(false);
@@ -89,7 +95,7 @@ export function useMindBlow(paperDoi: string) {
     } finally {
       setIsLoading(false);
     }
-  }, [paperDoi, userId, hasMindBlown, isLoading]);
+  }, [paperId, userId, hasMindBlown, isLoading]);
 
   return {
     count,

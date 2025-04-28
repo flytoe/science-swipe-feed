@@ -4,7 +4,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
-import { useDatabaseToggle } from '@/hooks/use-database-toggle';
 
 interface ClaudeToggleProps {
   paperId: string | number;
@@ -19,33 +18,28 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
   onToggle, 
   size = 'sm' 
 }) => {
-  const { databaseSource } = useDatabaseToggle();
-  
   const handleToggle = async (checked: boolean) => {
     // Update UI state immediately (optimistic update)
     onToggle(checked);
     
-    // Only attempt database update for europe_paper
-    if (databaseSource === 'europe_paper') {
-      try {
-        // Convert paperId to appropriate type for database comparison
-        const { error } = await supabase
-          .from('europe_paper')
-          .update({ show_claude: checked })
-          .eq('id', Number(paperId)); // Convert to Number to ensure compatibility
-        
-        if (error) {
-          console.error('Error updating Claude preference:', error);
-          toast.error('Failed to save preference');
-          // Revert UI if save fails
-          onToggle(!checked);
-        }
-      } catch (error) {
-        console.error('Error in toggle action:', error);
+    try {
+      // Convert paperId to appropriate type for database comparison
+      const { error } = await supabase
+        .from('europe_paper')
+        .update({ show_claude: checked })
+        .eq('id', Number(paperId)); // Convert to Number to ensure compatibility
+      
+      if (error) {
+        console.error('Error updating Claude preference:', error);
         toast.error('Failed to save preference');
         // Revert UI if save fails
         onToggle(!checked);
       }
+    } catch (error) {
+      console.error('Error in toggle action:', error);
+      toast.error('Failed to save preference');
+      // Revert UI if save fails
+      onToggle(!checked);
     }
   };
 

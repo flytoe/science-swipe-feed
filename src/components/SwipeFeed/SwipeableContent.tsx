@@ -33,7 +33,7 @@ const SwipeableContent: React.FC<SwipeableContentProps> = ({
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={`card-${currentPaper?.doi || currentPaper?.id}`}
+        key={`card-${currentPaper?.id}`}
         initial={{ 
           opacity: 0, 
           x: swipeDirection === 'left' ? '100%' : '-100%',

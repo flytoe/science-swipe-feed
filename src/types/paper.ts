@@ -24,7 +24,8 @@ export type Paper = {
   ai_key_takeaways_claude?: any | null;
   ai_matter_claude?: string | null;
   show_claude?: boolean;
-  // For backward compatibility, add doi getter
+  // For Europe papers
   doi: string;
-  oai?: string; // Optional field for core_paper
+  feed_worthy?: boolean;
+  feed_worthy_reason?: string | null;
 };

@@ -1,6 +1,5 @@
 
 import { Json } from "../integrations/supabase/types";
-import { DatabaseSource } from "../hooks/use-database-toggle";
 
 export interface FormattedTakeaway {
   text: string | Record<string, string>;
@@ -11,11 +10,10 @@ export interface FormattedTakeaway {
 
 export const parseKeyTakeaways = (
   takeaways: any, 
-  ai_matter?: string | null,
-  databaseSource?: DatabaseSource
+  ai_matter?: string | null
 ): FormattedTakeaway[] => {
   const formattedTakeaways: FormattedTakeaway[] = [];
-  const isEuropePaper = databaseSource === 'europe_paper';
+  const isEuropePaper = true; // Always true since we only use Europe papers now
 
   if (takeaways) {
     try {
@@ -23,11 +21,7 @@ export const parseKeyTakeaways = (
       if (Array.isArray(takeaways) && takeaways.length > 0) {
         if (typeof takeaways[0] === 'object' && takeaways[0] !== null && 'text' in takeaways[0]) {
           // For Europe papers, use all takeaways as research findings
-          // For other sources, filter out any why_it_matters entries
-          const filtered = isEuropePaper 
-            ? takeaways 
-            : takeaways.filter(t => t.type !== 'why_it_matters');
-          formattedTakeaways.push(...filtered);
+          formattedTakeaways.push(...takeaways);
         } else if (typeof takeaways[0] === 'string') {
           // Convert string array to FormattedTakeaway objects
           formattedTakeaways.push(...takeaways.map((text, index) => ({ 
@@ -53,7 +47,7 @@ export const parseKeyTakeaways = (
       else if (typeof takeaways === 'string') {
         try {
           const parsed = JSON.parse(takeaways);
-          formattedTakeaways.push(...parseKeyTakeaways(parsed, null, databaseSource));
+          formattedTakeaways.push(...parseKeyTakeaways(parsed));
         } catch (e) {
           formattedTakeaways.push({ 
             text: takeaways, 
@@ -69,7 +63,7 @@ export const parseKeyTakeaways = (
 
   // Only add ai_matter for Europe papers or if there's no why_it_matters type already
   if (ai_matter && typeof ai_matter === 'string' && ai_matter.trim() !== '') {
-    if (isEuropePaper || !formattedTakeaways.some(t => t.type === 'why_it_matters')) {
+    if (!formattedTakeaways.some(t => t.type === 'why_it_matters')) {
       formattedTakeaways.push({
         text: ai_matter,
         type: 'why_it_matters' as const

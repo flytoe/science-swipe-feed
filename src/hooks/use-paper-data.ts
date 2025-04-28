@@ -5,7 +5,6 @@ import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../ut
 import { parseKeyTakeaways } from '../utils/takeawayParser';
 import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
-import { useDatabaseToggle } from './use-database-toggle';
 import { supabase } from '../integrations/supabase/client';
 
 interface UsePaperDataResult {
@@ -47,7 +46,6 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [claudeMode, setClaudeMode] = useState(false);
-  const { databaseSource } = useDatabaseToggle();
   
   // Initialize Claude mode from paper data
   useEffect(() => {
@@ -56,8 +54,26 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     }
   }, [paper]);
   
-  const toggleClaudeMode = (enabled: boolean) => {
+  const toggleClaudeMode = async (enabled: boolean) => {
     setClaudeMode(enabled);
+    
+    // Update the show_claude value in the database if we have a paper ID
+    if (paper && paper.id) {
+      try {
+        // Convert paperId to appropriate type for database comparison
+        const { error } = await supabase
+          .from('europe_paper')
+          .update({ show_claude: enabled })
+          .eq('id', Number(paper.id)); // Convert to Number to ensure compatibility
+        
+        if (error) {
+          console.error('Error updating Claude preference:', error);
+          toast.error('Failed to save preference');
+        }
+      } catch (error) {
+        console.error('Error in toggle action:', error);
+      }
+    }
   };
   
   useEffect(() => {
@@ -99,7 +115,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     generateImageIfNeeded();
-  }, [paper, databaseSource]); 
+  }, [paper]); 
   
   useEffect(() => {
     const loadPaperData = async () => {
@@ -160,8 +176,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         
         const formattedTakeaways = parseKeyTakeaways(
           takeaways, 
-          matter,
-          databaseSource
+          matter
         );
         
         const displayTitle = headline || paper.title_org || 'Untitled Paper';
@@ -197,7 +212,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     loadPaperData();
-  }, [paper, isGenerating, databaseSource, claudeMode]);
+  }, [paper, isGenerating, claudeMode]);
   
   return formattedData;
 };
