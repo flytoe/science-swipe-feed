@@ -13,6 +13,7 @@ import {
 import HeroSlide from './paper-slides/HeroSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 import DetailSlide from './paper-slides/DetailSlide';
+import MatterSlide from './paper-slides/MatterSlide';
 import MindBlowButton from './MindBlowButton';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import RegenerateImageButton from './RegenerateImageButton';
@@ -50,6 +51,9 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
+  // Extract matter content for the MatterSlide
+  const matter = claudeMode && paper.ai_matter_claude ? paper.ai_matter_claude : paper.ai_matter;
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -99,12 +103,25 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
               />
             </CarouselItem>
             
+            {/* Matter Slide */}
+            {matter && (
+              <CarouselItem className="pl-0">
+                <MatterSlide matter={matter} />
+              </CarouselItem>
+            )}
+            
             {formattedTakeaways && formattedTakeaways.length > 0 ? (
-              formattedTakeaways.map((takeaway, idx) => (
-                <CarouselItem key={`takeaway-${idx}`} className="pl-0">
-                  <TakeawaysSlide takeaways={[takeaway]} />
-                </CarouselItem>
-              ))
+              formattedTakeaways
+                .filter(takeaway => takeaway.type !== 'why_it_matters')
+                .map((takeaway, idx) => (
+                  <CarouselItem key={`takeaway-${idx}`} className="pl-0">
+                    <TakeawaysSlide 
+                      takeaways={[takeaway]} 
+                      currentIndex={idx}
+                      totalTakeaways={formattedTakeaways.filter(t => t.type !== 'why_it_matters').length}
+                    />
+                  </CarouselItem>
+                ))
             ) : (
               <CarouselItem className="pl-0">
                 <TakeawaysSlide takeaways={[]} />
@@ -118,7 +135,6 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 abstract_org={paper.abstract_org}
                 doi={paper.doi}
                 creator={paper.creator}
-                matter={claudeMode && paper.ai_matter_claude ? paper.ai_matter_claude : paper.ai_matter}
               />
             </CarouselItem>
           </CarouselContent>
