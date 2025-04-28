@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -27,9 +26,7 @@ interface FeedItemProps {
 const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const navigate = useNavigate();
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [localToggleState, setLocalToggleState] = useState(!!paper.show_claude);
   
   const { 
     formattedCategoryNames, 
@@ -39,17 +36,11 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     refreshImageData,
     formattedTakeaways,
     paper: paperWithData,
-    hasClaudeContent,
-    showClaudeToggle,
+    claudeMode,
     toggleClaudeMode
-  } = usePaperData({ ...paper, show_claude: localToggleState });
+  } = usePaperData(paper);
 
   const { isLoading, hasMindBlown, count, toggleMindBlow: toggle } = useMindBlow(paper.doi);
-
-  // Update local toggle state when paper prop changes
-  useEffect(() => {
-    setLocalToggleState(!!paper.show_claude);
-  }, [paper.show_claude]);
 
   const handleCarouselChange = (api: any) => {
     if (api) {
@@ -59,14 +50,9 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
-  // Handle toggle with local state update for immediate feedback
-  const handleToggleClaudeMode = (enabled: boolean) => {
-    setLocalToggleState(enabled);
-    toggleClaudeMode(enabled);
-  };
-
-  // Extract matter content based on current toggle state
-  const matter = localToggleState && hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
+  // Extract matter content and determine if Claude toggle should be shown
+  const matter = claudeMode ? paper.ai_matter_claude : paper.ai_matter;
+  const showClaudeToggle = paper.claude_refined;
   
   return (
     <motion.div
@@ -82,8 +68,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           <div className="mr-2">
             <ClaudeToggle
               paperId={paper.id}
-              isEnabled={localToggleState}
-              onToggle={handleToggleClaudeMode}
+              isEnabled={claudeMode}
+              onToggle={toggleClaudeMode}
               size="sm"
             />
           </div>

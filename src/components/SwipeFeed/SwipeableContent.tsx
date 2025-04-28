@@ -30,21 +30,10 @@ const SwipeableContent: React.FC<SwipeableContentProps> = ({
   handleDragEnd,
   isMobile,
 }) => {
-  // Handle toggle state changes with force re-render
-  const handleClaudeToggle = (enabled: boolean) => {
-    if (currentPaper) {
-      currentPaper.show_claude = enabled;
-      // Force re-render of the component to show updated content
-      window.setTimeout(() => {
-        // This empty timeout forces React to re-render with the updated state
-      }, 0);
-    }
-  };
-
   return (
     <AnimatePresence mode="wait" initial={false}>
       <motion.div
-        key={`card-${currentPaper?.id}-${currentPaper?.show_claude ? 'claude' : 'default'}`} // Add show_claude to key to force re-render
+        key={`card-${currentPaper?.id}`}
         initial={{ 
           opacity: 0, 
           x: swipeDirection === 'left' ? '100%' : '-100%',
@@ -90,7 +79,11 @@ const SwipeableContent: React.FC<SwipeableContentProps> = ({
             <ClaudeToggle
               paperId={currentPaper.id}
               isEnabled={!!currentPaper.show_claude}
-              onToggle={handleClaudeToggle}
+              onToggle={(enabled) => {
+                if (currentPaper) {
+                  currentPaper.show_claude = enabled;
+                }
+              }}
             />
           )}
         </div>

@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
-import { formatCategoryName, fetchCategoryMap } from '../utils/categoryUtils';
+import { formatCategoryName, fetchCategoryMap, formatCategoryArray } from '../utils/categoryUtils';
 import { parseKeyTakeaways } from '../utils/takeawayParser';
-import { checkAndGenerateImageIfNeeded } from '../lib/imageGenerationService';
+import { checkAndGenerateImageIfNeeded, generateImageForPaper } from '../lib/imageGenerationService';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
 
@@ -18,8 +19,7 @@ interface UsePaperDataResult {
   imageSourceType: 'default' | 'database' | 'generated' | 'runware';
   refreshImageData: (newImageUrl?: string) => void;
   paper: Paper | null;
-  hasClaudeContent: boolean;
-  showClaudeToggle: boolean;
+  claudeMode: boolean;
   toggleClaudeMode: (enabled: boolean) => void;
 }
 
@@ -35,25 +35,96 @@ const defaultPaperData: UsePaperDataResult = {
   imageSourceType: 'default',
   refreshImageData: () => {},
   paper: null,
-  hasClaudeContent: false,
-  showClaudeToggle: false,
+  claudeMode: false,
   toggleClaudeMode: () => {},
 };
 
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
-  const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
+  const [formattedData, setFormattedData] = useState<UsePaperDataResult>({
+    ...defaultPaperData, 
+    paper
+  });
   const [isGenerating, setIsGenerating] = useState(false);
-  const [toggleVersion, setToggleVersion] = useState(0);
-
+  const [claudeMode, setClaudeMode] = useState(false);
+  
+  // Initialize Claude mode from paper data
+  useEffect(() => {
+    if (paper && 'show_claude' in paper) {
+      setClaudeMode(!!paper.show_claude);
+    }
+  }, [paper]);
+  
+  const toggleClaudeMode = async (enabled: boolean) => {
+    setClaudeMode(enabled);
+    
+    // Update the show_claude value in the database if we have a paper ID
+    if (paper && paper.id) {
+      try {
+        // Convert paperId to appropriate type for database comparison
+        const { error } = await supabase
+          .from('europe_paper')
+          .update({ show_claude: enabled })
+          .eq('id', Number(paper.id)); // Convert to Number to ensure compatibility
+        
+        if (error) {
+          console.error('Error updating Claude preference:', error);
+          toast.error('Failed to save preference');
+        }
+      } catch (error) {
+        console.error('Error in toggle action:', error);
+      }
+    }
+  };
+  
+  useEffect(() => {
+    const generateImageIfNeeded = async () => {
+      if (!paper) return;
+      
+      if (paper.image_url || isGenerating) return;
+      
+      try {
+        setIsGenerating(true);
+        setFormattedData(prev => ({
+          ...prev,
+          isGeneratingImage: true
+        }));
+        
+        const imageUrl = await checkAndGenerateImageIfNeeded(paper);
+        
+        if (imageUrl) {
+          setFormattedData(prev => ({
+            ...prev,
+            imageSrc: imageUrl,
+            imageSourceType: 'runware',
+            isGeneratingImage: false
+          }));
+          console.log(`Successfully generated image for paper: ${paper.id}`);
+        } else {
+          console.warn(`Failed to generate image for paper: ${paper.id}`);
+          setFormattedData(prev => ({
+            ...prev,
+            isGeneratingImage: false
+          }));
+        }
+      } catch (error) {
+        console.error(`Error generating image for paper ${paper.id}:`, error);
+        toast.error('Failed to generate image');
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+    
+    generateImageIfNeeded();
+  }, [paper]); 
+  
   useEffect(() => {
     const loadPaperData = async () => {
       if (!paper) {
-        setFormattedData(defaultPaperData);
+        setFormattedData({...defaultPaperData, paper: null, claudeMode, toggleClaudeMode});
         return;
       }
       
       try {
-        // Format date
         let createdAt = new Date(paper.created_at);
         if (isNaN(createdAt.getTime())) {
           createdAt = new Date();
@@ -65,34 +136,35 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           day: 'numeric',
         }).format(createdAt);
         
-        // Format categories
         const paperCategories = Array.isArray(paper.category) ? 
           paper.category : 
           (paper.category ? [paper.category] : []);
           
         const categoryMap = await fetchCategoryMap();
+        
         const formattedCategoryNames = paperCategories.map(cat => 
           formatCategoryName(cat, categoryMap)
         );
         
-        // Check if paper has Claude content
-        const hasClaudeContent = !!(
-          paper.ai_headline_claude ||
-          paper.ai_matter_claude ||
-          paper.ai_key_takeaways_claude
-        );
-        
-        // Choose content based on show_claude flag
-        const headline = paper.show_claude ? paper.ai_headline_claude : paper.ai_headline;
-        const matter = paper.show_claude ? paper.ai_matter_claude : paper.ai_matter;
-        const takeaways = paper.show_claude ? paper.ai_key_takeaways_claude : paper.ai_key_takeaways;
-        
+        // Choose between default and Claude data based on claude mode
+        const headline = claudeMode && paper.ai_headline_claude 
+          ? paper.ai_headline_claude 
+          : paper.ai_headline;
+          
+        const matter = claudeMode && paper.ai_matter_claude
+          ? paper.ai_matter_claude
+          : paper.ai_matter;
+          
+        const takeaways = claudeMode && paper.ai_key_takeaways_claude
+          ? paper.ai_key_takeaways_claude
+          : paper.ai_key_takeaways;
+          
         const simpleTakeaways = Array.isArray(takeaways) ? 
           takeaways : 
           (takeaways ? [takeaways] : []);
           
-        // Handle image source
-        const imageSrc = paper.image_url || defaultPaperData.imageSrc;
+        const imageSrc = paper.image_url || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=1973';
+        
         let imageSourceType: 'default' | 'database' | 'generated' | 'runware' = 'database';
         if (!paper.image_url) {
           imageSourceType = 'default';
@@ -102,46 +174,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           imageSourceType = 'generated';
         }
         
-        const formattedTakeaways = parseKeyTakeaways(takeaways, matter);
-        const displayTitle = headline || paper.title_org || 'Untitled Paper';
+        const formattedTakeaways = parseKeyTakeaways(
+          takeaways, 
+          matter
+        );
         
-        // Toggle handler with immediate UI update
-        const toggleClaudeMode = async (enabled: boolean) => {
-          try {
-            // Convert paperId to number for database comparison
-            const paperId = typeof paper.id === 'string' ? parseInt(paper.id, 10) : paper.id;
-            
-            // Update local state immediately for better UX
-            setFormattedData(prev => ({
-              ...prev,
-              paper: { ...paper, show_claude: enabled }
-            }));
-            
-            // Force a re-render to update all content that depends on the Claude mode
-            setToggleVersion(v => v + 1);
-            
-            // Update Supabase in the background
-            const { error } = await supabase
-              .from('europe_paper')
-              .update({ show_claude: enabled })
-              .eq('id', paperId);
-              
-            if (error) {
-              console.error('Error updating Claude preference:', error);
-              toast.error('Failed to save preference. Changes will be lost after refresh.');
-              
-              // Keep the UI updated even if the database update fails
-              // This allows the user to see the different content version
-              // even though it won't persist after page refresh
-            } else {
-              toast.success('Preference saved');
-              console.log('Claude preference updated successfully in database');
-            }
-          } catch (error) {
-            console.error('Error updating Claude preference:', error);
-            toast.error('Failed to save preference. Changes will be lost after refresh.');
-          }
-        };
+        const displayTitle = headline || paper.title_org || 'Untitled Paper';
         
         setFormattedData({
           categories: paperCategories,
@@ -153,9 +191,8 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           formattedTakeaways,
           isGeneratingImage: isGenerating,
           imageSourceType,
-          paper,
-          hasClaudeContent,
-          showClaudeToggle: hasClaudeContent,
+          paper: paper,
+          claudeMode,
           toggleClaudeMode,
           refreshImageData: (newImageUrl?: string) => {
             if (newImageUrl) {
@@ -170,12 +207,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         });
       } catch (error) {
         console.error('Error in usePaperData:', error);
-        setFormattedData({ ...defaultPaperData, paper });
+        setFormattedData({...defaultPaperData, paper, claudeMode, toggleClaudeMode});
       }
     };
     
     loadPaperData();
-  }, [paper, isGenerating, toggleVersion]);
+  }, [paper, isGenerating, claudeMode]);
   
   return formattedData;
 };

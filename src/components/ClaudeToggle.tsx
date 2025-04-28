@@ -10,15 +10,13 @@ interface ClaudeToggleProps {
   isEnabled: boolean;
   onToggle: (enabled: boolean) => void;
   size?: 'sm' | 'md' | 'lg';
-  className?: string;
 }
 
 const ClaudeToggle: React.FC<ClaudeToggleProps> = ({ 
   paperId, 
   isEnabled, 
   onToggle, 
-  size = 'sm',
-  className = ''
+  size = 'sm' 
 }) => {
   const handleToggle = async (checked: boolean) => {
     // Update UI state immediately (optimistic update)
@@ -26,35 +24,27 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
     
     try {
       // Convert paperId to appropriate type for database comparison
-      const numericId = typeof paperId === 'string' ? parseInt(paperId, 10) : paperId;
-      
-      console.log(`Toggling Claude mode for paper ${numericId} to ${checked}`);
-      
       const { error } = await supabase
         .from('europe_paper')
         .update({ show_claude: checked })
-        .eq('id', numericId);
+        .eq('id', Number(paperId)); // Convert to Number to ensure compatibility
       
       if (error) {
         console.error('Error updating Claude preference:', error);
-        
-        // Don't revert UI state - we'll let the local state handle the toggle
-        // even if the database update fails
-        
-        // Just notify the user that the preference won't persist
-        toast.error('Preference saved locally only. Will reset on page refresh.');
-      } else {
-        console.log('Claude preference updated successfully');
+        toast.error('Failed to save preference');
+        // Revert UI if save fails
+        onToggle(!checked);
       }
     } catch (error) {
       console.error('Error in toggle action:', error);
-      toast.error('Failed to save preference to database');
-      // Don't revert UI - let the local state show the toggle
+      toast.error('Failed to save preference');
+      // Revert UI if save fails
+      onToggle(!checked);
     }
   };
 
   return (
-    <div className={`flex items-center gap-2 ${size === 'sm' ? 'scale-90' : ''} ${className}`}>
+    <div className={`flex items-center gap-2 ${size === 'sm' ? 'scale-90' : ''}`}>
       <Switch 
         id={`claude-toggle-${paperId}`}
         checked={isEnabled}
@@ -62,7 +52,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
       />
       <Label 
         htmlFor={`claude-toggle-${paperId}`} 
-        className="text-xs text-gray-500 cursor-pointer select-none"
+        className="text-xs text-gray-500 cursor-pointer"
       >
         {isEnabled ? 'Claude AI' : 'Default AI'}
       </Label>

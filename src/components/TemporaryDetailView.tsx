@@ -25,8 +25,10 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const paperData = usePaperData(paper);
   
+  // Get from URL if we're in direct route or from props
   const isDirectRoute = location.pathname.startsWith('/paper/');
   
+  // Handle the case where we're at /paper/:id route
   const handleClose = () => {
     if (isDirectRoute) {
       navigate('/');
@@ -59,8 +61,7 @@ const TemporaryDetailView: React.FC<TemporaryDetailViewProps> = ({
     onRegenerationComplete: handleRegenerationComplete,
     isPromptModalOpen,
     onPromptModalClose: () => setIsPromptModalOpen(true),
-    showClaudeToggle: paperData.showClaudeToggle,
-    isClaudeEnabled: !!paper?.show_claude,
+    claudeMode: paperData.claudeMode,
     toggleClaudeMode: paperData.toggleClaudeMode
   };
   
