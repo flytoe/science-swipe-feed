@@ -26,16 +26,22 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
     
     try {
       // Convert paperId to appropriate type for database comparison
+      const numericId = typeof paperId === 'string' ? parseInt(paperId, 10) : paperId;
+      
+      console.log(`Toggling Claude mode for paper ${numericId} to ${checked}`);
+      
       const { error } = await supabase
         .from('europe_paper')
         .update({ show_claude: checked })
-        .eq('id', Number(paperId));
+        .eq('id', numericId);
       
       if (error) {
         console.error('Error updating Claude preference:', error);
         toast.error('Failed to save preference');
         // Revert UI if save fails
         onToggle(!checked);
+      } else {
+        console.log('Claude preference updated successfully');
       }
     } catch (error) {
       console.error('Error in toggle action:', error);

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -53,7 +52,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
-  // Extract matter content and determine if Claude toggle should be shown
+  // Extract matter content based on Claude mode
   const matter = hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
   
   return (
