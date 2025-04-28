@@ -28,10 +28,11 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
     // Only attempt database update for europe_paper
     if (databaseSource === 'europe_paper') {
       try {
+        // Convert paperId to appropriate type for database comparison
         const { error } = await supabase
           .from('europe_paper')
           .update({ show_claude: checked })
-          .eq('id', paperId);
+          .eq('id', Number(paperId)); // Convert to Number to ensure compatibility
         
         if (error) {
           console.error('Error updating Claude preference:', error);
