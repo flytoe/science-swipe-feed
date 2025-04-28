@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '../ui/button';
 import { ExternalLink } from 'lucide-react';
@@ -12,7 +11,6 @@ interface DetailSlideProps {
   abstract_org?: string;
   doi?: string;
   creator?: string[] | string | null;
-  matter?: string;
   showAbstract?: boolean;
 }
 
@@ -22,7 +20,6 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
   abstract_org,
   doi,
   creator,
-  matter,
   showAbstract = true,
 }) => {
   // Format the creators for display
@@ -49,15 +46,9 @@ const DetailSlide: React.FC<DetailSlideProps> = ({
             variant="outline" 
             className="bg-indigo-500/20 text-white border-indigo-400/30 text-base px-3 py-1"
           >
-            Matter Overview
+            Paper Details
           </Badge>
         </div>
-
-        {matter && (
-          <div className="text-white text-lg font-medium mb-6">
-            {matter}
-          </div>
-        )}
 
         {creatorDisplay && (
           <div className="text-white/80 text-sm">

@@ -9,6 +9,7 @@ import {
   CarouselDots
 } from './ui/carousel';
 import HeroSlide from './paper-slides/HeroSlide';
+import MatterSlide from './paper-slides/MatterSlide';
 import DetailSlide from './paper-slides/DetailSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
 
@@ -37,14 +38,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
 }) => {
   // Separate takeaways into research findings and "Why It Matters"
   const researchTakeaways = takeaways.filter(t => t.type !== 'why_it_matters');
-  const whyItMattersTakeaway = takeaways.find(t => t.type === 'why_it_matters');
   
-  // Create ordered takeaways array with research findings first
-  const orderedTakeaways = [...researchTakeaways];
-  if (whyItMattersTakeaway) {
-    orderedTakeaways.push(whyItMattersTakeaway);
-  }
-
   return (
     <motion.div
       className="h-full flex flex-col relative"
@@ -76,12 +70,19 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
             />
           </CarouselItem>
           
+          {/* Matter Slide */}
+          {ai_matter && (
+            <CarouselItem className="pl-0">
+              <MatterSlide matter={ai_matter} />
+            </CarouselItem>
+          )}
+          
           {/* Takeaway Slides */}
-          {orderedTakeaways.map((takeaway, index) => (
+          {researchTakeaways.map((takeaway, index) => (
             <CarouselItem key={index} className="pl-0">
               <TakeawaysSlide 
                 takeaways={[takeaway]}
-                currentIndex={takeaway.type !== 'why_it_matters' ? researchTakeaways.indexOf(takeaway) : undefined}
+                currentIndex={researchTakeaways.indexOf(takeaway)}
                 totalTakeaways={researchTakeaways.length}
               />
             </CarouselItem>
@@ -95,7 +96,6 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               abstract_org={abstract_org}
               doi={doi}
               creator={creator}
-              matter={whyItMattersTakeaway?.text as string}
             />
           </CarouselItem>
         </CarouselContent>
