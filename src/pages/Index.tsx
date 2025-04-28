@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FilterX, SearchIcon, Settings, Info, Gift } from 'lucide-react';
+import { SearchIcon, Settings, Info, Gift } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -13,8 +13,6 @@ import {
   DialogTitle,
   DialogHeader,
 } from '@/components/ui/dialog';
-import FeedModeSelector from '@/components/FeedModeSelector';
-import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
 import OnboardingModal from '@/components/Onboarding/OnboardingModal';
 import { useOnboardingStore } from '@/hooks/use-onboarding';
 import DonationPrompt from '@/components/donations/DonationPrompt';
@@ -22,9 +20,8 @@ import DonationModal from '@/components/donations/DonationModal';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
-import DatabaseToggle from '@/components/DatabaseToggle';
-import HapticFeedbackTester from '@/components/HapticFeedbackTester';
 import { useDatabaseToggle, getIdFieldName } from '@/hooks/use-database-toggle';
+import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
 
 const Index: React.FC = () => {
   const [isSample, setIsSample] = useState(false);
@@ -200,8 +197,8 @@ const Index: React.FC = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <header className="sticky top-0 z-30 w-full bg-white/90 backdrop-blur-sm border-b border-gray-200">
-        <div className="container max-w-md mx-auto px-4 py-4 flex flex-col items-center gap-3">
+      <header className="fixed top-0 z-30 w-full bg-transparent">
+        <div className="container max-w-md mx-auto px-4 py-4">
           <div className="w-full flex items-center justify-between">
             <h1 className="text-xl font-semibold text-gray-800">Research Feed</h1>
             <div className="flex items-center space-x-2">
@@ -217,30 +214,12 @@ const Index: React.FC = () => {
                 variant="ghost" 
                 size="icon" 
                 className="text-gray-600"
-                onClick={handleShowOnboarding}
-              >
-                <Info className="h-5 w-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-gray-600"
-                onClick={handleShowDonation}
-              >
-                <Gift className="h-5 w-5" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-gray-600"
                 onClick={() => setIsSettingsOpen(true)}
               >
                 <Settings className="h-5 w-5" />
               </Button>
             </div>
           </div>
-          
-          <FeedModeSelector />
         </div>
       </header>
 
@@ -287,7 +266,32 @@ const Index: React.FC = () => {
               <DialogTitle className="text-lg font-semibold">Settings</DialogTitle>
             </DialogHeader>
             <div className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
-              <DatabaseToggle />
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  <span>About</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleShowOnboarding}
+                >
+                  View
+                </Button>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Gift className="h-5 w-5" />
+                  <span>Support Us</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleShowDonation}
+                >
+                  Donate
+                </Button>
+              </div>
               <div className="p-4">
                 <button 
                   onClick={handleToggleDonationPrompt}
@@ -296,6 +300,7 @@ const Index: React.FC = () => {
                   {showDonationPrompt ? 'Hide' : 'Show'} Donation Prompt
                 </button>
               </div>
+              <DatabaseToggle />
             </div>
             <div className="p-4 border-t border-gray-200">
               <Button 
@@ -343,7 +348,7 @@ const Index: React.FC = () => {
       ) : null}
 
       <AnimatePresence>
-        <div className="pb-8 pt-2">
+        <div className="pt-16 pb-8">
           {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
             <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
               <p>No papers match the selected categories</p>
