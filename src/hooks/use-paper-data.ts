@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import type { Paper } from '../lib/supabase';
 import { formatCategoryName, fetchCategoryMap } from '../utils/categoryUtils';
@@ -44,7 +43,8 @@ const defaultPaperData: UsePaperDataResult = {
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   const [formattedData, setFormattedData] = useState<UsePaperDataResult>(defaultPaperData);
   const [isGenerating, setIsGenerating] = useState(false);
-  
+  const [toggleVersion, setToggleVersion] = useState(0);
+
   useEffect(() => {
     const loadPaperData = async () => {
       if (!paper) {
@@ -105,27 +105,41 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
         const formattedTakeaways = parseKeyTakeaways(takeaways, matter);
         const displayTitle = headline || paper.title_org || 'Untitled Paper';
         
-        // Toggle handler
+        // Toggle handler with immediate UI update
         const toggleClaudeMode = async (enabled: boolean) => {
           try {
             // Convert paperId to number for database comparison
             const paperId = typeof paper.id === 'string' ? parseInt(paper.id, 10) : paper.id;
-            
-            const { error } = await supabase
-              .from('europe_paper')
-              .update({ show_claude: enabled })
-              .eq('id', paperId);
-              
-            if (error) throw error;
             
             // Update local state immediately for better UX
             setFormattedData(prev => ({
               ...prev,
               paper: { ...paper, show_claude: enabled }
             }));
+            
+            // Force a re-render to update all content that depends on the Claude mode
+            setToggleVersion(v => v + 1);
+            
+            // Update Supabase in the background
+            const { error } = await supabase
+              .from('europe_paper')
+              .update({ show_claude: enabled })
+              .eq('id', paperId);
+              
+            if (error) {
+              console.error('Error updating Claude preference:', error);
+              toast.error('Failed to save preference. Changes will be lost after refresh.');
+              
+              // Keep the UI updated even if the database update fails
+              // This allows the user to see the different content version
+              // even though it won't persist after page refresh
+            } else {
+              toast.success('Preference saved');
+              console.log('Claude preference updated successfully in database');
+            }
           } catch (error) {
             console.error('Error updating Claude preference:', error);
-            toast.error('Failed to save preference');
+            toast.error('Failed to save preference. Changes will be lost after refresh.');
           }
         };
         
@@ -161,7 +175,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
     };
     
     loadPaperData();
-  }, [paper, isGenerating]);
+  }, [paper, isGenerating, toggleVersion]);
   
   return formattedData;
 };

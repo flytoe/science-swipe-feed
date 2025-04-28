@@ -37,17 +37,19 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
       
       if (error) {
         console.error('Error updating Claude preference:', error);
-        toast.error('Failed to save preference');
-        // Revert UI if save fails
-        onToggle(!checked);
+        
+        // Don't revert UI state - we'll let the local state handle the toggle
+        // even if the database update fails
+        
+        // Just notify the user that the preference won't persist
+        toast.error('Preference saved locally only. Will reset on page refresh.');
       } else {
         console.log('Claude preference updated successfully');
       }
     } catch (error) {
       console.error('Error in toggle action:', error);
-      toast.error('Failed to save preference');
-      // Revert UI if save fails
-      onToggle(!checked);
+      toast.error('Failed to save preference to database');
+      // Don't revert UI - let the local state show the toggle
     }
   };
 

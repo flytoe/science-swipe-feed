@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +29,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [localToggleState, setLocalToggleState] = useState(!!paper.show_claude);
   
   const { 
     formattedCategoryNames, 
@@ -40,9 +42,14 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     hasClaudeContent,
     showClaudeToggle,
     toggleClaudeMode
-  } = usePaperData(paper);
+  } = usePaperData({ ...paper, show_claude: localToggleState });
 
   const { isLoading, hasMindBlown, count, toggleMindBlow: toggle } = useMindBlow(paper.doi);
+
+  // Update local toggle state when paper prop changes
+  useEffect(() => {
+    setLocalToggleState(!!paper.show_claude);
+  }, [paper.show_claude]);
 
   const handleCarouselChange = (api: any) => {
     if (api) {
@@ -52,8 +59,14 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
     }
   };
 
-  // Extract matter content based on Claude mode
-  const matter = hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
+  // Handle toggle with local state update for immediate feedback
+  const handleToggleClaudeMode = (enabled: boolean) => {
+    setLocalToggleState(enabled);
+    toggleClaudeMode(enabled);
+  };
+
+  // Extract matter content based on current toggle state
+  const matter = localToggleState && hasClaudeContent ? paper.ai_matter_claude : paper.ai_matter;
   
   return (
     <motion.div
@@ -69,8 +82,8 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
           <div className="mr-2">
             <ClaudeToggle
               paperId={paper.id}
-              isEnabled={!!paper.show_claude}
-              onToggle={toggleClaudeMode}
+              isEnabled={localToggleState}
+              onToggle={handleToggleClaudeMode}
               size="sm"
             />
           </div>
