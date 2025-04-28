@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { SearchIcon, Settings, Info, Gift } from 'lucide-react';
+import { SearchIcon, Settings, Info, Gift, X as FilterX } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import DonationModal from '@/components/donations/DonationModal';
 import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
+import DatabaseToggle from '@/components/DatabaseToggle';
 import { useDatabaseToggle, getIdFieldName } from '@/hooks/use-database-toggle';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
 
