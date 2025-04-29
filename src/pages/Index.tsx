@@ -22,6 +22,8 @@ import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
+import { Input } from '@/components/ui/input';
+import { Command, CommandInput } from '@/components/ui/command';
 
 const DATABASE_SOURCE = 'europe_paper';
 
@@ -34,6 +36,7 @@ const Index: React.FC = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const { currentMode } = useFeedModeStore();
   
@@ -103,9 +106,22 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
+    // First filter by search query
+    const searchFiltered = papers.filter(paper => {
+      if (!searchQuery) return true;
+      
+      const query = searchQuery.toLowerCase();
+      const matchesId = paper.id?.toString().toLowerCase().includes(query);
+      const matchesTitle = paper.title_org?.toLowerCase().includes(query);
+      const matchesType = paper.post_type?.toLowerCase().includes(query);
+      
+      return matchesId || matchesTitle || matchesType;
+    });
+    
+    // Then filter by categories
     const categoryFiltered = selectedCategories.length === 0
-      ? papers
-      : papers.filter(paper => {
+      ? searchFiltered
+      : searchFiltered.filter(paper => {
           if (!paper.category) return false;
           
           const paperCategories = Array.isArray(paper.category) 
@@ -119,7 +135,7 @@ const Index: React.FC = () => {
     
     const sorted = sortPapers(categoryFiltered, currentMode);
     setFilteredPapers(sorted);
-  }, [selectedCategories, papers, currentMode]);
+  }, [selectedCategories, papers, currentMode, searchQuery]);
 
   useEffect(() => {
     if (shouldShowDonationPrompt()) {
@@ -167,6 +183,10 @@ const Index: React.FC = () => {
 
   const handleFilterChange = (categories: string[]) => {
     setSelectedCategories(categories);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   const handleCloseDonationPrompt = () => {
@@ -228,17 +248,20 @@ const Index: React.FC = () => {
           <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
           <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md w-[95vw] h-[90vh] p-0 overflow-hidden">
             <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <h2 className="text-lg font-semibold">Filter Categories</h2>
+              <h2 className="text-lg font-semibold">Search & Filter</h2>
               <div className="flex gap-2">
-                {selectedCategories.length > 0 && (
+                {(selectedCategories.length > 0 || searchQuery) && (
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => setSelectedCategories([])}
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setSearchQuery('');
+                    }}
                     className="h-8 text-xs bg-white/10 text-white border-white/20"
                   >
                     <FilterX size={14} className="mr-1" />
-                    Reset
+                    Reset All
                   </Button>
                 )}
                 <Button 
@@ -251,6 +274,18 @@ const Index: React.FC = () => {
                 </Button>
               </div>
             </div>
+            
+            <div className="p-4 border-b border-white/10">
+              <Command className="rounded-lg border border-white/20 overflow-visible bg-transparent">
+                <CommandInput 
+                  placeholder="Search by ID, title, or type..." 
+                  value={searchQuery}
+                  onValueChange={setSearchQuery}
+                  className="h-9 text-white"
+                />
+              </Command>
+            </div>
+            
             <div className="p-4 h-full overflow-hidden">
               <CategoryFilter onFilterChange={handleFilterChange} />
             </div>
@@ -348,9 +383,9 @@ const Index: React.FC = () => {
 
       <AnimatePresence>
         <div className="pt-16 pb-8">
-          {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
+          {filteredPapers.length === 0 ? (
             <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
-              <p>No papers match the selected categories</p>
+              <p>No papers match the selected filters</p>
             </div>
           ) : (
             <ScrollableFeed 

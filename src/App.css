@@ -44,3 +44,25 @@
   background-color: #000;
   color: #fff;
 }
+
+/* Search Input */
+.search-input {
+  border: 3px solid #000;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 1rem;
+  padding: 0.75rem;
+  width: 100%;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #000;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+}
+
+.search-result-highlight {
+  background-color: #ffff00;
+  font-weight: bold;
+  padding: 0 2px;
+}
