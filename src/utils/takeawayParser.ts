@@ -41,9 +41,21 @@ export const parseKeyTakeaways = (
               citation: isEuropePaper ? key : undefined
             });
           } else if (typeof value === 'object' && value !== null) {
-            // Handle nested objects by converting them to a string representation
+            // Handle nested objects by converting them to a Record<string, string>
+            const textValue: Record<string, string> = {};
+            
+            // Ensure we're only extracting string values
+            Object.entries(value as object).forEach(([nestedKey, nestedValue]) => {
+              if (typeof nestedValue === 'string') {
+                textValue[nestedKey] = nestedValue;
+              } else if (nestedValue !== null) {
+                // Convert non-string values to string representation
+                textValue[nestedKey] = String(nestedValue);
+              }
+            });
+            
             formattedTakeaways.push({
-              text: value, // Store the entire object, but handle rendering separately
+              text: textValue,
               type: 'default' as const,
               citation: isEuropePaper ? key : undefined
             });
