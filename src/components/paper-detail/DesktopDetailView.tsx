@@ -42,14 +42,14 @@ const DesktopDetailView: React.FC<DesktopDetailViewProps> = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl max-h-[90vh] p-0 overflow-hidden bg-white">
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0 overflow-hidden bg-black text-white border-4 border-white">
           <div className="flex flex-col h-full">
-            <div className="flex justify-between items-center p-4 border-b">
+            <div className="flex justify-between items-center p-4 border-b-4 border-white">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={onClose}
-                className="text-gray-700"
+                className="text-white hover:bg-white hover:text-black transition-colors"
               >
                 {isDirectRoute ? <ArrowLeft className="h-5 w-5" /> : <X className="h-5 w-5" />}
               </Button>
@@ -71,7 +71,7 @@ const DesktopDetailView: React.FC<DesktopDetailViewProps> = ({
               </div>
             </div>
             
-            <ScrollArea className="flex-1 overflow-y-auto">
+            <ScrollArea className="flex-1 overflow-y-auto bg-black">
               <div className="p-6">
                 <PaperCardDetail {...paperData} />
                 
@@ -79,10 +79,10 @@ const DesktopDetailView: React.FC<DesktopDetailViewProps> = ({
                   <Button 
                     onClick={() => onPromptModalClose()}
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-4 border-white text-white hover:bg-white hover:text-black font-bold uppercase tracking-wider"
                     disabled={isGeneratingImage}
                   >
-                    {isGeneratingImage ? 'Generating...' : 'Regenerate Image'}
+                    {isGeneratingImage ? 'GENERATING...' : 'REGENERATE IMAGE'}
                   </Button>
                 </div>
               </div>

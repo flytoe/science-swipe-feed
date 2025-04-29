@@ -42,14 +42,14 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onClose}>
-        <DrawerContent className="h-[95vh] max-h-[95vh] p-0">
-          <div className="flex flex-col h-full overflow-hidden bg-white">
-            <div className="flex justify-between items-center p-4 border-b">
+        <DrawerContent className="h-[95vh] max-h-[95vh] p-0 bg-black text-white border-t-4 border-white">
+          <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex justify-between items-center p-4 border-b-4 border-white">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 onClick={onClose}
-                className="text-gray-700"
+                className="text-white hover:bg-white hover:text-black transition-colors"
               >
                 {isDirectRoute ? <ArrowLeft className="h-5 w-5" /> : <X className="h-5 w-5" />}
               </Button>
@@ -69,7 +69,7 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
               </div>
             </div>
             
-            <ScrollArea className="flex-1 overflow-y-auto">
+            <ScrollArea className="flex-1 overflow-y-auto bg-black">
               <div className="p-4">
                 <PaperCardDetail {...paperData} />
                 
@@ -77,10 +77,10 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
                   <Button 
                     onClick={() => onPromptModalClose()}
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-4 border-white text-white hover:bg-white hover:text-black font-bold uppercase tracking-wider"
                     disabled={isGeneratingImage}
                   >
-                    {isGeneratingImage ? 'Generating...' : 'Regenerate Image'}
+                    {isGeneratingImage ? 'GENERATING...' : 'REGENERATE IMAGE'}
                   </Button>
                 </div>
               </div>
