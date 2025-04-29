@@ -9,7 +9,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface KeyTakeawayProps {
-  text: string;
+  text: string; // Changed from allowing objects to only allowing strings
   citation?: string;
   type?: 'default' | 'why_it_matters';
 }

@@ -24,9 +24,7 @@ const PaperCardTakeaways: React.FC<PaperCardTakeawaysProps> = ({ takeaways }) =>
       {whyItMattersTakeaways.length > 0 && (
         <div className="mb-5">
           {whyItMattersTakeaways.map((takeaway, index) => {
-            const formattedText = typeof takeaway.text === 'string' 
-              ? takeaway.text 
-              : formatTakeawayText(takeaway.text);
+            const formattedText = formatTakeawayText(takeaway.text);
               
             return (
               <div key={`why-${index}`} className="flex flex-col gap-2 mb-4">

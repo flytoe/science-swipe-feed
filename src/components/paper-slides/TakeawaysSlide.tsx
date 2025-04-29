@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { FormattedTakeaway } from '../../utils/takeawayParser';
+import { FormattedTakeaway, formatTakeawayText } from '../../utils/takeawayParser';
 import KeyTakeaway from '../KeyTakeaway';
 import { Badge } from '../ui/badge';
 
@@ -24,7 +25,8 @@ const TakeawaysSlide: React.FC<TakeawaysSlideProps> = ({
 
   const takeaway = takeaways[0];
   const isWhyItMatters = takeaway.type === 'why_it_matters';
-  const takeawayText = typeof takeaway.text === 'string' ? takeaway.text : JSON.stringify(takeaway.text);
+  // Properly format the takeaway text to ensure we never pass an object directly to render
+  const takeawayText = formatTakeawayText(takeaway.text);
   
   let displayNumber;
   if (isWhyItMatters) {

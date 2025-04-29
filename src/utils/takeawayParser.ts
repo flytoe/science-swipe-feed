@@ -40,6 +40,13 @@ export const parseKeyTakeaways = (
               type: 'default' as const,
               citation: isEuropePaper ? key : undefined
             });
+          } else if (typeof value === 'object' && value !== null) {
+            // Handle nested objects by converting them to a string representation
+            formattedTakeaways.push({
+              text: value, // Store the entire object, but handle rendering separately
+              type: 'default' as const,
+              citation: isEuropePaper ? key : undefined
+            });
           }
         });
       }

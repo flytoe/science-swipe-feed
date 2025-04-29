@@ -73,7 +73,7 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
                     <div className="w-1 h-full bg-gradient-to-b from-blue-400 to-purple-500 rounded-full" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium mb-1 text-gray-800">{takeaway.text}</h3>
+                    <h3 className="font-medium mb-1 text-gray-800">{takeaway.text as string}</h3>
                     {takeaway.citation && (
                       <p className="text-gray-500 text-sm">{takeaway.citation}</p>
                     )}
@@ -94,10 +94,7 @@ const DetailTakeaways: React.FC<DetailTakeawaysProps> = ({ takeaways }) => {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium mb-1 text-indigo-900">
-                  {typeof whyItMattersTakeaway.text === 'string' 
-                    ? whyItMattersTakeaway.text 
-                    : formatTakeawayText(whyItMattersTakeaway.text)
-                  }
+                  {formatTakeawayText(whyItMattersTakeaway.text)}
                 </h3>
                 {whyItMattersTakeaway.citation && (
                   <p className="text-indigo-600 text-sm">{whyItMattersTakeaway.citation}</p>
