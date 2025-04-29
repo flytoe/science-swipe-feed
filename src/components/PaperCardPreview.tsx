@@ -6,6 +6,7 @@ import PaperCardMedia from './PaperCardMedia';
 import MindBlowBadge from './MindBlowBadge';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import { Paper } from '../lib/supabase';
+import PostTypeBadge from './PostTypeBadge';
 
 interface PaperCardPreviewProps {
   imageSrc: string;
@@ -75,7 +76,11 @@ const PaperCardPreview: React.FC<PaperCardPreviewProps> = ({
             {formattedDate}
           </Badge>
           
-          {categories.slice(0, 2).map((category, idx) => (
+          {paper?.post_type && (
+            <PostTypeBadge type={paper.post_type} size="sm" />
+          )}
+          
+          {categories.slice(0, paper?.post_type ? 1 : 2).map((category, idx) => (
             <Badge 
               key={idx}
               variant="outline" 

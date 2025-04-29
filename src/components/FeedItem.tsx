@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -101,6 +102,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 imageSrc={imageSrc}
                 formattedDate={formattedDate}
                 creator={paper.creator}
+                paper={paper}
               />
             </CarouselItem>
             

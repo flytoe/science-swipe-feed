@@ -118,6 +118,7 @@ export type Database = {
           image_url: string | null
           is_open_access: boolean | null
           oai: string | null
+          post_type: string | null
           rerun: boolean
           score: number | null
           score_raw: string | null
@@ -149,6 +150,7 @@ export type Database = {
           image_url?: string | null
           is_open_access?: boolean | null
           oai?: string | null
+          post_type?: string | null
           rerun?: boolean
           score?: number | null
           score_raw?: string | null
@@ -180,6 +182,7 @@ export type Database = {
           image_url?: string | null
           is_open_access?: boolean | null
           oai?: string | null
+          post_type?: string | null
           rerun?: boolean
           score?: number | null
           score_raw?: string | null

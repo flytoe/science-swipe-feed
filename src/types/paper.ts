@@ -28,4 +28,6 @@ export type Paper = {
   doi: string;
   feed_worthy?: boolean;
   feed_worthy_reason?: string | null;
+  // Post type for categorizing papers
+  post_type?: string | null;
 };

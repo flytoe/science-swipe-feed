@@ -31,3 +31,16 @@
   transform: translate(-4px, -4px);
   box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8);
 }
+
+/* Post Type Badge */
+.post-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border: 2px solid #fff;
+  background-color: #000;
+  color: #fff;
+}
