@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PostTypeBadge from './PostTypeBadge';
 
+// Define available post types for filtering
 const postTypes = [
   'breakthrough',
   'what if',

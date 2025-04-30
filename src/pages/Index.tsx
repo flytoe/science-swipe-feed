@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Filter, Settings, Info, Gift, X as FilterX } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -24,6 +25,7 @@ import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import FeedModeSelector from '@/components/FeedModeSelector';
 
 const DATABASE_SOURCE = 'europe_paper';
 
@@ -384,8 +386,14 @@ const Index: React.FC = () => {
         </div>
       ) : null}
 
+      <div className="pt-16 pb-2">
+        <div className="max-w-md mx-auto px-4">
+          <FeedModeSelector />
+        </div>
+      </div>
+
       <AnimatePresence>
-        <div className="pt-16 pb-8">
+        <div className="pt-2 pb-8">
           {filteredPapers.length === 0 && (selectedCategories.length > 0 || selectedTypes.length > 0) ? (
             <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
               <p>No papers match the selected filters</p>
