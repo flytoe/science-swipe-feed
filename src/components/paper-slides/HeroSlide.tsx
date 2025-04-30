@@ -20,7 +20,7 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
   paper,
   postType
 }) => {
-  // Format creator data to be displayed
+  // Format creator data to be displayed (kept for backwards compatibility)
   let creatorDisplay = '';
   if (creator) {
     if (Array.isArray(creator)) {
@@ -37,28 +37,24 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
         aria-hidden="true"
       />
       
-      {(formattedDate || postType) && (
+      {formattedDate && (
         <div className="absolute top-4 left-4 flex flex-wrap items-start gap-2 z-10">
-          {postType && (
-            <PostTypeBadge type={postType} />
-          )}
-          {formattedDate && (
-            <span className="text-xs px-2 py-1 bg-white/10 backdrop-blur-sm rounded-md">
-              {formattedDate}
-            </span>
-          )}
+          <span className="text-xs px-2 py-1 bg-white/10 backdrop-blur-sm rounded-md">
+            {formattedDate}
+          </span>
         </div>
       )}
       
-      <div className="relative z-10 mt-auto">
+      <div className="relative z-10 mt-auto w-full">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
           {title}
         </h1>
         
-        {creatorDisplay && (
-          <p className="text-sm text-gray-300 mt-2">
-            By {creatorDisplay}
-          </p>
+        {/* Display post type badge prominently instead of creator */}
+        {postType && (
+          <div className="mt-3">
+            <PostTypeBadge type={postType} size="lg" />
+          </div>
         )}
       </div>
     </div>

@@ -18,40 +18,59 @@ interface PostTypeBadgeProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
+// Post type configuration with icons, emojis, and colors
+const postTypeConfig = {
+  'breakthrough': {
+    icon: Rocket,
+    emoji: '⚡',
+    color: '#FDD835'  // Bright yellow
+  },
+  'what if': {
+    icon: HelpCircle,
+    emoji: '🔮',
+    color: '#7E57C2'  // Soft violet
+  },
+  'mythbuster': {
+    icon: Bomb,
+    emoji: '💥',
+    color: '#EF5350'  // Strong red
+  },
+  'gamechanger': {
+    icon: RefreshCw,
+    emoji: '✨',
+    color: '#26A69A'  // Turquoise green
+  },
+  'reality check': {
+    icon: Hourglass,
+    emoji: '😳',
+    color: '#B0BEC5'  // Cool grey
+  },
+  'hidden gem': {
+    icon: Diamond,
+    emoji: '💎',
+    color: '#AB47BC'  // Rich violet
+  }
+};
+
 const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({ 
   type, 
   className = '',
   size = 'md'
 }) => {
-  const getIcon = () => {
-    switch (type?.toLowerCase()) {
-      case 'breakthrough':
-        return <Rocket size={size === 'sm' ? 14 : 16} />;
-      case 'what if':
-        return <HelpCircle size={size === 'sm' ? 14 : 16} />;
-      case 'mythbuster':
-        return <Bomb size={size === 'sm' ? 14 : 16} />;
-      case 'gamechanger':
-        return <RefreshCw size={size === 'sm' ? 14 : 16} />;
-      case 'reality check':
-        return <Hourglass size={size === 'sm' ? 14 : 16} />;
-      case 'hidden gem':
-        return <Diamond size={size === 'sm' ? 14 : 16} />;
-      default:
-        return null;
-    }
-  };
+  // Get config for this post type
+  const config = type && postTypeConfig[type.toLowerCase()];
+  
+  // If no valid type or config is provided, don't render anything
+  if (!type || !config) return null;
+
+  const Icon = config.icon;
+  const emoji = config.emoji;
+  const bgColor = config.color;
 
   const getLabel = () => {
     if (!type) return '';
     return type.toUpperCase();
   };
-
-  // If no valid type is provided, don't render anything
-  if (!type) return null;
-
-  const icon = getIcon();
-  if (!icon) return null;
 
   const sizeClasses = {
     sm: 'text-xs py-0.5 px-1.5',
@@ -64,13 +83,14 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
       variant="outline" 
       className={`
         brutalist-text uppercase font-bold
-        bg-black text-white border-2 border-white
+        text-white border-2 border-white
         flex items-center gap-1.5 
         ${sizeClasses[size]}
         ${className}
       `}
+      style={{ backgroundColor: bgColor }}
     >
-      {icon}
+      <span className="mr-0.5">{emoji}</span>
       <span>{getLabel()}</span>
     </Badge>
   );

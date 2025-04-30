@@ -41,6 +41,14 @@
   text-transform: uppercase;
   padding: 4px 8px;
   border: 2px solid #fff;
-  background-color: #000;
   color: #fff;
 }
+
+/* Post Type Badge Colors */
+.post-type-breakthrough { background-color: #FDD835; }
+.post-type-what-if { background-color: #7E57C2; }
+.post-type-mythbuster { background-color: #EF5350; }
+.post-type-gamechanger { background-color: #26A69A; }
+.post-type-reality-check { background-color: #B0BEC5; }
+.post-type-hidden-gem { background-color: #AB47BC; }
+

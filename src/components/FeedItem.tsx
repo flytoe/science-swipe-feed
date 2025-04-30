@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Paper } from '../lib/supabase';
@@ -85,12 +84,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         />
       </div>
 
-      {/* Post Type Badge - top left */}
-      {paper.post_type && (
-        <div className="absolute top-4 left-4 z-50">
-          <PostTypeBadge type={paper.post_type} size="sm" />
-        </div>
-      )}
+      {/* We'll remove the top-left post type badge since it will now be shown in the HeroSlide */}
 
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         <img
