@@ -18,6 +18,7 @@ import MindBlowButton from './MindBlowButton';
 import { useMindBlow } from '../hooks/use-mind-blow';
 import RegenerateImageButton from './RegenerateImageButton';
 import ClaudeToggle from './ClaudeToggle';
+import PostTypeBadge from './PostTypeBadge';
 
 interface FeedItemProps {
   paper: Paper;
@@ -84,6 +85,13 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
         />
       </div>
 
+      {/* Post Type Badge - top left */}
+      {paper.post_type && (
+        <div className="absolute top-4 left-4 z-50">
+          <PostTypeBadge type={paper.post_type} size="sm" />
+        </div>
+      )}
+
       <div className="absolute inset-0 overflow-hidden rounded-xl">
         <img
           src={imageSrc}
@@ -103,6 +111,7 @@ const FeedItem: React.FC<FeedItemProps> = ({ paper, index }) => {
                 formattedDate={formattedDate}
                 creator={paper.creator}
                 paper={paper}
+                postType={paper.post_type}
               />
             </CarouselItem>
             

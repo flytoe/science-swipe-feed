@@ -9,6 +9,7 @@ import PaperCardDetail from '../PaperCardDetail';
 import ImagePromptModal from '../ImagePromptModal';
 import { Paper } from '../../lib/supabase';
 import ClaudeToggle from '../ClaudeToggle';
+import PostTypeBadge from '../PostTypeBadge';
 
 interface DesktopDetailViewProps {
   paper: Paper | null;
@@ -55,7 +56,6 @@ const DesktopDetailView: React.FC<DesktopDetailViewProps> = ({
               </Button>
               
               <div className="flex items-center gap-3">
-                {/* Claude Toggle - Only show if paper has claude refined content */}
                 {paper?.claude_refined && (
                   <ClaudeToggle
                     paperId={paper.id}
@@ -73,6 +73,11 @@ const DesktopDetailView: React.FC<DesktopDetailViewProps> = ({
             
             <ScrollArea className="flex-1 overflow-y-auto bg-black">
               <div className="p-6">
+                {paper?.post_type && (
+                  <div className="mb-4">
+                    <PostTypeBadge type={paper.post_type} size="lg" />
+                  </div>
+                )}
                 <PaperCardDetail {...paperData} />
                 
                 <div className="mt-4">

@@ -1,96 +1,64 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import MindBlowBadge from '../MindBlowBadge';
-import { Badge } from '../ui/badge';
-import RegenerateImageButton from '../RegenerateImageButton';
 import { Paper } from '../../lib/supabase';
 import PostTypeBadge from '../PostTypeBadge';
 
 interface HeroSlideProps {
   title: string;
   imageSrc: string;
-  formattedDate: string;
-  mindBlowCount?: number;
+  formattedDate?: string;
   creator?: string[] | string | null;
-  isFirstSlide?: boolean;
-  activeIndex?: number;
-  paper?: Paper | null;
+  paper?: Paper;
+  postType?: string | null;
 }
 
 const HeroSlide: React.FC<HeroSlideProps> = ({
   title,
   imageSrc,
   formattedDate,
-  mindBlowCount,
   creator,
-  isFirstSlide = false,
-  activeIndex = 0,
-  paper
+  paper,
+  postType
 }) => {
-  const creatorDisplay = React.useMemo(() => {
-    if (!creator || isFirstSlide || activeIndex === 0) return null;
-    if (typeof creator === 'string') return creator;
-    if (Array.isArray(creator)) return creator.join(', ');
-    return null;
-  }, [creator, isFirstSlide, activeIndex]);
-
+  // Format creator data to be displayed
+  let creatorDisplay = '';
+  if (creator) {
+    if (Array.isArray(creator)) {
+      creatorDisplay = creator.join(', ');
+    } else {
+      creatorDisplay = creator;
+    }
+  }
+  
   return (
-    <div className="relative w-full h-full min-h-[280px]">
-      <div className="absolute inset-0">
-        <img src={imageSrc} alt={title} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
-      </div>
-
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-        <Badge variant="outline" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200">
-          {formattedDate}
-        </Badge>
-        {paper?.post_type && (
-          <PostTypeBadge type={paper.post_type} size="sm" />
-        )}
-        {paper && <RegenerateImageButton paper={paper} variant="outline" size="icon" className="bg-white/70 backdrop-blur-sm text-gray-700 border-gray-200 hover:bg-white/80" />}
-      </div>
-
-      {mindBlowCount && mindBlowCount > 0 && (
-        <div className="absolute top-4 right-16 z-30">
-          <MindBlowBadge count={mindBlowCount} />
+    <div className="relative flex items-end min-h-[500px] w-full p-4 md:p-6 rounded-xl overflow-hidden text-white">
+      <div 
+        className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-0"
+        aria-hidden="true"
+      />
+      
+      {(formattedDate || postType) && (
+        <div className="absolute top-4 left-4 flex flex-wrap items-start gap-2 z-10">
+          {postType && (
+            <PostTypeBadge type={postType} />
+          )}
+          {formattedDate && (
+            <span className="text-xs px-2 py-1 bg-white/10 backdrop-blur-sm rounded-md">
+              {formattedDate}
+            </span>
+          )}
         </div>
       )}
-
-      <div className="absolute bottom-0 left-0 right-0 p-6 z-10">
-        <motion.h1 
-          initial={{
-            opacity: 0,
-            y: 20
-          }} 
-          animate={{
-            opacity: 1,
-            y: 0
-          }} 
-          transition={{
-            delay: 0.2
-          }} 
-          className="text-3xl font-bold text-white mb-4 py-[24px]"
-        >
+      
+      <div className="relative z-10 mt-auto">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
           {title}
-        </motion.h1>
+        </h1>
         
         {creatorDisplay && (
-          <motion.p 
-            className="text-sm text-white/80" 
-            initial={{
-              opacity: 0
-            }} 
-            animate={{
-              opacity: 1
-            }} 
-            transition={{
-              delay: 0.3
-            }}
-          >
+          <p className="text-sm text-gray-300 mt-2">
             By {creatorDisplay}
-          </motion.p>
+          </p>
         )}
       </div>
     </div>

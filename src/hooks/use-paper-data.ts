@@ -21,6 +21,7 @@ interface UsePaperDataResult {
   paper: Paper | null;
   claudeMode: boolean;
   toggleClaudeMode: (enabled: boolean) => void;
+  post_type?: string | null;
 }
 
 const defaultPaperData: UsePaperDataResult = {
@@ -37,6 +38,7 @@ const defaultPaperData: UsePaperDataResult = {
   paper: null,
   claudeMode: false,
   toggleClaudeMode: () => {},
+  post_type: null,
 };
 
 export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
@@ -120,7 +122,12 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
   useEffect(() => {
     const loadPaperData = async () => {
       if (!paper) {
-        setFormattedData({...defaultPaperData, paper: null, claudeMode, toggleClaudeMode});
+        setFormattedData({
+          ...defaultPaperData, 
+          paper: null, 
+          claudeMode, 
+          toggleClaudeMode
+        });
         return;
       }
       
@@ -194,6 +201,7 @@ export const usePaperData = (paper: Paper | null): UsePaperDataResult => {
           paper: paper,
           claudeMode,
           toggleClaudeMode,
+          post_type: paper.post_type,
           refreshImageData: (newImageUrl?: string) => {
             if (newImageUrl) {
               setFormattedData(prev => ({

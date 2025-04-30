@@ -12,6 +12,8 @@ import HeroSlide from './paper-slides/HeroSlide';
 import MatterSlide from './paper-slides/MatterSlide';
 import DetailSlide from './paper-slides/DetailSlide';
 import TakeawaysSlide from './paper-slides/TakeawaysSlide';
+import PostTypeBadge from './PostTypeBadge';
+import { Paper } from '../types/paper';
 
 interface PaperCardDetailProps {
   displayTitle: string;
@@ -23,6 +25,8 @@ interface PaperCardDetailProps {
   creator?: string[] | string | null;
   imageSrc: string;
   ai_matter?: string;
+  post_type?: string | null;
+  paper?: Paper;
 }
 
 const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
@@ -35,6 +39,8 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
   creator,
   imageSrc,
   ai_matter,
+  post_type,
+  paper
 }) => {
   // Separate takeaways into research findings and "Why It Matters"
   const researchTakeaways = takeaways.filter(t => t.type !== 'why_it_matters');
@@ -67,6 +73,7 @@ const PaperCardDetail: React.FC<PaperCardDetailProps> = ({
               imageSrc={imageSrc}
               formattedDate={formattedDate}
               creator={creator}
+              postType={post_type}
             />
           </CarouselItem>
           

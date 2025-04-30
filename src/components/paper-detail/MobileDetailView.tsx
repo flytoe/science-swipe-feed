@@ -9,6 +9,7 @@ import PaperCardDetail from '../PaperCardDetail';
 import ImagePromptModal from '../ImagePromptModal';
 import { Paper } from '../../lib/supabase';
 import ClaudeToggle from '../ClaudeToggle';
+import PostTypeBadge from '../PostTypeBadge';
 
 interface MobileDetailViewProps {
   paper: Paper | null;
@@ -71,6 +72,11 @@ const MobileDetailView: React.FC<MobileDetailViewProps> = ({
             
             <ScrollArea className="flex-1 overflow-y-auto bg-black">
               <div className="p-4">
+                {paper?.post_type && (
+                  <div className="mb-4">
+                    <PostTypeBadge type={paper.post_type} size="md" />
+                  </div>
+                )}
                 <PaperCardDetail {...paperData} />
                 
                 <div className="mt-4">

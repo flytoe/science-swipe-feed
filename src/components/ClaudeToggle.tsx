@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { supabase } from '../integrations/supabase/client';
+import { NativeSwitch } from './ui/native-switch';
 
 interface ClaudeToggleProps {
   paperId: string | number;
@@ -43,8 +44,14 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
     }
   };
 
+  const sizeClasses = {
+    sm: 'scale-90',
+    md: 'scale-100',
+    lg: 'scale-110'
+  };
+
   return (
-    <div className={`flex items-center gap-2 ${size === 'sm' ? 'scale-90' : ''}`}>
+    <div className={`flex items-center gap-2 ${sizeClasses[size]}`}>
       <Switch 
         id={`claude-toggle-${paperId}`}
         checked={isEnabled}
