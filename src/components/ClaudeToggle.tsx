@@ -11,13 +11,15 @@ interface ClaudeToggleProps {
   isEnabled: boolean;
   onToggle: (enabled: boolean) => void;
   size?: 'sm' | 'md' | 'lg';
+  className?: string;
 }
 
 const ClaudeToggle: React.FC<ClaudeToggleProps> = ({ 
   paperId, 
   isEnabled, 
   onToggle, 
-  size = 'sm' 
+  size = 'sm',
+  className = '' 
 }) => {
   const handleToggle = async (checked: boolean) => {
     // Update UI state immediately (optimistic update)
@@ -51,7 +53,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
   };
 
   return (
-    <div className={`flex items-center gap-2 ${sizeClasses[size]}`}>
+    <div className={`flex items-center gap-2 ${sizeClasses[size]} ${className}`}>
       <Switch 
         id={`claude-toggle-${paperId}`}
         checked={isEnabled}
@@ -59,7 +61,7 @@ const ClaudeToggle: React.FC<ClaudeToggleProps> = ({
       />
       <Label 
         htmlFor={`claude-toggle-${paperId}`} 
-        className="text-xs text-gray-500 cursor-pointer"
+        className="text-xs font-medium cursor-pointer"
       >
         {isEnabled ? 'Claude AI' : 'Default AI'}
       </Label>

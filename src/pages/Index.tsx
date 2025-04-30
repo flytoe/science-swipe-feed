@@ -1,11 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
-import { SearchIcon, Settings, Info, Gift, X as FilterX } from 'lucide-react';
+import { Filter, Settings, Info, Gift, X as FilterX } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getPapers, Paper } from '../lib/supabase';
 import CategoryFilter from '../components/CategoryFilter';
+import TypeFilter from '../components/TypeFilter';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
   DialogPortal,
   DialogTitle,
   DialogHeader,
+  DialogTrigger
 } from '@/components/ui/dialog';
 import OnboardingModal from '@/components/Onboarding/OnboardingModal';
 import { useOnboardingStore } from '@/hooks/use-onboarding';
@@ -22,6 +23,7 @@ import { useMindBlowTracker } from '@/hooks/use-mind-blow-tracker';
 import ScrollableFeed from '@/components/ScrollableFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFeedModeStore, sortPapers } from '@/hooks/use-feed-mode';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DATABASE_SOURCE = 'europe_paper';
 
@@ -32,8 +34,10 @@ const Index: React.FC = () => {
   const [papers, setPapers] = useState<Paper[]>([]);
   const [filteredPapers, setFilteredPapers] = useState<Paper[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeFilterTab, setActiveFilterTab] = useState('categories');
   
   const { currentMode } = useFeedModeStore();
   
@@ -103,23 +107,35 @@ const Index: React.FC = () => {
   };
 
   useEffect(() => {
-    const categoryFiltered = selectedCategories.length === 0
-      ? papers
-      : papers.filter(paper => {
-          if (!paper.category) return false;
-          
-          const paperCategories = Array.isArray(paper.category) 
-            ? paper.category 
-            : [paper.category];
-          
-          return selectedCategories.some(selected => 
-            paperCategories.includes(selected)
-          );
-        });
+    // Filter papers by both categories and types
+    let filtered = papers;
     
-    const sorted = sortPapers(categoryFiltered, currentMode);
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(paper => {
+        if (!paper.category) return false;
+        
+        const paperCategories = Array.isArray(paper.category) 
+          ? paper.category 
+          : [paper.category];
+        
+        return selectedCategories.some(selected => 
+          paperCategories.includes(selected)
+        );
+      });
+    }
+    
+    // Apply type filter
+    if (selectedTypes.length > 0) {
+      filtered = filtered.filter(paper => {
+        if (!paper.post_type) return false;
+        return selectedTypes.includes(paper.post_type);
+      });
+    }
+    
+    const sorted = sortPapers(filtered, currentMode);
     setFilteredPapers(sorted);
-  }, [selectedCategories, papers, currentMode]);
+  }, [selectedCategories, selectedTypes, papers, currentMode]);
 
   useEffect(() => {
     if (shouldShowDonationPrompt()) {
@@ -169,6 +185,10 @@ const Index: React.FC = () => {
     setSelectedCategories(categories);
   };
 
+  const handleTypeFilterChange = (types: string[]) => {
+    setSelectedTypes(types);
+  };
+
   const handleCloseDonationPrompt = () => {
     setShowDonationPrompt(false);
   };
@@ -208,7 +228,7 @@ const Index: React.FC = () => {
                 className="text-gray-600"
                 onClick={() => setIsFilterOpen(true)}
               >
-                <SearchIcon className="h-5 w-5" />
+                <Filter className="h-5 w-5" />
               </Button>
               <Button 
                 variant="ghost" 
@@ -228,17 +248,20 @@ const Index: React.FC = () => {
           <DialogOverlay className="bg-black/80 backdrop-blur-sm" />
           <DialogContent className="bg-gray-900 border-gray-800 text-white sm:max-w-md w-[95vw] h-[90vh] p-0 overflow-hidden">
             <div className="p-4 flex items-center justify-between border-b border-white/10">
-              <h2 className="text-lg font-semibold">Filter Categories</h2>
+              <h2 className="text-lg font-semibold">Filters</h2>
               <div className="flex gap-2">
-                {selectedCategories.length > 0 && (
+                {(selectedCategories.length > 0 || selectedTypes.length > 0) && (
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => setSelectedCategories([])}
+                    onClick={() => {
+                      setSelectedCategories([]);
+                      setSelectedTypes([]);
+                    }}
                     className="h-8 text-xs bg-white/10 text-white border-white/20"
                   >
                     <FilterX size={14} className="mr-1" />
-                    Reset
+                    Reset All
                   </Button>
                 )}
                 <Button 
@@ -251,9 +274,24 @@ const Index: React.FC = () => {
                 </Button>
               </div>
             </div>
-            <div className="p-4 h-full overflow-hidden">
-              <CategoryFilter onFilterChange={handleFilterChange} />
-            </div>
+            
+            <Tabs defaultValue="types" className="p-4 h-[calc(100%-73px)] overflow-hidden">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="types">Post Types</TabsTrigger>
+                <TabsTrigger value="categories">Categories</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="types" className="h-[calc(100%-48px)] overflow-y-auto">
+                <TypeFilter
+                  selectedTypes={selectedTypes}
+                  onTypeSelect={handleTypeFilterChange}
+                />
+              </TabsContent>
+              
+              <TabsContent value="categories" className="h-[calc(100%-48px)] overflow-y-auto">
+                <CategoryFilter onFilterChange={handleFilterChange} />
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </DialogPortal>
       </Dialog>
@@ -348,9 +386,9 @@ const Index: React.FC = () => {
 
       <AnimatePresence>
         <div className="pt-16 pb-8">
-          {filteredPapers.length === 0 && selectedCategories.length > 0 ? (
+          {filteredPapers.length === 0 && (selectedCategories.length > 0 || selectedTypes.length > 0) ? (
             <div className="flex items-center justify-center h-[calc(100vh-12rem)] text-gray-500">
-              <p>No papers match the selected categories</p>
+              <p>No papers match the selected filters</p>
             </div>
           ) : (
             <ScrollableFeed 

@@ -23,32 +23,38 @@ const postTypeConfig = {
   'breakthrough': {
     icon: Rocket,
     emoji: '⚡',
-    color: '#FDD835'  // Bright yellow
+    color: '#FDD835',  // Bright yellow
+    label: 'BREAKTHROUGH'
   },
   'what if': {
     icon: HelpCircle,
     emoji: '🔮',
-    color: '#7E57C2'  // Soft violet
+    color: '#7E57C2',  // Soft violet
+    label: 'WHAT IF'
   },
   'mythbuster': {
     icon: Bomb,
     emoji: '💥',
-    color: '#EF5350'  // Strong red
+    color: '#EF5350',  // Strong red
+    label: 'MYTHBUSTER'
   },
   'gamechanger': {
     icon: RefreshCw,
     emoji: '✨',
-    color: '#26A69A'  // Turquoise green
+    color: '#26A69A',  // Turquoise green
+    label: 'GAMECHANGER'
   },
   'reality check': {
     icon: Hourglass,
     emoji: '😳',
-    color: '#B0BEC5'  // Cool grey
+    color: '#B0BEC5',  // Cool grey
+    label: 'REALITY CHECK'
   },
   'hidden gem': {
     icon: Diamond,
     emoji: '💎',
-    color: '#AB47BC'  // Rich violet
+    color: '#AB47BC',  // Rich violet
+    label: 'HIDDEN GEM'
   }
 };
 
@@ -66,11 +72,7 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
   const Icon = config.icon;
   const emoji = config.emoji;
   const bgColor = config.color;
-
-  const getLabel = () => {
-    if (!type) return '';
-    return type.toUpperCase();
-  };
+  const label = config.label;
 
   const sizeClasses = {
     sm: 'text-xs py-0.5 px-1.5',
@@ -91,7 +93,7 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
       style={{ backgroundColor: bgColor }}
     >
       <span className="mr-0.5">{emoji}</span>
-      <span>{getLabel()}</span>
+      <span>{label}</span>
     </Badge>
   );
 };

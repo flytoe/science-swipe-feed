@@ -52,3 +52,12 @@
 .post-type-reality-check { background-color: #B0BEC5; }
 .post-type-hidden-gem { background-color: #AB47BC; }
 
+/* Claude mode adaptations */
+.claude-mode-content {
+  min-height: auto;
+  transition: min-height 0.3s ease;
+}
+
+.claude-mode-content.expanded {
+  min-height: 550px;
+}
