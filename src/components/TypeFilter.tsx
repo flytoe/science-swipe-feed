@@ -31,7 +31,7 @@ const TypeFilter: React.FC<TypeFilterProps> = ({ selectedTypes, onTypeSelect }) 
     <div className="w-full">
       <h3 className="text-lg font-semibold mb-4">Filter by Type</h3>
       
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6">
         {postTypes.map((type) => {
           const isSelected = selectedTypes.includes(type);
           return (
@@ -39,7 +39,7 @@ const TypeFilter: React.FC<TypeFilterProps> = ({ selectedTypes, onTypeSelect }) 
               key={type}
               whileTap={{ scale: 0.95 }}
               onClick={() => toggleType(type)}
-              className={`cursor-pointer transition-all ${isSelected ? 'ring-4 ring-white/50' : 'opacity-70'}`}
+              className={`cursor-pointer transition-all ${isSelected ? 'ring-4 ring-white/50' : 'opacity-70 hover:opacity-90'}`}
             >
               <PostTypeBadge type={type} size="md" />
             </motion.div>

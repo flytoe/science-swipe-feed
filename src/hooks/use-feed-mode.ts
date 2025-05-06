@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Paper } from '@/lib/supabase';
 
-export type FeedMode = 'newest' | 'mindblown' | 'surprise';
+export type FeedMode = 'newest' | 'mindblown' | 'surprise' | 'bytype';
 
 interface FeedModeState {
   currentMode: FeedMode;
@@ -46,6 +46,20 @@ export const sortPapers = (papers: Paper[], mode: FeedMode): Paper[] => {
     case 'surprise':
       // Completely random order
       return papersCopy.sort(() => Math.random() - 0.5);
+      
+    case 'bytype':
+      // Group by post_type
+      return papersCopy.sort((a, b) => {
+        // First sort by type (nulls last)
+        if (a.post_type && !b.post_type) return -1;
+        if (!a.post_type && b.post_type) return 1;
+        if (a.post_type && b.post_type) {
+          if (a.post_type < b.post_type) return -1;
+          if (a.post_type > b.post_type) return 1;
+        }
+        // If types are the same, sort by date (newest first)
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
       
     default:
       return papersCopy;

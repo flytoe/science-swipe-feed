@@ -80,6 +80,7 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
     lg: 'text-sm py-1.5 px-2.5'
   };
 
+  // Add more prominent shadow and transform effect
   return (
     <Badge 
       variant="outline" 
@@ -87,6 +88,7 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
         brutalist-text uppercase font-bold
         text-white border-2 border-white
         flex items-center gap-1.5 
+        shadow-lg transform transition-all duration-200
         ${sizeClasses[size]}
         ${className}
       `}

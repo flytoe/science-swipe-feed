@@ -105,6 +105,7 @@ export function formatPaperData(item: any, databaseSource: DatabaseSource): any 
     claude_refined: !!item.claude_refined,
     show_claude: !!item.show_claude,
     doi: item.doi || '',
+    post_type: item.post_type || null, // Add post_type field
   };
   
   return paper;

@@ -42,6 +42,13 @@
   padding: 4px 8px;
   border: 2px solid #fff;
   color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-type-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 
 /* Post Type Badge Colors */
