@@ -26,13 +26,13 @@ const HeroSlide: React.FC<HeroSlideProps> = ({
         className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-transparent z-0"
         aria-hidden="true"
       />
-
-      <div className="absolute top-4 left-4 flex flex-wrap items-start gap-2 z-10">
+      
+      <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
         {postType && (
           <PostTypeBadge type={postType} size="lg" />
         )}
         {formattedDate && (
-          <span className="text-xs px-2 py-1 bg-black/20 backdrop-blur-sm rounded-md">
+          <span className="text-xs px-2 py-1 bg-black/20 backdrop-blur-sm rounded-md self-start">
             {formattedDate}
           </span>
         )}

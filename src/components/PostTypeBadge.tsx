@@ -41,7 +41,7 @@ const postTypeConfig = {
   'gamechanger': {
     icon: RefreshCw,
     emoji: '✨',
-    color: '#26A69A',  // Turquoise green
+    color: '#F34564',  // Turquoise green
     label: 'GAMECHANGER'
   },
   'reality check': {
@@ -53,7 +53,7 @@ const postTypeConfig = {
   'hidden gem': {
     icon: Diamond,
     emoji: '💎',
-    color: '#AB47BC',  // Rich violet
+    color: '#f0f0f0',  // Rich violet
     label: 'HIDDEN GEM'
   }
 };
@@ -86,16 +86,15 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
       variant="outline" 
       className={`
         brutalist-text uppercase font-bold
-        text-white
         flex items-center gap-1.5 
-        shadow-lg transform transition-all duration-200
+        transform transition-all duration-200 backdrop-blur-sm
         ${sizeClasses[size]}
         ${className}
       `}
-      style={{ backgroundColor: bgColor }}
+      style={{ borderColor: bgColor, backgroundColor: `${bgColor}80` }}
     >
       <span className="mr-0.5">{emoji}</span>
-      <span>{label}</span>
+      <span style={{ color: bgColor }}>{label}</span>
     </Badge>
   );
 };
