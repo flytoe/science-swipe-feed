@@ -86,7 +86,7 @@ const PostTypeBadge: React.FC<PostTypeBadgeProps> = ({
       variant="outline" 
       className={`
         brutalist-text uppercase font-bold
-        text-white border-2 border-white
+        text-white
         flex items-center gap-1.5 
         shadow-lg transform transition-all duration-200
         ${sizeClasses[size]}
